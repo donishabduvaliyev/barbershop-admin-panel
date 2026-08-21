@@ -17,6 +17,11 @@ export function useShopSocket(token, onEvent) {
     const socket = io(SOCKET_URL, {
       auth: { token },
       transports: ['websocket', 'polling'],
+      // Same ngrok free-tier interstitial workaround as lib/api.js — only
+      // takes effect on the polling fallback (WebSocket upgrades can't
+      // carry custom headers from a browser), but ngrok passes true
+      // Upgrade requests through untouched anyway.
+      extraHeaders: { 'ngrok-skip-browser-warning': 'true' },
     });
 
     socket.on('appointment:update', (payload) => handlerRef.current?.(payload));

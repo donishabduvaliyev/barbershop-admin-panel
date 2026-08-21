@@ -12,6 +12,11 @@ async function request(path, { method = 'GET', body, token } = {}) {
     method,
     headers: {
       'Content-Type': 'application/json',
+      // Skips ngrok's free-tier browser-warning interstitial — without this,
+      // ngrok returns an HTML warning page (200, no CORS headers) instead of
+      // proxying through to the API, which the browser then reports as a
+      // CORS failure even though nothing is actually misconfigured.
+      'ngrok-skip-browser-warning': 'true',
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
     body: body ? JSON.stringify(body) : undefined,
