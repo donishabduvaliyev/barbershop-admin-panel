@@ -1,0 +1,17 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+# The Netlify build is a static bundle — it has no dev proxy, so it needs
+# the backend's actual URL baked in at build time. This ngrok URL changes
+# every time the tunnel restarts (free tier); update it here and redeploy
+# whenever that happens, or switch to a stable ngrok domain / real host.
+[build.environment]
+  VITE_API_URL = "https://4517-188-113-212-68.ngrok-free.app/api"
+  VITE_SOCKET_URL = "https://4517-188-113-212-68.ngrok-free.app"
+  VITE_SHOP_BOT_USERNAME = "HealthcareAdminNamnaganBOT"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
