@@ -39,6 +39,7 @@ export default function Settings() {
         phone: data.phone || '',
         address: data.address || '',
         isOperational: data.isOperational,
+        capacity: data.capacity || 1,
       });
       setHours(hoursArrayToDayMap(data.workingHours));
     });
@@ -113,6 +114,17 @@ export default function Settings() {
         <div className="grid sm:grid-cols-2 gap-3">
           <Field label="Phone"><Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="+998 90 123 45 67" /></Field>
           <Field label="Address"><Input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} /></Field>
+        </div>
+
+        <div className="grid sm:grid-cols-2 gap-3">
+          <Field
+            label="Capacity"
+            hint={shop.staff?.length > 0
+              ? `Not used right now — you have ${shop.staff.length} staff member${shop.staff.length === 1 ? '' : 's'} named, so capacity is based on them instead.`
+              : "How many clients you can serve at the same hour (used since you haven't added named staff)."}
+          >
+            <Input type="number" min="1" value={form.capacity} onChange={(e) => setForm({ ...form, capacity: Number(e.target.value) || 1 })} />
+          </Field>
         </div>
 
         <div className="flex justify-end pt-1">
