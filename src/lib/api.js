@@ -1,9 +1,10 @@
 const API_BASE = import.meta.env.VITE_API_URL || '/api';
 
 class ApiError extends Error {
-  constructor(message, status) {
+  constructor(message, status, data) {
     super(message);
     this.status = status;
+    this.data = data;
   }
 }
 
@@ -26,7 +27,7 @@ async function request(path, { method = 'GET', body, token } = {}) {
   const data = isJson ? await res.json().catch(() => null) : null;
 
   if (!res.ok) {
-    throw new ApiError(data?.message || 'Something went wrong.', res.status);
+    throw new ApiError(data?.message || 'Something went wrong.', res.status, data);
   }
   return data;
 }

@@ -9,9 +9,12 @@ const IS_DEV = import.meta.env.DEV;
 
 export default function Login() {
   const { login } = useAuth();
-  const [status, setStatus] = useState('checking'); // checking | telegram-auth | no-telegram | error
+  const [status, setStatus] = useState('checking'); // checking | telegram-auth | select-shop | no-telegram | error
   const [errorMessage, setErrorMessage] = useState('');
   const [devLoading, setDevLoading] = useState(false);
+  const [identityToken, setIdentityToken] = useState(null);
+  const [shopOptions, setShopOptions] = useState([]);
+  const [selecting, setSelecting] = useState(false);
 
   useEffect(() => {
     const tg = window.Telegram?.WebApp;
@@ -20,7 +23,15 @@ export default function Login() {
       setStatus('telegram-auth');
       const api = createApiClient();
       api.post('/admin/auth/telegram', { initData: tg.initData })
-        .then(({ token, shop }) => login(token, shop))
+        .then((res) => {
+          if (res.needsShopSelection) {
+            setIdentityToken(res.identityToken);
+            setShopOptions(res.shops);
+            setStatus('select-shop');
+          } else {
+            login(res.token, res.shop);
+          }
+        })
         .catch((err) => {
           setErrorMessage(err.message || 'Could not verify your Telegram account.');
           setStatus('error');
@@ -29,6 +40,20 @@ export default function Login() {
       setStatus('no-telegram');
     }
   }, [login]);
+
+  const chooseShop = async (shopId) => {
+    setSelecting(true);
+    try {
+      const api = createApiClient();
+      const { token, shop } = await api.post('/admin/auth/select-shop', { token: identityToken, shopId });
+      login(token, shop);
+    } catch (err) {
+      setErrorMessage(err.message || 'Could not open that shop.');
+      setStatus('error');
+    } finally {
+      setSelecting(false);
+    }
+  };
 
   const handleDevLogin = async () => {
     setDevLoading(true);
@@ -67,6 +92,23 @@ export default function Login() {
           <div className="flex flex-col items-center gap-3 mt-6">
             <span className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin" />
             <p className="text-sm text-text-muted">Verifying your Telegram account…</p>
+          </div>
+        )}
+
+        {status === 'select-shop' && (
+          <div className="mt-4 space-y-2 text-left">
+            <p className="text-sm text-text-muted mb-3 text-center">Which shop would you like to open?</p>
+            {shopOptions.map((shop) => (
+              <button
+                key={shop.id}
+                disabled={selecting}
+                onClick={() => chooseShop(shop.id)}
+                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl border border-border bg-surface-3 hover:border-accent/60 transition-colors disabled:opacity-50"
+              >
+                <img src={shop.image} alt="" className="w-9 h-9 rounded-lg object-cover shrink-0" />
+                <span className="text-sm font-medium text-text truncate">{shop.name?.en || shop.name?.ru}</span>
+              </button>
+            ))}
           </div>
         )}
 

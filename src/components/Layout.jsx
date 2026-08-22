@@ -1,12 +1,15 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import clsx from 'clsx';
 import {
   Squares2X2Icon, CalendarDaysIcon, ScissorsIcon, UserGroupIcon,
   ChartBarIcon, Cog6ToothIcon, ArrowLeftStartOnRectangleIcon, Bars3Icon, XMarkIcon,
+  ChevronUpDownIcon, CheckIcon,
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../lib/AuthContext';
+import { createApiClient } from '../lib/api';
+import Modal from './Modal';
 
 const NAV_ITEMS = [
   { to: '/', label: 'Dashboard', icon: Squares2X2Icon, end: true },
@@ -52,11 +55,78 @@ function NavItems({ onNavigate }) {
   );
 }
 
+// Shown only once we know the account actually owns more than one shop —
+// lets them jump between shops without re-verifying via Telegram each time.
+function ShopSwitcher({ shopName, shopInitial }) {
+  const { token, shop, login } = useAuth();
+  const [myShops, setMyShops] = useState(null);
+  const [open, setOpen] = useState(false);
+  const [switching, setSwitching] = useState(false);
+
+  useEffect(() => {
+    if (!token) return;
+    createApiClient(token).get('/admin/auth/my-shops')
+      .then((res) => setMyShops(res.shops))
+      .catch(() => setMyShops([]));
+  }, [token]);
+
+  const switchTo = async (shopId) => {
+    setSwitching(true);
+    try {
+      const api = createApiClient(token);
+      const { token: newToken, shop: newShop } = await api.post('/admin/auth/select-shop', { token, shopId });
+      login(newToken, newShop);
+      setOpen(false);
+    } catch {
+      // Silently keep the picker open — the user can just try again.
+    } finally {
+      setSwitching(false);
+    }
+  };
+
+  const hasMultiple = (myShops?.length || 0) > 1;
+
+  return (
+    <>
+      <button
+        onClick={() => hasMultiple && setOpen(true)}
+        className={clsx('flex items-center gap-3 min-w-0 flex-1 text-left', hasMultiple && 'cursor-pointer')}
+      >
+        <div className="w-8 h-8 rounded-full bg-surface-3 flex items-center justify-center text-xs font-semibold text-text-muted shrink-0">
+          {shopInitial}
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-medium truncate">{shopName}</p>
+        </div>
+        {hasMultiple && <ChevronUpDownIcon className="w-4 h-4 text-text-faint shrink-0" />}
+      </button>
+
+      <Modal open={open} onClose={() => setOpen(false)} title="Switch shop">
+        <div className="space-y-1.5">
+          {(myShops || []).map((s) => (
+            <button
+              key={s.id}
+              disabled={switching}
+              onClick={() => switchTo(s.id)}
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl border border-border bg-surface-3 hover:border-accent/60 transition-colors disabled:opacity-50"
+            >
+              <img src={s.image} alt="" className="w-8 h-8 rounded-lg object-cover shrink-0" />
+              <span className="text-sm font-medium text-text truncate flex-1 text-left">{s.name?.en || s.name?.ru}</span>
+              {s.id === shop?.id && <CheckIcon className="w-4 h-4 text-accent shrink-0" />}
+            </button>
+          ))}
+        </div>
+      </Modal>
+    </>
+  );
+}
+
 export default function Layout() {
   const { shop, logout } = useAuth();
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const shopName = shop?.name?.en || shop?.name?.ru || 'Your Shop';
+  const shopInitial = shopName.slice(0, 1).toUpperCase();
 
   return (
     <div className="min-h-screen bg-bg text-text flex">
@@ -68,13 +138,8 @@ export default function Layout() {
         </div>
         <NavItems />
         <div className="mt-auto pt-4 border-t border-border-soft flex items-center gap-3 px-2">
-          <div className="w-8 h-8 rounded-full bg-surface-3 flex items-center justify-center text-xs font-semibold text-text-muted shrink-0">
-            {shopName.slice(0, 1).toUpperCase()}
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="text-sm font-medium truncate">{shopName}</p>
-          </div>
-          <button onClick={logout} title="Log out" className="text-text-faint hover:text-danger transition-colors p-1.5">
+          <ShopSwitcher shopName={shopName} shopInitial={shopInitial} />
+          <button onClick={logout} title="Log out" className="text-text-faint hover:text-danger transition-colors p-1.5 shrink-0">
             <ArrowLeftStartOnRectangleIcon className="w-[18px] h-[18px]" />
           </button>
         </div>
@@ -108,7 +173,10 @@ export default function Layout() {
                 <button onClick={() => setMobileOpen(false)} className="text-text-muted"><XMarkIcon className="w-5 h-5" /></button>
               </div>
               <NavItems onNavigate={() => setMobileOpen(false)} />
-              <button onClick={logout} className="mt-auto flex items-center gap-2 text-sm text-text-faint hover:text-danger transition-colors px-2 py-2">
+              <div className="mt-auto pt-4 border-t border-border-soft flex items-center gap-3 px-2">
+                <ShopSwitcher shopName={shopName} shopInitial={shopInitial} />
+              </div>
+              <button onClick={logout} className="flex items-center gap-2 text-sm text-text-faint hover:text-danger transition-colors px-2 py-2 mt-2">
                 <ArrowLeftStartOnRectangleIcon className="w-[18px] h-[18px]" /> Log out
               </button>
             </motion.div>

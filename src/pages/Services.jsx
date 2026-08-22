@@ -18,6 +18,7 @@ export default function Services() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [upcomingCount, setUpcomingCount] = useState(0);
 
   useEffect(() => {
     api.get('/admin/shop').then((shop) => setServices(shop.services));
@@ -55,14 +56,20 @@ export default function Services() {
     }
   };
 
-  const remove = async () => {
+  const remove = async (force = false) => {
     try {
-      const updated = await api.delete(`/admin/shop/services/${deleteTarget._id}`);
+      const path = `/admin/shop/services/${deleteTarget._id}${force ? '?force=true' : ''}`;
+      const updated = await api.delete(path);
       setServices(updated);
       showToast('Service removed');
+      setDeleteTarget(null);
+      setUpcomingCount(0);
     } catch (err) {
+      if (err.status === 409 && err.data?.upcomingCount) {
+        setUpcomingCount(err.data.upcomingCount);
+        return;
+      }
       showToast(err.message || 'Could not remove service', 'error');
-    } finally {
       setDeleteTarget(null);
     }
   };
@@ -95,7 +102,7 @@ export default function Services() {
                   <h3 className="font-medium text-text leading-snug">{service.name.en}</h3>
                   <div className="flex gap-1 shrink-0">
                     <button onClick={() => openEdit(service)} className="p-1.5 rounded-lg text-text-faint hover:text-text hover:bg-surface-3 transition-colors"><PencilSquareIcon className="w-4 h-4" /></button>
-                    <button onClick={() => setDeleteTarget(service)} className="p-1.5 rounded-lg text-text-faint hover:text-danger hover:bg-danger/10 transition-colors"><TrashIcon className="w-4 h-4" /></button>
+                    <button onClick={() => { setDeleteTarget(service); setUpcomingCount(0); }} className="p-1.5 rounded-lg text-text-faint hover:text-danger hover:bg-danger/10 transition-colors"><TrashIcon className="w-4 h-4" /></button>
                   </div>
                 </div>
                 <p className="text-xs text-text-faint mt-1">{service.name.ru} · {service.name.uz}</p>
@@ -138,11 +145,20 @@ export default function Services() {
         footer={(
           <>
             <Button variant="ghost" onClick={() => setDeleteTarget(null)}>Cancel</Button>
-            <Button variant="danger" onClick={remove}>Remove</Button>
+            <Button variant="danger" onClick={() => remove(upcomingCount > 0)}>
+              {upcomingCount > 0 ? 'Delete anyway' : 'Remove'}
+            </Button>
           </>
         )}
       >
-        <p className="text-sm text-text-muted">Remove <span className="text-text font-medium">{deleteTarget?.name.en}</span>? This won't affect past appointments.</p>
+        {upcomingCount > 0 ? (
+          <p className="text-sm text-warning">
+            <span className="font-medium">{deleteTarget?.name.en}</span> has {upcomingCount} upcoming appointment{upcomingCount === 1 ? '' : 's'}.
+            Deleting it won't cancel them, but they'll no longer link to a real service.
+          </p>
+        ) : (
+          <p className="text-sm text-text-muted">Remove <span className="text-text font-medium">{deleteTarget?.name.en}</span>? This won't affect past appointments.</p>
+        )}
       </Modal>
     </div>
   );
