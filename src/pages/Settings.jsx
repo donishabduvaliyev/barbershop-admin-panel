@@ -2,7 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '../lib/AuthContext';
 import { useToast } from '../components/ToastProvider';
 import { Card, Button, Field, Input, Textarea, Switch } from '../components/ui';
+import ImageUpload from '../components/ImageUpload';
 import { Skeleton } from '../components/Skeleton';
+import { XMarkIcon } from '@heroicons/react/24/outline';
 
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 const DEFAULT_HOURS = { open: false, from: '09:00', to: '18:00' };
@@ -59,6 +61,21 @@ export default function Settings() {
     }
   };
 
+  const uploadMainPhoto = async (file) => {
+    const { image } = await api.upload('/admin/shop/photo', file);
+    setShop((prev) => ({ ...prev, image }));
+  };
+
+  const uploadGalleryPhoto = async (file) => {
+    const { images } = await api.upload('/admin/shop/photos', file);
+    setShop((prev) => ({ ...prev, images }));
+  };
+
+  const removeGalleryPhoto = async (url) => {
+    const { images } = await api.delete('/admin/shop/photos', { url });
+    setShop((prev) => ({ ...prev, images }));
+  };
+
   const saveHours = async () => {
     setSavingHours(true);
     try {
@@ -89,6 +106,38 @@ export default function Settings() {
         <h1 className="font-display text-2xl font-semibold text-text">Settings</h1>
         <p className="text-text-muted text-sm mt-1">Shop details and opening hours.</p>
       </div>
+
+      <Card className="p-6 space-y-4">
+        <div>
+          <h2 className="font-medium text-text">Photos</h2>
+          <p className="text-xs text-text-muted mt-0.5">The main photo shows on your shop's card and page header; gallery photos show underneath it.</p>
+        </div>
+
+        <div className="grid sm:grid-cols-[240px_1fr] gap-5">
+          <div>
+            <p className="text-xs font-medium text-text-muted mb-1.5">Main photo</p>
+            <ImageUpload value={shop.image} onUpload={uploadMainPhoto} shape="rect" size="lg" />
+          </div>
+
+          <div>
+            <p className="text-xs font-medium text-text-muted mb-1.5">Gallery</p>
+            <div className="flex flex-wrap gap-2">
+              {(shop.images || []).map((url) => (
+                <div key={url} className="relative group w-20 h-20 rounded-lg overflow-hidden border border-border">
+                  <img src={url} alt="" className="w-full h-full object-cover" />
+                  <button
+                    onClick={() => removeGalleryPhoto(url)}
+                    className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/70 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <XMarkIcon className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              ))}
+              <ImageUpload value={null} onUpload={uploadGalleryPhoto} shape="rect" size="sm" />
+            </div>
+          </div>
+        </div>
+      </Card>
 
       <Card className="p-6 space-y-5">
         <div className="flex items-center justify-between pb-1">

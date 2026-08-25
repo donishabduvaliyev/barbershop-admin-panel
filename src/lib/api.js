@@ -32,6 +32,32 @@ async function request(path, { method = 'GET', body, token } = {}) {
   return data;
 }
 
+// Separate from request() because a file upload must NOT set
+// Content-Type: application/json — the browser needs to set its own
+// multipart/form-data boundary header, which only happens if we leave
+// Content-Type unset entirely.
+async function uploadFile(path, file, token) {
+  const formData = new FormData();
+  formData.append('photo', file);
+
+  const res = await fetch(`${API_BASE}${path}`, {
+    method: 'POST',
+    headers: {
+      'ngrok-skip-browser-warning': 'true',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: formData,
+  });
+
+  const isJson = res.headers.get('content-type')?.includes('application/json');
+  const data = isJson ? await res.json().catch(() => null) : null;
+
+  if (!res.ok) {
+    throw new ApiError(data?.message || 'Upload failed.', res.status, data);
+  }
+  return data;
+}
+
 // A thin per-request wrapper bound to the current session token — every
 // admin page gets one of these from useAuth() rather than juggling tokens itself.
 export function createApiClient(token) {
@@ -39,7 +65,8 @@ export function createApiClient(token) {
     get: (path) => request(path, { token }),
     post: (path, body) => request(path, { method: 'POST', body, token }),
     patch: (path, body) => request(path, { method: 'PATCH', body, token }),
-    delete: (path) => request(path, { method: 'DELETE', token }),
+    delete: (path, body) => request(path, { method: 'DELETE', body, token }),
+    upload: (path, file) => uploadFile(path, file, token),
   };
 }
 

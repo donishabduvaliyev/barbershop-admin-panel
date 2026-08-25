@@ -6,6 +6,7 @@ import { useAuth } from '../lib/AuthContext';
 import { useToast } from '../components/ToastProvider';
 import { Card, Button, Field, Input, EmptyState } from '../components/ui';
 import Modal from '../components/Modal';
+import ImageUpload from '../components/ImageUpload';
 import { CardGridSkeleton } from '../components/Skeleton';
 
 const EMPTY_FORM = { name: '', title: '', photo: '' };
@@ -43,6 +44,12 @@ export default function Staff() {
     } finally {
       setSaving(false);
     }
+  };
+
+  const uploadPhoto = async (file) => {
+    const { photo } = await api.upload(`/admin/shop/staff/${editing._id}/photo`, file);
+    setForm((f) => ({ ...f, photo }));
+    setStaff((prev) => prev.map((m) => (m._id === editing._id ? { ...m, photo } : m)));
   };
 
   const remove = async (force = false) => {
@@ -117,9 +124,19 @@ export default function Staff() {
         )}
       >
         <div className="space-y-4">
+          {editing ? (
+            <Field label="Photo">
+              <ImageUpload value={form.photo} onUpload={uploadPhoto} shape="circle" />
+            </Field>
+          ) : (
+            <Field label="Photo" hint="Save the staff member first, then edit them to add a photo.">
+              <div className="w-24 h-24 rounded-full border border-dashed border-border flex items-center justify-center text-text-faint text-xs text-center px-2">
+                Add after saving
+              </div>
+            </Field>
+          )}
           <Field label="Name"><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Aziz" /></Field>
           <Field label="Title" hint="Optional — e.g. Senior Barber"><Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Senior Barber" /></Field>
-          <Field label="Photo URL" hint="Optional"><Input value={form.photo} onChange={(e) => setForm({ ...form, photo: e.target.value })} placeholder="https://…" /></Field>
         </div>
       </Modal>
 
