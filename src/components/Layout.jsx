@@ -5,7 +5,7 @@ import clsx from 'clsx';
 import {
   Squares2X2Icon, CalendarDaysIcon, ScissorsIcon, UserGroupIcon,
   ChartBarIcon, Cog6ToothIcon, ArrowLeftStartOnRectangleIcon, Bars3Icon, XMarkIcon,
-  ChevronUpDownIcon, CheckIcon,
+  ChevronUpDownIcon, CheckIcon, UsersIcon,
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../lib/AuthContext';
 import { createApiClient } from '../lib/api';
@@ -14,6 +14,7 @@ import Modal from './Modal';
 const NAV_ITEMS = [
   { to: '/', label: 'Dashboard', icon: Squares2X2Icon, end: true },
   { to: '/appointments', label: 'Appointments', icon: CalendarDaysIcon },
+  { to: '/customers', label: 'Customers', icon: UsersIcon },
   { to: '/services', label: 'Services', icon: ScissorsIcon },
   { to: '/staff', label: 'Staff', icon: UserGroupIcon },
   { to: '/statistics', label: 'Statistics', icon: ChartBarIcon },

@@ -6,6 +6,7 @@ import Layout from './components/Layout';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Appointments from './pages/Appointments';
+import Customers from './pages/Customers';
 import Services from './pages/Services';
 import Staff from './pages/Staff';
 import Statistics from './pages/Statistics';
@@ -40,6 +41,7 @@ export default function App() {
             >
               <Route path="/" element={<Dashboard />} />
               <Route path="/appointments" element={<Appointments />} />
+              <Route path="/customers" element={<Customers />} />
               <Route path="/services" element={<Services />} />
               <Route path="/staff" element={<Staff />} />
               <Route path="/statistics" element={<Statistics />} />

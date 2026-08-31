@@ -4,12 +4,13 @@ import { PlusIcon, PencilSquareIcon, TrashIcon, XMarkIcon, CalendarDaysIcon } fr
 import { StarIcon as StarSolid } from '@heroicons/react/24/solid';
 import { useAuth } from '../lib/AuthContext';
 import { useToast } from '../components/ToastProvider';
-import { Card, Button, Field, Input, EmptyState } from '../components/ui';
+import { Card, Button, Field, Input, EmptyState, Switch } from '../components/ui';
 import Modal from '../components/Modal';
 import ImageUpload from '../components/ImageUpload';
+import WorkingHoursEditor from '../components/WorkingHoursEditor';
 import { CardGridSkeleton } from '../components/Skeleton';
 
-const EMPTY_FORM = { name: '', title: '', photo: '', daysOff: [] };
+const EMPTY_FORM = { name: '', title: '', photo: '', daysOff: [], serviceIds: [], commission: '', workingHours: [] };
 const todayKey = () => new Date().toISOString().slice(0, 10);
 const formatDayOff = (dateKey) => new Date(`${dateKey}T00:00:00`).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
 
@@ -17,6 +18,8 @@ export default function Staff() {
   const { api } = useAuth();
   const { showToast } = useToast();
   const [staff, setStaff] = useState(null);
+  const [services, setServices] = useState([]);
+  const [shopHours, setShopHours] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(EMPTY_FORM);
@@ -27,25 +30,45 @@ export default function Staff() {
   const [dayOffConflict, setDayOffConflict] = useState(null);
 
   useEffect(() => {
-    api.get('/admin/shop').then((shop) => setStaff(shop.staff));
+    api.get('/admin/shop').then((shop) => {
+      setStaff(shop.staff);
+      setServices(shop.services || []);
+      setShopHours(shop.workingHours || []);
+    });
   }, [api]);
 
   const openCreate = () => { setEditing(null); setForm(EMPTY_FORM); setModalOpen(true); };
   const openEdit = (member) => {
     setEditing(member);
-    setForm({ name: member.name, title: member.title || '', photo: member.photo || '', daysOff: member.daysOff || [] });
+    setForm({
+      name: member.name,
+      title: member.title || '',
+      photo: member.photo || '',
+      daysOff: member.daysOff || [],
+      serviceIds: member.serviceIds || [],
+      commission: member.commission ?? '',
+      workingHours: member.workingHours || [],
+    });
     setNewDayOffDate('');
     setDayOffConflict(null);
     setModalOpen(true);
+  };
+
+  const toggleService = (serviceId) => {
+    setForm((f) => ({
+      ...f,
+      serviceIds: f.serviceIds.includes(serviceId) ? f.serviceIds.filter((id) => id !== serviceId) : [...f.serviceIds, serviceId],
+    }));
   };
 
   const save = async () => {
     if (!form.name.trim()) { showToast('Name is required', 'error'); return; }
     setSaving(true);
     try {
+      const payload = { ...form, commission: form.commission === '' ? null : Number(form.commission) };
       const updated = editing
-        ? await api.patch(`/admin/shop/staff/${editing._id}`, form)
-        : await api.post('/admin/shop/staff', form);
+        ? await api.patch(`/admin/shop/staff/${editing._id}`, payload)
+        : await api.post('/admin/shop/staff', payload);
       setStaff(updated);
       showToast(editing ? 'Staff member updated' : 'Staff member added');
       setModalOpen(false);
@@ -189,6 +212,40 @@ export default function Staff() {
           )}
           <Field label="Name"><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Aziz" /></Field>
           <Field label="Title" hint="Optional — e.g. Senior Barber"><Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Senior Barber" /></Field>
+          <Field label="Commission %" hint="Optional — your own reference, not shown to customers"><Input type="number" min="0" max="100" value={form.commission} onChange={(e) => setForm({ ...form, commission: e.target.value })} placeholder="40" className="!w-28" /></Field>
+
+          {services.length > 0 && (
+            <Field label="Services" hint="Leave all unchecked to let them perform every service.">
+              <div className="flex flex-wrap gap-1.5">
+                {services.map((service) => {
+                  const checked = form.serviceIds.includes(service._id);
+                  return (
+                    <button
+                      key={service._id}
+                      type="button"
+                      onClick={() => toggleService(service._id)}
+                      className={`px-2.5 py-1.5 rounded-lg border text-xs transition-colors ${checked ? 'bg-accent/15 border-accent text-accent' : 'bg-surface-3 border-border text-text-muted hover:text-text'}`}
+                    >
+                      {service.name?.en}
+                    </button>
+                  );
+                })}
+              </div>
+            </Field>
+          )}
+
+          <Field label="Working hours">
+            <div className="space-y-2">
+              <Switch
+                checked={form.workingHours.length > 0}
+                onChange={(useCustom) => setForm((f) => ({ ...f, workingHours: useCustom ? shopHours : [] }))}
+                label={form.workingHours.length > 0 ? 'Custom hours' : "Follows the shop's hours"}
+              />
+              {form.workingHours.length > 0 && (
+                <WorkingHoursEditor value={form.workingHours} onChange={(workingHours) => setForm((f) => ({ ...f, workingHours }))} compact />
+              )}
+            </div>
+          </Field>
 
           {editing && (
             <Field label="Time off" hint="Customers can't book them on these dates.">

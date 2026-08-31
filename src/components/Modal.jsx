@@ -13,7 +13,7 @@ export default function Modal({ open, onClose, title, children, footer, maxWidth
           onClick={onClose}
         >
           <motion.div
-            className={`w-full ${maxWidth} bg-surface-2 border border-border rounded-2xl shadow-2xl shadow-black/50 overflow-hidden`}
+            className={`w-full ${maxWidth} max-h-[85vh] flex flex-col bg-surface-2 border border-border rounded-2xl shadow-2xl shadow-black/50 overflow-hidden`}
             initial={{ opacity: 0, y: 16, scale: 0.97 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 8, scale: 0.98, transition: { duration: 0.15 } }}
@@ -21,7 +21,7 @@ export default function Modal({ open, onClose, title, children, footer, maxWidth
             onClick={(e) => e.stopPropagation()}
           >
             {title && (
-              <div className="px-6 pt-5 pb-4 border-b border-border-soft flex items-center justify-between">
+              <div className="px-6 pt-5 pb-4 border-b border-border-soft flex items-center justify-between shrink-0">
                 <h3 className="text-base font-semibold text-text">{title}</h3>
                 <button
                   onClick={onClose}
@@ -31,8 +31,11 @@ export default function Modal({ open, onClose, title, children, footer, maxWidth
                 </button>
               </div>
             )}
-            <div className="px-6 py-5">{children}</div>
-            {footer && <div className="px-6 py-4 border-t border-border-soft flex justify-end gap-2">{footer}</div>}
+            {/* Only this middle section scrolls — a tall form (e.g. Staff's
+                edit modal) never pushes the footer's Save/Cancel buttons
+                out of reach on a short viewport. */}
+            <div className="px-6 py-5 overflow-y-auto">{children}</div>
+            {footer && <div className="px-6 py-4 border-t border-border-soft flex justify-end gap-2 shrink-0">{footer}</div>}
           </motion.div>
         </motion.div>
       )}

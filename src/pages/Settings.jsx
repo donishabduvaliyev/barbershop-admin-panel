@@ -3,25 +3,9 @@ import { useAuth } from '../lib/AuthContext';
 import { useToast } from '../components/ToastProvider';
 import { Card, Button, Field, Input, Textarea, Switch } from '../components/ui';
 import ImageUpload from '../components/ImageUpload';
+import WorkingHoursEditor from '../components/WorkingHoursEditor';
 import { Skeleton } from '../components/Skeleton';
 import { XMarkIcon } from '@heroicons/react/24/outline';
-
-const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-const DEFAULT_HOURS = { open: false, from: '09:00', to: '18:00' };
-
-function hoursArrayToDayMap(workingHours = []) {
-  const map = Object.fromEntries(DAYS.map((d) => [d, { ...DEFAULT_HOURS }]));
-  for (const entry of workingHours) {
-    for (const day of entry.days) {
-      if (map[day]) map[day] = { open: true, from: entry.from, to: entry.to };
-    }
-  }
-  return map;
-}
-
-function dayMapToHoursArray(dayMap) {
-  return DAYS.filter((d) => dayMap[d].open).map((d) => ({ days: [d], from: dayMap[d].from, to: dayMap[d].to }));
-}
 
 export default function Settings() {
   const { api, shop: sessionShop, login, token } = useAuth();
@@ -43,7 +27,7 @@ export default function Settings() {
         isOperational: data.isOperational,
         capacity: data.capacity || 1,
       });
-      setHours(hoursArrayToDayMap(data.workingHours));
+      setHours(data.workingHours || []);
     });
   }, [api]);
 
@@ -79,7 +63,7 @@ export default function Settings() {
   const saveHours = async () => {
     setSavingHours(true);
     try {
-      const workingHours = await api.patch('/admin/shop/working-hours', { workingHours: dayMapToHoursArray(hours) });
+      const workingHours = await api.patch('/admin/shop/working-hours', { workingHours: hours });
       setShop((prev) => ({ ...prev, workingHours }));
       showToast('Working hours updated');
     } catch (err) {
@@ -183,24 +167,7 @@ export default function Settings() {
 
       <Card className="p-6 space-y-4">
         <h2 className="font-medium text-text">Working hours</h2>
-        <div className="space-y-2">
-          {DAYS.map((day) => (
-            <div key={day} className="flex items-center gap-3 py-1.5">
-              <div className="w-28 shrink-0">
-                <Switch checked={hours[day].open} onChange={(v) => setHours({ ...hours, [day]: { ...hours[day], open: v } })} label={day.slice(0, 3)} />
-              </div>
-              {hours[day].open ? (
-                <div className="flex items-center gap-2 flex-1">
-                  <Input type="time" value={hours[day].from} onChange={(e) => setHours({ ...hours, [day]: { ...hours[day], from: e.target.value } })} className="!w-32" />
-                  <span className="text-text-faint text-sm">to</span>
-                  <Input type="time" value={hours[day].to} onChange={(e) => setHours({ ...hours, [day]: { ...hours[day], to: e.target.value } })} className="!w-32" />
-                </div>
-              ) : (
-                <span className="text-sm text-text-faint">Closed</span>
-              )}
-            </div>
-          ))}
-        </div>
+        <WorkingHoursEditor value={hours} onChange={setHours} />
         <div className="flex justify-end pt-1">
           <Button onClick={saveHours} disabled={savingHours}>{savingHours ? 'Saving…' : 'Save hours'}</Button>
         </div>
