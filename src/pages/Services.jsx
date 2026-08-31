@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { PlusIcon, PencilSquareIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../lib/AuthContext';
 import { useToast } from '../components/ToastProvider';
 import { Card, Button, Field, Input, EmptyState } from '../components/ui';
@@ -10,6 +11,7 @@ import { CardGridSkeleton } from '../components/Skeleton';
 const EMPTY_FORM = { en: '', ru: '', uz: '', price: '', durationMinutes: '' };
 
 export default function Services() {
+  const { t } = useTranslation();
   const { api } = useAuth();
   const { showToast } = useToast();
   const [services, setServices] = useState(null);
@@ -33,7 +35,7 @@ export default function Services() {
 
   const save = async () => {
     if (!form.en || !form.ru || !form.uz || !form.price || !form.durationMinutes) {
-      showToast('Please fill in every field', 'error');
+      showToast(t('services.toastFillFields'), 'error');
       return;
     }
     setSaving(true);
@@ -47,10 +49,10 @@ export default function Services() {
         ? await api.patch(`/admin/shop/services/${editing._id}`, payload)
         : await api.post('/admin/shop/services', payload);
       setServices(updated);
-      showToast(editing ? 'Service updated' : 'Service added');
+      showToast(editing ? t('services.toastUpdated') : t('services.toastAdded'));
       setModalOpen(false);
     } catch (err) {
-      showToast(err.message || 'Could not save service', 'error');
+      showToast(err.message || t('services.toastSaveError'), 'error');
     } finally {
       setSaving(false);
     }
@@ -61,7 +63,7 @@ export default function Services() {
       const path = `/admin/shop/services/${deleteTarget._id}${force ? '?force=true' : ''}`;
       const updated = await api.delete(path);
       setServices(updated);
-      showToast('Service removed');
+      showToast(t('services.toastRemoved'));
       setDeleteTarget(null);
       setUpcomingCount(0);
     } catch (err) {
@@ -69,7 +71,7 @@ export default function Services() {
         setUpcomingCount(err.data.upcomingCount);
         return;
       }
-      showToast(err.message || 'Could not remove service', 'error');
+      showToast(err.message || t('services.toastRemoveError'), 'error');
       setDeleteTarget(null);
     }
   };
@@ -78,16 +80,16 @@ export default function Services() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-display text-2xl font-semibold text-text">Services</h1>
-          <p className="text-text-muted text-sm mt-1">What you offer, and what it costs.</p>
+          <h1 className="font-display text-2xl font-semibold text-text">{t('services.title')}</h1>
+          <p className="text-text-muted text-sm mt-1">{t('services.subtitle')}</p>
         </div>
-        <Button onClick={openCreate}><PlusIcon className="w-4 h-4" /> Add service</Button>
+        <Button onClick={openCreate}><PlusIcon className="w-4 h-4" /> {t('services.addService')}</Button>
       </div>
 
       {services === null ? (
         <CardGridSkeleton />
       ) : services.length === 0 ? (
-        <Card><EmptyState icon="✂️" title="No services yet" description="Add your first service so customers can book it." action={<Button onClick={openCreate}>Add service</Button>} /></Card>
+        <Card><EmptyState icon="✂️" title={t('services.noServicesTitle')} description={t('services.noServicesDesc')} action={<Button onClick={openCreate}>{t('services.addService')}</Button>} /></Card>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {services.map((service, i) => (
@@ -119,21 +121,21 @@ export default function Services() {
       <Modal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
-        title={editing ? 'Edit service' : 'Add service'}
+        title={editing ? t('services.editService') : t('services.addServiceTitle')}
         footer={(
           <>
-            <Button variant="ghost" onClick={() => setModalOpen(false)}>Cancel</Button>
-            <Button onClick={save} disabled={saving}>{saving ? 'Saving…' : 'Save'}</Button>
+            <Button variant="ghost" onClick={() => setModalOpen(false)}>{t('common.cancel')}</Button>
+            <Button onClick={save} disabled={saving}>{saving ? t('common.saving') : t('common.save')}</Button>
           </>
         )}
       >
         <div className="space-y-4">
-          <Field label="Name (English)"><Input value={form.en} onChange={(e) => setForm({ ...form, en: e.target.value })} placeholder="Haircut" /></Field>
-          <Field label="Name (Русский)"><Input value={form.ru} onChange={(e) => setForm({ ...form, ru: e.target.value })} placeholder="Стрижка" /></Field>
-          <Field label="Name (O'zbek)"><Input value={form.uz} onChange={(e) => setForm({ ...form, uz: e.target.value })} placeholder="Soch olish" /></Field>
+          <Field label={t('services.nameEn')}><Input value={form.en} onChange={(e) => setForm({ ...form, en: e.target.value })} placeholder="Haircut" /></Field>
+          <Field label={t('services.nameRu')}><Input value={form.ru} onChange={(e) => setForm({ ...form, ru: e.target.value })} placeholder="Стрижка" /></Field>
+          <Field label={t('services.nameUz')}><Input value={form.uz} onChange={(e) => setForm({ ...form, uz: e.target.value })} placeholder="Soch olish" /></Field>
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Price (UZS)"><Input type="number" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} placeholder="50000" /></Field>
-            <Field label="Duration (min)"><Input type="number" value={form.durationMinutes} onChange={(e) => setForm({ ...form, durationMinutes: e.target.value })} placeholder="30" /></Field>
+            <Field label={t('services.price')}><Input type="number" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} placeholder="50000" /></Field>
+            <Field label={t('services.duration')}><Input type="number" value={form.durationMinutes} onChange={(e) => setForm({ ...form, durationMinutes: e.target.value })} placeholder="30" /></Field>
           </div>
         </div>
       </Modal>
@@ -141,23 +143,22 @@ export default function Services() {
       <Modal
         open={!!deleteTarget}
         onClose={() => setDeleteTarget(null)}
-        title="Remove service"
+        title={t('services.removeTitle')}
         footer={(
           <>
-            <Button variant="ghost" onClick={() => setDeleteTarget(null)}>Cancel</Button>
+            <Button variant="ghost" onClick={() => setDeleteTarget(null)}>{t('common.cancel')}</Button>
             <Button variant="danger" onClick={() => remove(upcomingCount > 0)}>
-              {upcomingCount > 0 ? 'Delete anyway' : 'Remove'}
+              {upcomingCount > 0 ? t('services.deleteAnyway') : t('common.remove')}
             </Button>
           </>
         )}
       >
         {upcomingCount > 0 ? (
           <p className="text-sm text-warning">
-            <span className="font-medium">{deleteTarget?.name.en}</span> has {upcomingCount} upcoming appointment{upcomingCount === 1 ? '' : 's'}.
-            Deleting it won't cancel them, but they'll no longer link to a real service.
+            {t('services.upcomingWarning', { name: deleteTarget?.name.en, count: upcomingCount })}
           </p>
         ) : (
-          <p className="text-sm text-text-muted">Remove <span className="text-text font-medium">{deleteTarget?.name.en}</span>? This won't affect past appointments.</p>
+          <p className="text-sm text-text-muted">{t('services.removeConfirm', { name: deleteTarget?.name.en })}</p>
         )}
       </Modal>
     </div>

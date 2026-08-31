@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../lib/AuthContext';
 import { useToast } from '../components/ToastProvider';
 import { Card, Button, Field, Input, Textarea, Switch } from '../components/ui';
@@ -8,6 +9,7 @@ import { Skeleton } from '../components/Skeleton';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 
 export default function Settings() {
+  const { t } = useTranslation();
   const { api, shop: sessionShop, login, token } = useAuth();
   const { showToast } = useToast();
   const [shop, setShop] = useState(null);
@@ -38,9 +40,9 @@ export default function Settings() {
       const updated = await api.patch('/admin/shop', form);
       setShop(updated);
       login(token, { ...sessionShop, name: updated.name });
-      showToast('Shop details updated');
+      showToast(t('settings.toastUpdated'));
     } catch (err) {
-      showToast(err.message || 'Could not save changes', 'error');
+      showToast(err.message || t('settings.toastSaveError'), 'error');
     } finally {
       setSaving(false);
     }
@@ -66,9 +68,9 @@ export default function Settings() {
     try {
       const workingHours = await api.patch('/admin/shop/working-hours', { workingHours: hours });
       setShop((prev) => ({ ...prev, workingHours }));
-      showToast('Working hours updated');
+      showToast(t('settings.toastHoursUpdated'));
     } catch (err) {
-      showToast(err.message || 'Could not save hours', 'error');
+      showToast(err.message || t('settings.toastHoursError'), 'error');
     } finally {
       setSavingHours(false);
     }
@@ -88,24 +90,24 @@ export default function Settings() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="font-display text-2xl font-semibold text-text">Settings</h1>
-        <p className="text-text-muted text-sm mt-1">Shop details and opening hours.</p>
+        <h1 className="font-display text-2xl font-semibold text-text">{t('settings.title')}</h1>
+        <p className="text-text-muted text-sm mt-1">{t('settings.subtitle')}</p>
       </div>
 
       <Card className="p-6 space-y-4">
         <div>
-          <h2 className="font-medium text-text">Photos</h2>
-          <p className="text-xs text-text-muted mt-0.5">The main photo shows on your shop's card and page header; gallery photos show underneath it.</p>
+          <h2 className="font-medium text-text">{t('settings.photos')}</h2>
+          <p className="text-xs text-text-muted mt-0.5">{t('settings.photosHint')}</p>
         </div>
 
         <div className="grid sm:grid-cols-[240px_1fr] gap-5">
           <div>
-            <p className="text-xs font-medium text-text-muted mb-1.5">Main photo</p>
+            <p className="text-xs font-medium text-text-muted mb-1.5">{t('settings.mainPhoto')}</p>
             <ImageUpload value={shop.image} onUpload={uploadMainPhoto} shape="rect" size="lg" />
           </div>
 
           <div>
-            <p className="text-xs font-medium text-text-muted mb-1.5">Gallery</p>
+            <p className="text-xs font-medium text-text-muted mb-1.5">{t('settings.gallery')}</p>
             <div className="flex flex-wrap gap-2">
               {(shop.images || []).map((url) => (
                 <div key={url} className="relative group w-20 h-20 rounded-lg overflow-hidden border border-border">
@@ -127,58 +129,58 @@ export default function Settings() {
       <Card className="p-6 space-y-5">
         <div className="flex items-center justify-between pb-1">
           <div>
-            <p className="text-sm font-medium text-text">Accepting bookings</p>
-            <p className="text-xs text-text-muted mt-0.5">Turn off to hide your shop from new bookings temporarily.</p>
+            <p className="text-sm font-medium text-text">{t('settings.acceptingBookings')}</p>
+            <p className="text-xs text-text-muted mt-0.5">{t('settings.acceptingBookingsHint')}</p>
           </div>
           <Switch checked={form.isOperational} onChange={(v) => setForm({ ...form, isOperational: v })} />
         </div>
 
         <div className="flex items-center justify-between pb-1">
           <div>
-            <p className="text-sm font-medium text-text">Win-back messages</p>
-            <p className="text-xs text-text-muted mt-0.5">Automatically nudge customers who haven't booked in about a month.</p>
+            <p className="text-sm font-medium text-text">{t('settings.winBackMessages')}</p>
+            <p className="text-xs text-text-muted mt-0.5">{t('settings.winBackHint')}</p>
           </div>
           <Switch checked={form.winBackEnabled} onChange={(v) => setForm({ ...form, winBackEnabled: v })} />
         </div>
 
         <div className="grid sm:grid-cols-3 gap-3">
-          <Field label="Name (English)"><Input value={form.name.en} onChange={(e) => setForm({ ...form, name: { ...form.name, en: e.target.value } })} /></Field>
-          <Field label="Name (Русский)"><Input value={form.name.ru} onChange={(e) => setForm({ ...form, name: { ...form.name, ru: e.target.value } })} /></Field>
-          <Field label="Name (O'zbek)"><Input value={form.name.uz} onChange={(e) => setForm({ ...form, name: { ...form.name, uz: e.target.value } })} /></Field>
+          <Field label={t('settings.nameEn')}><Input value={form.name.en} onChange={(e) => setForm({ ...form, name: { ...form.name, en: e.target.value } })} /></Field>
+          <Field label={t('settings.nameRu')}><Input value={form.name.ru} onChange={(e) => setForm({ ...form, name: { ...form.name, ru: e.target.value } })} /></Field>
+          <Field label={t('settings.nameUz')}><Input value={form.name.uz} onChange={(e) => setForm({ ...form, name: { ...form.name, uz: e.target.value } })} /></Field>
         </div>
 
         <div className="grid sm:grid-cols-3 gap-3">
-          <Field label="Description (English)"><Textarea rows={2} value={form.description.en} onChange={(e) => setForm({ ...form, description: { ...form.description, en: e.target.value } })} /></Field>
-          <Field label="Description (Русский)"><Textarea rows={2} value={form.description.ru} onChange={(e) => setForm({ ...form, description: { ...form.description, ru: e.target.value } })} /></Field>
-          <Field label="Description (O'zbek)"><Textarea rows={2} value={form.description.uz} onChange={(e) => setForm({ ...form, description: { ...form.description, uz: e.target.value } })} /></Field>
+          <Field label={t('settings.descEn')}><Textarea rows={2} value={form.description.en} onChange={(e) => setForm({ ...form, description: { ...form.description, en: e.target.value } })} /></Field>
+          <Field label={t('settings.descRu')}><Textarea rows={2} value={form.description.ru} onChange={(e) => setForm({ ...form, description: { ...form.description, ru: e.target.value } })} /></Field>
+          <Field label={t('settings.descUz')}><Textarea rows={2} value={form.description.uz} onChange={(e) => setForm({ ...form, description: { ...form.description, uz: e.target.value } })} /></Field>
         </div>
 
         <div className="grid sm:grid-cols-2 gap-3">
-          <Field label="Phone"><Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="+998 90 123 45 67" /></Field>
-          <Field label="Address"><Input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} /></Field>
+          <Field label={t('settings.phone')}><Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="+998 90 123 45 67" /></Field>
+          <Field label={t('settings.address')}><Input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} /></Field>
         </div>
 
         <div className="grid sm:grid-cols-2 gap-3">
           <Field
-            label="Capacity"
+            label={t('settings.capacity')}
             hint={shop.staff?.length > 0
-              ? `Not used right now — you have ${shop.staff.length} staff member${shop.staff.length === 1 ? '' : 's'} named, so capacity is based on them instead.`
-              : "How many clients you can serve at the same hour (used since you haven't added named staff)."}
+              ? t('settings.capacityHintStaff', { count: shop.staff.length })
+              : t('settings.capacityHintNoStaff')}
           >
             <Input type="number" min="1" value={form.capacity} onChange={(e) => setForm({ ...form, capacity: Number(e.target.value) || 1 })} />
           </Field>
         </div>
 
         <div className="flex justify-end pt-1">
-          <Button onClick={saveShop} disabled={saving}>{saving ? 'Saving…' : 'Save changes'}</Button>
+          <Button onClick={saveShop} disabled={saving}>{saving ? t('common.saving') : t('settings.saveChanges')}</Button>
         </div>
       </Card>
 
       <Card className="p-6 space-y-4">
-        <h2 className="font-medium text-text">Working hours</h2>
+        <h2 className="font-medium text-text">{t('settings.workingHours')}</h2>
         <WorkingHoursEditor value={hours} onChange={setHours} />
         <div className="flex justify-end pt-1">
-          <Button onClick={saveHours} disabled={savingHours}>{savingHours ? 'Saving…' : 'Save hours'}</Button>
+          <Button onClick={saveHours} disabled={savingHours}>{savingHours ? t('common.saving') : t('settings.saveHours')}</Button>
         </div>
       </Card>
     </div>

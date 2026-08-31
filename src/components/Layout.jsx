@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import clsx from 'clsx';
+import { useTranslation } from 'react-i18next';
 import {
   Squares2X2Icon, CalendarDaysIcon, ScissorsIcon, UserGroupIcon,
   ChartBarIcon, Cog6ToothIcon, ArrowLeftStartOnRectangleIcon, Bars3Icon, XMarkIcon,
@@ -10,22 +11,24 @@ import {
 import { useAuth } from '../lib/AuthContext';
 import { createApiClient } from '../lib/api';
 import Modal from './Modal';
+import LanguageSwitcher from './LanguageSwitcher';
 
 const NAV_ITEMS = [
-  { to: '/', label: 'Dashboard', icon: Squares2X2Icon, end: true },
-  { to: '/appointments', label: 'Appointments', icon: CalendarDaysIcon },
-  { to: '/customers', label: 'Customers', icon: UsersIcon },
-  { to: '/services', label: 'Services', icon: ScissorsIcon },
-  { to: '/staff', label: 'Staff', icon: UserGroupIcon },
-  { to: '/statistics', label: 'Statistics', icon: ChartBarIcon },
-  { to: '/promotions', label: 'Promotions', icon: MegaphoneIcon },
-  { to: '/settings', label: 'Settings', icon: Cog6ToothIcon },
+  { to: '/', key: 'dashboard', icon: Squares2X2Icon, end: true },
+  { to: '/appointments', key: 'appointments', icon: CalendarDaysIcon },
+  { to: '/customers', key: 'customers', icon: UsersIcon },
+  { to: '/services', key: 'services', icon: ScissorsIcon },
+  { to: '/staff', key: 'staff', icon: UserGroupIcon },
+  { to: '/statistics', key: 'statistics', icon: ChartBarIcon },
+  { to: '/promotions', key: 'promotions', icon: MegaphoneIcon },
+  { to: '/settings', key: 'settings', icon: Cog6ToothIcon },
 ];
 
 function NavItems({ onNavigate }) {
+  const { t } = useTranslation();
   return (
     <nav className="flex flex-col gap-1">
-      {NAV_ITEMS.map(({ to, label, icon: Icon, end }) => (
+      {NAV_ITEMS.map(({ to, key, icon: Icon, end }) => (
         <NavLink
           key={to}
           to={to}
@@ -48,7 +51,7 @@ function NavItems({ onNavigate }) {
                 />
               )}
               <Icon className={clsx('w-[18px] h-[18px] relative z-10 shrink-0', isActive && 'text-accent')} />
-              <span className="relative z-10">{label}</span>
+              <span className="relative z-10">{t(`nav.${key}`)}</span>
             </>
           )}
         </NavLink>
@@ -60,6 +63,7 @@ function NavItems({ onNavigate }) {
 // Shown only once we know the account actually owns more than one shop —
 // lets them jump between shops without re-verifying via Telegram each time.
 function ShopSwitcher({ shopName, shopInitial }) {
+  const { t, i18n } = useTranslation();
   const { token, shop, login } = useAuth();
   const [myShops, setMyShops] = useState(null);
   const [open, setOpen] = useState(false);
@@ -103,7 +107,7 @@ function ShopSwitcher({ shopName, shopInitial }) {
         {hasMultiple && <ChevronUpDownIcon className="w-4 h-4 text-text-faint shrink-0" />}
       </button>
 
-      <Modal open={open} onClose={() => setOpen(false)} title="Switch shop">
+      <Modal open={open} onClose={() => setOpen(false)} title={t('common.switchShop')}>
         <div className="space-y-1.5">
           {(myShops || []).map((s) => (
             <button
@@ -113,7 +117,7 @@ function ShopSwitcher({ shopName, shopInitial }) {
               className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl border border-border bg-surface-3 hover:border-accent/60 transition-colors disabled:opacity-50"
             >
               <img src={s.image} alt="" className="w-8 h-8 rounded-lg object-cover shrink-0" />
-              <span className="text-sm font-medium text-text truncate flex-1 text-left">{s.name?.en || s.name?.ru}</span>
+              <span className="text-sm font-medium text-text truncate flex-1 text-left">{s.name?.[i18n.language] || s.name?.en || s.name?.ru}</span>
               {s.id === shop?.id && <CheckIcon className="w-4 h-4 text-accent shrink-0" />}
             </button>
           ))}
@@ -124,10 +128,11 @@ function ShopSwitcher({ shopName, shopInitial }) {
 }
 
 export default function Layout() {
+  const { t } = useTranslation();
   const { shop, logout } = useAuth();
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const shopName = shop?.name?.en || shop?.name?.ru || 'Your Shop';
+  const shopName = shop?.name?.en || shop?.name?.ru || t('common.yourShop');
   const shopInitial = shopName.slice(0, 1).toUpperCase();
 
   return (
@@ -139,11 +144,14 @@ export default function Layout() {
           <span className="font-display text-lg font-semibold tracking-tight">Tezkor</span>
         </div>
         <NavItems />
-        <div className="mt-auto pt-4 border-t border-border-soft flex items-center gap-3 px-2">
-          <ShopSwitcher shopName={shopName} shopInitial={shopInitial} />
-          <button onClick={logout} title="Log out" className="text-text-faint hover:text-danger transition-colors p-1.5 shrink-0">
-            <ArrowLeftStartOnRectangleIcon className="w-[18px] h-[18px]" />
-          </button>
+        <div className="mt-auto pt-4 border-t border-border-soft px-2">
+          <LanguageSwitcher className="mb-3 w-full justify-center" />
+          <div className="flex items-center gap-3">
+            <ShopSwitcher shopName={shopName} shopInitial={shopInitial} />
+            <button onClick={logout} title={t('common.logOut')} className="text-text-faint hover:text-danger transition-colors p-1.5 shrink-0">
+              <ArrowLeftStartOnRectangleIcon className="w-[18px] h-[18px]" />
+            </button>
+          </div>
         </div>
       </aside>
 
@@ -175,11 +183,14 @@ export default function Layout() {
                 <button onClick={() => setMobileOpen(false)} className="text-text-muted"><XMarkIcon className="w-5 h-5" /></button>
               </div>
               <NavItems onNavigate={() => setMobileOpen(false)} />
-              <div className="mt-auto pt-4 border-t border-border-soft flex items-center gap-3 px-2">
-                <ShopSwitcher shopName={shopName} shopInitial={shopInitial} />
+              <div className="mt-auto pt-4 border-t border-border-soft px-2">
+                <LanguageSwitcher className="mb-3" />
+                <div className="flex items-center gap-3">
+                  <ShopSwitcher shopName={shopName} shopInitial={shopInitial} />
+                </div>
               </div>
               <button onClick={logout} className="flex items-center gap-2 text-sm text-text-faint hover:text-danger transition-colors px-2 py-2 mt-2">
-                <ArrowLeftStartOnRectangleIcon className="w-[18px] h-[18px]" /> Log out
+                <ArrowLeftStartOnRectangleIcon className="w-[18px] h-[18px]" /> {t('common.logOut')}
               </button>
             </motion.div>
           </motion.div>

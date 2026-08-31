@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Input, Switch } from './ui';
 
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
@@ -24,6 +25,7 @@ function dayMapToHoursArray(dayMap) {
 // array in state and passes it straight through, no separate day-map state
 // needed on their end.
 export default function WorkingHoursEditor({ value, onChange, compact = false }) {
+  const { t } = useTranslation();
   const dayMap = useMemo(() => hoursArrayToDayMap(value), [value]);
 
   const updateDay = (day, patch) => {
@@ -35,16 +37,16 @@ export default function WorkingHoursEditor({ value, onChange, compact = false })
       {DAYS.map((day) => (
         <div key={day} className="flex items-center gap-3 py-1">
           <div className={compact ? 'w-24 shrink-0' : 'w-28 shrink-0'}>
-            <Switch checked={dayMap[day].open} onChange={(v) => updateDay(day, { open: v })} label={day.slice(0, 3)} />
+            <Switch checked={dayMap[day].open} onChange={(v) => updateDay(day, { open: v })} label={t(`common.daysShort.${day}`)} />
           </div>
           {dayMap[day].open ? (
             <div className="flex items-center gap-2 flex-1">
               <Input type="time" value={dayMap[day].from} onChange={(e) => updateDay(day, { from: e.target.value })} className="!w-28" />
-              <span className="text-text-faint text-sm">to</span>
+              <span className="text-text-faint text-sm">{t('common.to')}</span>
               <Input type="time" value={dayMap[day].to} onChange={(e) => updateDay(day, { to: e.target.value })} className="!w-28" />
             </div>
           ) : (
-            <span className="text-sm text-text-faint">Closed</span>
+            <span className="text-sm text-text-faint">{t('common.closed')}</span>
           )}
         </div>
       ))}

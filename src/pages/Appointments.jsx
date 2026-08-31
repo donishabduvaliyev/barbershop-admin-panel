@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import clsx from 'clsx';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../lib/AuthContext';
 import { useShopSocket } from '../lib/socket';
 import { useToast } from '../components/ToastProvider';
@@ -8,26 +9,26 @@ import StatusBadge from '../components/StatusBadge';
 import { Card, Button, EmptyState, Textarea } from '../components/ui';
 import Modal from '../components/Modal';
 import { TableRowSkeleton } from '../components/Skeleton';
+import { localeFor } from '../lib/locale';
 
-const TABS = [
-  { key: '', label: 'All' },
-  { key: 'pending', label: 'Pending' },
-  { key: 'confirmed', label: 'Confirmed' },
-  { key: 'completed', label: 'Completed' },
-  { key: 'rejected', label: 'Rejected' },
-  { key: 'cancelled', label: 'Cancelled' },
-  { key: 'no-show', label: 'No-show' },
+const TAB_KEYS = [
+  { key: '', label: 'tabAll' },
+  { key: 'pending', label: 'tabPending' },
+  { key: 'confirmed', label: 'tabConfirmed' },
+  { key: 'completed', label: 'tabCompleted' },
+  { key: 'rejected', label: 'tabRejected' },
+  { key: 'cancelled', label: 'tabCancelled' },
+  { key: 'no-show', label: 'tabNoShow' },
 ];
 
-function formatDateTime(iso) {
-  return new Date(iso).toLocaleString(undefined, {
-    weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
-  });
-}
-
 export default function Appointments() {
+  const { t, i18n } = useTranslation();
   const { api, token } = useAuth();
   const { showToast } = useToast();
+
+  const formatDateTime = (iso) => new Date(iso).toLocaleString(localeFor(i18n.language), {
+    weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
+  });
 
   const [status, setStatus] = useState('');
   const [page, setPage] = useState(1);
@@ -70,13 +71,13 @@ export default function Appointments() {
       const updated = await api.patch(`/admin/appointments/${id}/${action}`, body);
       setData((prev) => ({ ...prev, appointments: prev.appointments.map((a) => (a._id === id ? updated : a)) }));
       showToast(
-        action === 'confirm' ? 'Appointment confirmed'
-          : action === 'reject' ? 'Appointment rejected'
-          : action === 'no-show' ? 'Marked as no-show'
-          : 'Marked as completed'
+        action === 'confirm' ? t('appointments.toastConfirmed')
+          : action === 'reject' ? t('appointments.toastRejected')
+          : action === 'no-show' ? t('appointments.toastNoShow')
+          : t('appointments.toastCompleted')
       );
     } catch (err) {
-      showToast(err.message || 'Something went wrong', 'error');
+      showToast(err.message || t('appointments.toastError'), 'error');
     } finally {
       setActioningId(null);
     }
@@ -92,11 +93,11 @@ export default function Appointments() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="font-display text-2xl font-semibold text-text">Appointments</h1>
+        <h1 className="font-display text-2xl font-semibold text-text">{t('appointments.title')}</h1>
       </div>
 
       <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
-        {TABS.map((tab) => (
+        {TAB_KEYS.map((tab) => (
           <button
             key={tab.key}
             onClick={() => { setStatus(tab.key); setPage(1); }}
@@ -105,7 +106,7 @@ export default function Appointments() {
               status === tab.key ? 'bg-accent text-black' : 'bg-surface text-text-muted hover:text-text border border-border-soft'
             )}
           >
-            {tab.label}
+            {t(`appointments.${tab.label}`)}
           </button>
         ))}
       </div>
@@ -114,7 +115,7 @@ export default function Appointments() {
         {loading && !data ? (
           <div>{Array.from({ length: 6 }).map((_, i) => <TableRowSkeleton key={i} />)}</div>
         ) : data?.appointments.length === 0 ? (
-          <EmptyState icon="📭" title="No appointments here" description="Try a different filter, or check back once bookings come in." />
+          <EmptyState icon="📭" title={t('appointments.noAppointmentsTitle')} description={t('appointments.noAppointmentsDesc')} />
         ) : (
           <div>
             <AnimatePresence initial={false}>
@@ -132,23 +133,23 @@ export default function Appointments() {
                     {(appt.userName || '?').slice(0, 1).toUpperCase()}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-text truncate">{appt.userName || 'Guest'} <span className="text-text-faint font-normal">· {appt.userNumber}</span></p>
-                    <p className="text-xs text-text-muted truncate">{appt.serviceName || 'Service'}{appt.staffName ? ` · ${appt.staffName}` : ''}{appt.price ? ` · ${appt.price.toLocaleString()} UZS` : ''}</p>
+                    <p className="text-sm font-medium text-text truncate">{appt.userName || t('common.guest')} <span className="text-text-faint font-normal">· {appt.userNumber}</span></p>
+                    <p className="text-xs text-text-muted truncate">{appt.serviceName || t('common.service')}{appt.staffName ? ` · ${appt.staffName}` : ''}{appt.price ? ` · ${appt.price.toLocaleString()} UZS` : ''}</p>
                   </div>
                   <div className="text-xs text-text-muted whitespace-nowrap">{formatDateTime(appt.requestedTime)}</div>
                   <StatusBadge status={appt.status} />
                   <div className="flex gap-2 sm:ml-2">
                     {appt.status === 'pending' && (
                       <>
-                        <Button variant="primary" className="!px-3 !py-1.5 text-xs" disabled={actioningId === appt._id} onClick={() => runAction(appt._id, 'confirm')}>Confirm</Button>
-                        <Button variant="danger" className="!px-3 !py-1.5 text-xs" disabled={actioningId === appt._id} onClick={() => openReject(appt)}>Reject</Button>
+                        <Button variant="primary" className="!px-3 !py-1.5 text-xs" disabled={actioningId === appt._id} onClick={() => runAction(appt._id, 'confirm')}>{t('appointments.confirm')}</Button>
+                        <Button variant="danger" className="!px-3 !py-1.5 text-xs" disabled={actioningId === appt._id} onClick={() => openReject(appt)}>{t('appointments.reject')}</Button>
                       </>
                     )}
                     {appt.status === 'confirmed' && (
-                      <Button variant="subtle" className="!px-3 !py-1.5 text-xs" disabled={actioningId === appt._id} onClick={() => runAction(appt._id, 'complete')}>Mark done</Button>
+                      <Button variant="subtle" className="!px-3 !py-1.5 text-xs" disabled={actioningId === appt._id} onClick={() => runAction(appt._id, 'complete')}>{t('appointments.markDone')}</Button>
                     )}
                     {(appt.status === 'confirmed' || appt.status === 'completed') && (
-                      <Button variant="ghost" className="!px-3 !py-1.5 text-xs" disabled={actioningId === appt._id} onClick={() => runAction(appt._id, 'no-show')}>No-show</Button>
+                      <Button variant="ghost" className="!px-3 !py-1.5 text-xs" disabled={actioningId === appt._id} onClick={() => runAction(appt._id, 'no-show')}>{t('appointments.noShow')}</Button>
                     )}
                   </div>
                 </motion.div>
@@ -159,10 +160,10 @@ export default function Appointments() {
 
         {data && data.pagination.totalPages > 1 && (
           <div className="flex items-center justify-between px-5 py-3.5 border-t border-border-soft text-sm text-text-muted">
-            <span>Page {data.pagination.currentPage} of {data.pagination.totalPages}</span>
+            <span>{t('appointments.pageOf', { current: data.pagination.currentPage, total: data.pagination.totalPages })}</span>
             <div className="flex gap-2">
-              <Button variant="ghost" className="!px-3 !py-1.5 text-xs" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>Prev</Button>
-              <Button variant="ghost" className="!px-3 !py-1.5 text-xs" disabled={page >= data.pagination.totalPages} onClick={() => setPage((p) => p + 1)}>Next</Button>
+              <Button variant="ghost" className="!px-3 !py-1.5 text-xs" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>{t('appointments.prev')}</Button>
+              <Button variant="ghost" className="!px-3 !py-1.5 text-xs" disabled={page >= data.pagination.totalPages} onClick={() => setPage((p) => p + 1)}>{t('appointments.next')}</Button>
             </div>
           </div>
         )}
@@ -171,16 +172,16 @@ export default function Appointments() {
       <Modal
         open={!!rejectTarget}
         onClose={() => setRejectTarget(null)}
-        title="Reject appointment"
+        title={t('appointments.rejectTitle')}
         footer={(
           <>
-            <Button variant="ghost" onClick={() => setRejectTarget(null)}>Cancel</Button>
-            <Button variant="danger" disabled={!rejectReason.trim() || actioningId === rejectTarget?._id} onClick={submitReject}>Send rejection</Button>
+            <Button variant="ghost" onClick={() => setRejectTarget(null)}>{t('common.cancel')}</Button>
+            <Button variant="danger" disabled={!rejectReason.trim() || actioningId === rejectTarget?._id} onClick={submitReject}>{t('appointments.sendRejection')}</Button>
           </>
         )}
       >
-        <p className="text-sm text-text-muted mb-3">The client will receive this reason on Telegram.</p>
-        <Textarea rows={3} value={rejectReason} onChange={(e) => setRejectReason(e.target.value)} placeholder="e.g. Fully booked at that time" autoFocus />
+        <p className="text-sm text-text-muted mb-3">{t('appointments.rejectBody')}</p>
+        <Textarea rows={3} value={rejectReason} onChange={(e) => setRejectReason(e.target.value)} placeholder={t('appointments.rejectPlaceholder')} autoFocus />
       </Modal>
     </div>
   );

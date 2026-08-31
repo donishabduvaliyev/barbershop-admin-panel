@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { PlusIcon, PencilSquareIcon, TrashIcon, XMarkIcon, CalendarDaysIcon } from '@heroicons/react/24/outline';
 import { StarIcon as StarSolid } from '@heroicons/react/24/solid';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../lib/AuthContext';
 import { useToast } from '../components/ToastProvider';
 import { Card, Button, Field, Input, EmptyState, Switch } from '../components/ui';
@@ -9,12 +10,14 @@ import Modal from '../components/Modal';
 import ImageUpload from '../components/ImageUpload';
 import WorkingHoursEditor from '../components/WorkingHoursEditor';
 import { CardGridSkeleton } from '../components/Skeleton';
+import { localeFor } from '../lib/locale';
 
 const EMPTY_FORM = { name: '', title: '', photo: '', daysOff: [], serviceIds: [], commission: '', workingHours: [] };
 const todayKey = () => new Date().toISOString().slice(0, 10);
-const formatDayOff = (dateKey) => new Date(`${dateKey}T00:00:00`).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
 
 export default function Staff() {
+  const { t, i18n } = useTranslation();
+  const formatDayOff = (dateKey) => new Date(`${dateKey}T00:00:00`).toLocaleDateString(localeFor(i18n.language), { weekday: 'short', month: 'short', day: 'numeric' });
   const { api } = useAuth();
   const { showToast } = useToast();
   const [staff, setStaff] = useState(null);
@@ -62,7 +65,7 @@ export default function Staff() {
   };
 
   const save = async () => {
-    if (!form.name.trim()) { showToast('Name is required', 'error'); return; }
+    if (!form.name.trim()) { showToast(t('staff.toastNameRequired'), 'error'); return; }
     setSaving(true);
     try {
       const payload = { ...form, commission: form.commission === '' ? null : Number(form.commission) };
@@ -70,10 +73,10 @@ export default function Staff() {
         ? await api.patch(`/admin/shop/staff/${editing._id}`, payload)
         : await api.post('/admin/shop/staff', payload);
       setStaff(updated);
-      showToast(editing ? 'Staff member updated' : 'Staff member added');
+      showToast(editing ? t('staff.toastUpdated') : t('staff.toastAdded'));
       setModalOpen(false);
     } catch (err) {
-      showToast(err.message || 'Could not save staff member', 'error');
+      showToast(err.message || t('staff.toastSaveError'), 'error');
     } finally {
       setSaving(false);
     }
@@ -96,15 +99,15 @@ export default function Staff() {
       setNewDayOffDate('');
       showToast(
         res.rejectedCount
-          ? `Day off added — ${res.rejectedCount} appointment${res.rejectedCount === 1 ? '' : 's'} rejected and the client${res.rejectedCount === 1 ? '' : 's'} notified`
-          : 'Day off added'
+          ? t('staff.toastDayOffAddedRejected', { count: res.rejectedCount })
+          : t('staff.toastDayOffAdded')
       );
     } catch (err) {
       if (err.status === 409 && err.data?.conflicts) {
         setDayOffConflict({ message: err.message, conflicts: err.data.conflicts });
         return;
       }
-      showToast(err.message || 'Could not add day off', 'error');
+      showToast(err.message || t('staff.toastDayOffError'), 'error');
     }
   };
 
@@ -114,7 +117,7 @@ export default function Staff() {
       setForm((f) => ({ ...f, daysOff: res.daysOff }));
       setStaff((prev) => prev.map((m) => (m._id === editing._id ? { ...m, daysOff: res.daysOff } : m)));
     } catch (err) {
-      showToast(err.message || 'Could not remove day off', 'error');
+      showToast(err.message || t('staff.toastDayOffRemoveError'), 'error');
     }
   };
 
@@ -123,7 +126,7 @@ export default function Staff() {
       const path = `/admin/shop/staff/${deleteTarget._id}${force ? '?force=true' : ''}`;
       const updated = await api.delete(path);
       setStaff(updated);
-      showToast('Staff member removed');
+      showToast(t('staff.toastRemoved'));
       setDeleteTarget(null);
       setUpcomingCount(0);
     } catch (err) {
@@ -131,7 +134,7 @@ export default function Staff() {
         setUpcomingCount(err.data.upcomingCount);
         return;
       }
-      showToast(err.message || 'Could not remove staff member', 'error');
+      showToast(err.message || t('staff.toastRemoveError'), 'error');
       setDeleteTarget(null);
     }
   };
@@ -140,16 +143,16 @@ export default function Staff() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-display text-2xl font-semibold text-text">Staff</h1>
-          <p className="text-text-muted text-sm mt-1">Who works at your shop.</p>
+          <h1 className="font-display text-2xl font-semibold text-text">{t('staff.title')}</h1>
+          <p className="text-text-muted text-sm mt-1">{t('staff.subtitle')}</p>
         </div>
-        <Button onClick={openCreate}><PlusIcon className="w-4 h-4" /> Add staff</Button>
+        <Button onClick={openCreate}><PlusIcon className="w-4 h-4" /> {t('staff.addStaff')}</Button>
       </div>
 
       {staff === null ? (
         <CardGridSkeleton />
       ) : staff.length === 0 ? (
-        <Card><EmptyState icon="💇" title="No staff yet" description="Add your team so customers can pick who they book with." action={<Button onClick={openCreate}>Add staff</Button>} /></Card>
+        <Card><EmptyState icon="💇" title={t('staff.noStaffTitle')} description={t('staff.noStaffDesc')} action={<Button onClick={openCreate}>{t('staff.addStaff')}</Button>} /></Card>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {staff.map((member, i) => (
@@ -174,11 +177,11 @@ export default function Staff() {
                 </div>
                 {member.daysOff?.includes(todayKey()) ? (
                   <span className="mt-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-warning/15 text-warning text-[11px] font-medium">
-                    <CalendarDaysIcon className="w-3 h-3" /> Off today
+                    <CalendarDaysIcon className="w-3 h-3" /> {t('staff.offToday')}
                   </span>
                 ) : member.daysOff?.filter((d) => d >= todayKey()).length > 0 ? (
                   <span className="mt-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-surface-3 text-text-faint text-[11px]">
-                    <CalendarDaysIcon className="w-3 h-3" /> {member.daysOff.filter((d) => d >= todayKey()).length} day{member.daysOff.filter((d) => d >= todayKey()).length === 1 ? '' : 's'} off scheduled
+                    <CalendarDaysIcon className="w-3 h-3" /> {t('staff.dayOffScheduled', { count: member.daysOff.filter((d) => d >= todayKey()).length })}
                   </span>
                 ) : null}
               </Card>
@@ -190,32 +193,32 @@ export default function Staff() {
       <Modal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
-        title={editing ? 'Edit staff member' : 'Add staff member'}
+        title={editing ? t('staff.editStaff') : t('staff.addStaffTitle')}
         footer={(
           <>
-            <Button variant="ghost" onClick={() => setModalOpen(false)}>Cancel</Button>
-            <Button onClick={save} disabled={saving}>{saving ? 'Saving…' : 'Save'}</Button>
+            <Button variant="ghost" onClick={() => setModalOpen(false)}>{t('common.cancel')}</Button>
+            <Button onClick={save} disabled={saving}>{saving ? t('common.saving') : t('common.save')}</Button>
           </>
         )}
       >
         <div className="space-y-4">
           {editing ? (
-            <Field label="Photo">
+            <Field label={t('staff.photo')}>
               <ImageUpload value={form.photo} onUpload={uploadPhoto} shape="circle" />
             </Field>
           ) : (
-            <Field label="Photo" hint="Save the staff member first, then edit them to add a photo.">
+            <Field label={t('staff.photo')} hint={t('staff.photoHintNew')}>
               <div className="w-24 h-24 rounded-full border border-dashed border-border flex items-center justify-center text-text-faint text-xs text-center px-2">
-                Add after saving
+                {t('staff.addAfterSaving')}
               </div>
             </Field>
           )}
-          <Field label="Name"><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Aziz" /></Field>
-          <Field label="Title" hint="Optional — e.g. Senior Barber"><Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Senior Barber" /></Field>
-          <Field label="Commission %" hint="Optional — your own reference, not shown to customers"><Input type="number" min="0" max="100" value={form.commission} onChange={(e) => setForm({ ...form, commission: e.target.value })} placeholder="40" className="!w-28" /></Field>
+          <Field label={t('staff.name')}><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Aziz" /></Field>
+          <Field label={t('staff.titleField')} hint={t('staff.titleHint')}><Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Senior Barber" /></Field>
+          <Field label={t('staff.commission')} hint={t('staff.commissionHint')}><Input type="number" min="0" max="100" value={form.commission} onChange={(e) => setForm({ ...form, commission: e.target.value })} placeholder="40" className="!w-28" /></Field>
 
           {services.length > 0 && (
-            <Field label="Services" hint="Leave all unchecked to let them perform every service.">
+            <Field label={t('staff.services')} hint={t('staff.servicesHint')}>
               <div className="flex flex-wrap gap-1.5">
                 {services.map((service) => {
                   const checked = form.serviceIds.includes(service._id);
@@ -234,12 +237,12 @@ export default function Staff() {
             </Field>
           )}
 
-          <Field label="Working hours">
+          <Field label={t('staff.workingHours')}>
             <div className="space-y-2">
               <Switch
                 checked={form.workingHours.length > 0}
                 onChange={(useCustom) => setForm((f) => ({ ...f, workingHours: useCustom ? shopHours : [] }))}
-                label={form.workingHours.length > 0 ? 'Custom hours' : "Follows the shop's hours"}
+                label={form.workingHours.length > 0 ? t('staff.customHours') : t('staff.followsShopHours')}
               />
               {form.workingHours.length > 0 && (
                 <WorkingHoursEditor value={form.workingHours} onChange={(workingHours) => setForm((f) => ({ ...f, workingHours }))} compact />
@@ -248,7 +251,7 @@ export default function Staff() {
           </Field>
 
           {editing && (
-            <Field label="Time off" hint="Customers can't book them on these dates.">
+            <Field label={t('staff.timeOff')} hint={t('staff.timeOffHint')}>
               <div className="space-y-2">
                 {form.daysOff.length > 0 && (
                   <div className="flex flex-wrap gap-1.5">
@@ -265,18 +268,18 @@ export default function Staff() {
                 <div className="flex gap-2">
                   <Input type="date" min={todayKey()} value={newDayOffDate} onChange={(e) => { setNewDayOffDate(e.target.value); setDayOffConflict(null); }} className="!w-40" />
                   <Button variant="subtle" className="!px-3 !py-2 text-xs" disabled={!newDayOffDate} onClick={() => addDayOff(false)}>
-                    <CalendarDaysIcon className="w-4 h-4" /> Add
+                    <CalendarDaysIcon className="w-4 h-4" /> {t('staff.add')}
                   </Button>
                 </div>
                 {dayOffConflict && (
                   <div className="rounded-lg border border-warning/30 bg-warning/10 p-3 space-y-2">
-                    <p className="text-xs text-warning">{dayOffConflict.message} Marking this day off will reject {dayOffConflict.conflicts.length === 1 ? 'it' : 'them'} and notify the client{dayOffConflict.conflicts.length === 1 ? '' : 's'}.</p>
+                    <p className="text-xs text-warning">{dayOffConflict.message} {t('staff.conflictWillReject', { count: dayOffConflict.conflicts.length })}</p>
                     <ul className="text-xs text-text-muted space-y-0.5">
                       {dayOffConflict.conflicts.map((c) => (
-                        <li key={c.id}>• {c.userName || 'Guest'} — {new Date(c.requestedTime).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</li>
+                        <li key={c.id}>• {c.userName || t('common.guest')} — {new Date(c.requestedTime).toLocaleString(localeFor(i18n.language), { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</li>
                       ))}
                     </ul>
-                    <Button variant="danger" className="!px-3 !py-1.5 text-xs" onClick={() => addDayOff(true)}>Mark off anyway</Button>
+                    <Button variant="danger" className="!px-3 !py-1.5 text-xs" onClick={() => addDayOff(true)}>{t('staff.markOffAnyway')}</Button>
                   </div>
                 )}
               </div>
@@ -288,23 +291,22 @@ export default function Staff() {
       <Modal
         open={!!deleteTarget}
         onClose={() => setDeleteTarget(null)}
-        title="Remove staff member"
+        title={t('staff.removeTitle')}
         footer={(
           <>
-            <Button variant="ghost" onClick={() => setDeleteTarget(null)}>Cancel</Button>
+            <Button variant="ghost" onClick={() => setDeleteTarget(null)}>{t('common.cancel')}</Button>
             <Button variant="danger" onClick={() => remove(upcomingCount > 0)}>
-              {upcomingCount > 0 ? 'Delete anyway' : 'Remove'}
+              {upcomingCount > 0 ? t('staff.deleteAnyway') : t('common.remove')}
             </Button>
           </>
         )}
       >
         {upcomingCount > 0 ? (
           <p className="text-sm text-warning">
-            <span className="font-medium">{deleteTarget?.name}</span> has {upcomingCount} upcoming appointment{upcomingCount === 1 ? '' : 's'}.
-            Deleting them won't cancel those appointments, but they'll no longer be assigned to a real staff member.
+            {t('staff.upcomingWarning', { name: deleteTarget?.name, count: upcomingCount })}
           </p>
         ) : (
-          <p className="text-sm text-text-muted">Remove <span className="text-text font-medium">{deleteTarget?.name}</span> from your team?</p>
+          <p className="text-sm text-text-muted">{t('staff.removeConfirm', { name: deleteTarget?.name })}</p>
         )}
       </Modal>
     </div>
