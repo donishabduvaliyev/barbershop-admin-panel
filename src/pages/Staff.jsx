@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { PlusIcon, PencilSquareIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, PencilSquareIcon, TrashIcon, XMarkIcon, CalendarDaysIcon } from '@heroicons/react/24/outline';
 import { StarIcon as StarSolid } from '@heroicons/react/24/solid';
 import { useAuth } from '../lib/AuthContext';
 import { useToast } from '../components/ToastProvider';
@@ -9,7 +9,9 @@ import Modal from '../components/Modal';
 import ImageUpload from '../components/ImageUpload';
 import { CardGridSkeleton } from '../components/Skeleton';
 
-const EMPTY_FORM = { name: '', title: '', photo: '' };
+const EMPTY_FORM = { name: '', title: '', photo: '', daysOff: [] };
+const todayKey = () => new Date().toISOString().slice(0, 10);
+const formatDayOff = (dateKey) => new Date(`${dateKey}T00:00:00`).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
 
 export default function Staff() {
   const { api } = useAuth();
@@ -21,13 +23,21 @@ export default function Staff() {
   const [saving, setSaving] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [upcomingCount, setUpcomingCount] = useState(0);
+  const [newDayOffDate, setNewDayOffDate] = useState('');
+  const [dayOffConflict, setDayOffConflict] = useState(null);
 
   useEffect(() => {
     api.get('/admin/shop').then((shop) => setStaff(shop.staff));
   }, [api]);
 
   const openCreate = () => { setEditing(null); setForm(EMPTY_FORM); setModalOpen(true); };
-  const openEdit = (member) => { setEditing(member); setForm({ name: member.name, title: member.title || '', photo: member.photo || '' }); setModalOpen(true); };
+  const openEdit = (member) => {
+    setEditing(member);
+    setForm({ name: member.name, title: member.title || '', photo: member.photo || '', daysOff: member.daysOff || [] });
+    setNewDayOffDate('');
+    setDayOffConflict(null);
+    setModalOpen(true);
+  };
 
   const save = async () => {
     if (!form.name.trim()) { showToast('Name is required', 'error'); return; }
@@ -50,6 +60,39 @@ export default function Staff() {
     const { photo } = await api.upload(`/admin/shop/staff/${editing._id}/photo`, file);
     setForm((f) => ({ ...f, photo }));
     setStaff((prev) => prev.map((m) => (m._id === editing._id ? { ...m, photo } : m)));
+  };
+
+  const addDayOff = async (force = false) => {
+    if (!newDayOffDate) return;
+    try {
+      const path = `/admin/shop/staff/${editing._id}/days-off${force ? '?force=true' : ''}`;
+      const res = await api.post(path, { date: newDayOffDate });
+      setForm((f) => ({ ...f, daysOff: res.daysOff }));
+      setStaff((prev) => prev.map((m) => (m._id === editing._id ? { ...m, daysOff: res.daysOff } : m)));
+      setDayOffConflict(null);
+      setNewDayOffDate('');
+      showToast(
+        res.rejectedCount
+          ? `Day off added — ${res.rejectedCount} appointment${res.rejectedCount === 1 ? '' : 's'} rejected and the client${res.rejectedCount === 1 ? '' : 's'} notified`
+          : 'Day off added'
+      );
+    } catch (err) {
+      if (err.status === 409 && err.data?.conflicts) {
+        setDayOffConflict({ message: err.message, conflicts: err.data.conflicts });
+        return;
+      }
+      showToast(err.message || 'Could not add day off', 'error');
+    }
+  };
+
+  const removeDayOff = async (date) => {
+    try {
+      const res = await api.delete(`/admin/shop/staff/${editing._id}/days-off`, { date });
+      setForm((f) => ({ ...f, daysOff: res.daysOff }));
+      setStaff((prev) => prev.map((m) => (m._id === editing._id ? { ...m, daysOff: res.daysOff } : m)));
+    } catch (err) {
+      showToast(err.message || 'Could not remove day off', 'error');
+    }
   };
 
   const remove = async (force = false) => {
@@ -106,6 +149,15 @@ export default function Staff() {
                   <span>{member.rating?.toFixed(1) || '0.0'}</span>
                   <span className="text-text-faint">({member.reviewsCount || 0})</span>
                 </div>
+                {member.daysOff?.includes(todayKey()) ? (
+                  <span className="mt-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-warning/15 text-warning text-[11px] font-medium">
+                    <CalendarDaysIcon className="w-3 h-3" /> Off today
+                  </span>
+                ) : member.daysOff?.filter((d) => d >= todayKey()).length > 0 ? (
+                  <span className="mt-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-surface-3 text-text-faint text-[11px]">
+                    <CalendarDaysIcon className="w-3 h-3" /> {member.daysOff.filter((d) => d >= todayKey()).length} day{member.daysOff.filter((d) => d >= todayKey()).length === 1 ? '' : 's'} off scheduled
+                  </span>
+                ) : null}
               </Card>
             </motion.div>
           ))}
@@ -137,6 +189,42 @@ export default function Staff() {
           )}
           <Field label="Name"><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Aziz" /></Field>
           <Field label="Title" hint="Optional — e.g. Senior Barber"><Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Senior Barber" /></Field>
+
+          {editing && (
+            <Field label="Time off" hint="Customers can't book them on these dates.">
+              <div className="space-y-2">
+                {form.daysOff.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5">
+                    {[...form.daysOff].sort().map((date) => (
+                      <span key={date} className="inline-flex items-center gap-1.5 pl-2.5 pr-1.5 py-1 rounded-full bg-surface-3 border border-border text-xs text-text">
+                        {formatDayOff(date)}
+                        <button onClick={() => removeDayOff(date)} className="w-4 h-4 rounded-full flex items-center justify-center text-text-faint hover:text-danger hover:bg-danger/10 transition-colors">
+                          <XMarkIcon className="w-3 h-3" />
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                )}
+                <div className="flex gap-2">
+                  <Input type="date" min={todayKey()} value={newDayOffDate} onChange={(e) => { setNewDayOffDate(e.target.value); setDayOffConflict(null); }} className="!w-40" />
+                  <Button variant="subtle" className="!px-3 !py-2 text-xs" disabled={!newDayOffDate} onClick={() => addDayOff(false)}>
+                    <CalendarDaysIcon className="w-4 h-4" /> Add
+                  </Button>
+                </div>
+                {dayOffConflict && (
+                  <div className="rounded-lg border border-warning/30 bg-warning/10 p-3 space-y-2">
+                    <p className="text-xs text-warning">{dayOffConflict.message} Marking this day off will reject {dayOffConflict.conflicts.length === 1 ? 'it' : 'them'} and notify the client{dayOffConflict.conflicts.length === 1 ? '' : 's'}.</p>
+                    <ul className="text-xs text-text-muted space-y-0.5">
+                      {dayOffConflict.conflicts.map((c) => (
+                        <li key={c.id}>• {c.userName || 'Guest'} — {new Date(c.requestedTime).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</li>
+                      ))}
+                    </ul>
+                    <Button variant="danger" className="!px-3 !py-1.5 text-xs" onClick={() => addDayOff(true)}>Mark off anyway</Button>
+                  </div>
+                )}
+              </div>
+            </Field>
+          )}
         </div>
       </Modal>
 
