@@ -16,6 +16,7 @@ const TABS = [
   { key: 'completed', label: 'Completed' },
   { key: 'rejected', label: 'Rejected' },
   { key: 'cancelled', label: 'Cancelled' },
+  { key: 'no-show', label: 'No-show' },
 ];
 
 function formatDateTime(iso) {
@@ -68,7 +69,12 @@ export default function Appointments() {
     try {
       const updated = await api.patch(`/admin/appointments/${id}/${action}`, body);
       setData((prev) => ({ ...prev, appointments: prev.appointments.map((a) => (a._id === id ? updated : a)) }));
-      showToast(action === 'confirm' ? 'Appointment confirmed' : action === 'reject' ? 'Appointment rejected' : 'Marked as completed');
+      showToast(
+        action === 'confirm' ? 'Appointment confirmed'
+          : action === 'reject' ? 'Appointment rejected'
+          : action === 'no-show' ? 'Marked as no-show'
+          : 'Marked as completed'
+      );
     } catch (err) {
       showToast(err.message || 'Something went wrong', 'error');
     } finally {
@@ -140,6 +146,9 @@ export default function Appointments() {
                     )}
                     {appt.status === 'confirmed' && (
                       <Button variant="subtle" className="!px-3 !py-1.5 text-xs" disabled={actioningId === appt._id} onClick={() => runAction(appt._id, 'complete')}>Mark done</Button>
+                    )}
+                    {(appt.status === 'confirmed' || appt.status === 'completed') && (
+                      <Button variant="ghost" className="!px-3 !py-1.5 text-xs" disabled={actioningId === appt._id} onClick={() => runAction(appt._id, 'no-show')}>No-show</Button>
                     )}
                   </div>
                 </motion.div>

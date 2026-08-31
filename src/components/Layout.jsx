@@ -5,7 +5,7 @@ import clsx from 'clsx';
 import {
   Squares2X2Icon, CalendarDaysIcon, ScissorsIcon, UserGroupIcon,
   ChartBarIcon, Cog6ToothIcon, ArrowLeftStartOnRectangleIcon, Bars3Icon, XMarkIcon,
-  ChevronUpDownIcon, CheckIcon, UsersIcon,
+  ChevronUpDownIcon, CheckIcon, UsersIcon, MegaphoneIcon,
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../lib/AuthContext';
 import { createApiClient } from '../lib/api';
@@ -18,6 +18,7 @@ const NAV_ITEMS = [
   { to: '/services', label: 'Services', icon: ScissorsIcon },
   { to: '/staff', label: 'Staff', icon: UserGroupIcon },
   { to: '/statistics', label: 'Statistics', icon: ChartBarIcon },
+  { to: '/promotions', label: 'Promotions', icon: MegaphoneIcon },
   { to: '/settings', label: 'Settings', icon: Cog6ToothIcon },
 ];
 

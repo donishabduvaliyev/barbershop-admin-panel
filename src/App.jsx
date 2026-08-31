@@ -10,6 +10,7 @@ import Customers from './pages/Customers';
 import Services from './pages/Services';
 import Staff from './pages/Staff';
 import Statistics from './pages/Statistics';
+import Promotions from './pages/Promotions';
 import Settings from './pages/Settings';
 
 function Gate({ children }) {
@@ -45,6 +46,7 @@ export default function App() {
               <Route path="/services" element={<Services />} />
               <Route path="/staff" element={<Staff />} />
               <Route path="/statistics" element={<Statistics />} />
+              <Route path="/promotions" element={<Promotions />} />
               <Route path="/settings" element={<Settings />} />
             </Route>
             <Route path="*" element={<Navigate to="/" replace />} />

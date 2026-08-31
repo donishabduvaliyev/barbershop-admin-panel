@@ -6,6 +6,7 @@ const STATUS_META = {
   completed: { label: 'Completed', color: 'var(--color-success)' },
   rejected: { label: 'Rejected', color: 'var(--color-danger)' },
   cancelled: { label: 'Cancelled', color: 'var(--color-text-faint)' },
+  'no-show': { label: 'No-show', color: 'var(--color-danger)' },
 };
 
 export default function StatusBadge({ status }) {

@@ -35,6 +35,7 @@ export default function Statistics() {
   const { api } = useAuth();
   const [rangeDays, setRangeDays] = useState(30);
   const [stats, setStats] = useState(null);
+  const [staffStats, setStaffStats] = useState(null);
 
   useEffect(() => {
     const to = new Date();
@@ -42,7 +43,9 @@ export default function Statistics() {
     from.setDate(from.getDate() - rangeDays);
     const query = new URLSearchParams({ from: from.toISOString(), to: to.toISOString() });
     setStats(null);
+    setStaffStats(null);
     api.get(`/admin/stats/overview?${query}`).then(setStats);
+    api.get(`/admin/stats/staff?${query}`).then((res) => setStaffStats(res.staff));
   }, [api, rangeDays]);
 
   const statusData = useMemo(
@@ -152,6 +155,48 @@ export default function Statistics() {
           )}
         </Card>
       </div>
+
+      <Card className="overflow-hidden">
+        <div className="px-6 py-4 border-b border-border-soft">
+          <h2 className="font-medium text-text">Employee performance</h2>
+        </div>
+        {!staffStats ? (
+          <div className="p-6"><Skeleton className="h-40 w-full" /></div>
+        ) : staffStats.length === 0 ? (
+          <EmptyState icon="💇" title="No completed visits yet" />
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="text-xs text-text-muted uppercase tracking-wide text-left">
+                  <th className="px-6 py-3 font-medium">Name</th>
+                  <th className="px-4 py-3 font-medium text-right">Appointments</th>
+                  <th className="px-4 py-3 font-medium text-right">Revenue</th>
+                  <th className="px-4 py-3 font-medium text-right">Avg ticket</th>
+                  <th className="px-4 py-3 font-medium text-right">Clients</th>
+                  <th className="px-4 py-3 font-medium text-right">Rating</th>
+                  <th className="px-6 py-3 font-medium text-right">Commission earned</th>
+                </tr>
+              </thead>
+              <tbody>
+                {staffStats.map((s) => (
+                  <tr key={s.staffId} className="border-t border-border-soft">
+                    <td className="px-6 py-3 text-text font-medium whitespace-nowrap">{s.name}</td>
+                    <td className="px-4 py-3 text-text-muted text-right">{s.appointments}</td>
+                    <td className="px-4 py-3 text-text text-right whitespace-nowrap">{s.revenue.toLocaleString()} UZS</td>
+                    <td className="px-4 py-3 text-text-muted text-right whitespace-nowrap">{s.averageTicket.toLocaleString()} UZS</td>
+                    <td className="px-4 py-3 text-text-muted text-right">{s.clients}</td>
+                    <td className="px-4 py-3 text-text-muted text-right">{s.rating > 0 ? `⭐ ${s.rating.toFixed(1)}` : '—'}</td>
+                    <td className="px-6 py-3 text-text text-right whitespace-nowrap">
+                      {s.commissionEarned != null ? `${s.commissionEarned.toLocaleString()} UZS` : <span className="text-text-faint">no commission set</span>}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </Card>
 
       <Card className="p-6">
         <h2 className="font-medium text-text mb-4">Most used services</h2>

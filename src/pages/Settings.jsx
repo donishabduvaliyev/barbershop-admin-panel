@@ -26,6 +26,7 @@ export default function Settings() {
         address: data.address || '',
         isOperational: data.isOperational,
         capacity: data.capacity || 1,
+        winBackEnabled: data.winBackEnabled ?? true,
       });
       setHours(data.workingHours || []);
     });
@@ -130,6 +131,14 @@ export default function Settings() {
             <p className="text-xs text-text-muted mt-0.5">Turn off to hide your shop from new bookings temporarily.</p>
           </div>
           <Switch checked={form.isOperational} onChange={(v) => setForm({ ...form, isOperational: v })} />
+        </div>
+
+        <div className="flex items-center justify-between pb-1">
+          <div>
+            <p className="text-sm font-medium text-text">Win-back messages</p>
+            <p className="text-xs text-text-muted mt-0.5">Automatically nudge customers who haven't booked in about a month.</p>
+          </div>
+          <Switch checked={form.winBackEnabled} onChange={(v) => setForm({ ...form, winBackEnabled: v })} />
         </div>
 
         <div className="grid sm:grid-cols-3 gap-3">
