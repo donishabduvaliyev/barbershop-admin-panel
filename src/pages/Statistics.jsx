@@ -9,7 +9,7 @@ import { useAuth } from '../lib/AuthContext';
 import { Card, Button, EmptyState } from '../components/ui';
 import { Skeleton } from '../components/Skeleton';
 import StatCard from '../components/StatCard';
-import { localeFor } from '../lib/locale';
+import { shortDateLabel } from '../lib/locale';
 
 const RANGES = [
   { key: 7, labelKey: 'range7d' },
@@ -64,7 +64,7 @@ export default function Statistics() {
   );
 
   const revenueData = useMemo(
-    () => (stats?.revenueOverTime || []).map((d) => ({ ...d, label: new Date(d.date).toLocaleDateString(localeFor(i18n.language), { month: 'short', day: 'numeric' }) })),
+    () => (stats?.revenueOverTime || []).map((d) => ({ ...d, label: shortDateLabel(d.date, i18n.language) })),
     [stats, i18n.language]
   );
 
