@@ -120,7 +120,7 @@ export default function Login() {
         {status === 'no-telegram' && (
           <div className="mt-4 space-y-5">
             <p className="text-sm text-text-muted leading-relaxed">
-              {t('login.noTelegramBody', { botName: 'Tezkor Shop Control' })}
+              {t('login.noTelegramBody', { botName: 'SmartChair Control' })}
             </p>
             <Button
               className="w-full"

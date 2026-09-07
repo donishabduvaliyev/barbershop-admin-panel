@@ -158,8 +158,8 @@ export default function Layout() {
       {/* Mobile topbar + drawer */}
       <div className="lg:hidden fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-4 h-14 bg-bg/80 backdrop-blur-xl border-b border-border-soft">
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg bg-accent/15 text-accent flex items-center justify-center font-display font-semibold text-xs">T</div>
-          <span className="font-display font-semibold">Tezkor</span>
+          <div className="w-7 h-7 rounded-lg bg-accent/15 text-accent flex items-center justify-center font-display font-semibold text-xs">S</div>
+          <span className="font-display font-semibold">SmartChair</span>
         </div>
         <button onClick={() => setMobileOpen(true)} className="p-1.5 text-text-muted">
           <Bars3Icon className="w-6 h-6" />
