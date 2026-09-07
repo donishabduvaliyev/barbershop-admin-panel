@@ -70,6 +70,11 @@ body {
   color: var(--color-text);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+  /* This app is dark-only (no light theme) — without this, native form
+     controls (the time inputs in WorkingHoursEditor especially) fall back
+     to the browser's light-mode chrome: a light segment-highlight and
+     picker icon that visibly clash with the dark surface behind them. */
+  color-scheme: dark;
 }
 
 ::selection {
