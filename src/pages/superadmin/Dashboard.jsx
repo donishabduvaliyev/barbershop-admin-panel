@@ -45,12 +45,14 @@ export default function SuperAdminDashboard() {
     [visits, i18n.language]
   );
 
+  // Booking.shopName is a plain string snapshot taken at booking time (see
+  // models/bookingHistory.js) — not the shop's localized {en,uz,ru} name.
   const topShopsData = useMemo(
     () => (overview?.topShops || []).map((s) => ({
       ...s,
-      shopName: s.shopName?.[i18n.language] || s.shopName?.en || t('superadmin.dashboard.unnamedShop'),
+      shopName: s.shopName || t('superadmin.dashboard.unnamedShop'),
     })),
-    [overview, i18n.language, t]
+    [overview, t]
   );
 
   const loading = !overview || !visits;
