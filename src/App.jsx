@@ -12,9 +12,15 @@ import Staff from './pages/Staff';
 import Statistics from './pages/Statistics';
 import Promotions from './pages/Promotions';
 import Settings from './pages/Settings';
+import SuperAdminLayout from './components/SuperAdminLayout';
+import SuperAdminDashboard from './pages/superadmin/Dashboard';
+import SuperAdminShops from './pages/superadmin/Shops';
 
-function Gate({ children }) {
-  const { isAuthenticated, isVerifying } = useAuth();
+// `requireRole` sends a signed-in user of the wrong role to their own home
+// instead of showing them a broken page — an owner has no platform view,
+// a super admin has no single shop to show in the owner layout.
+function Gate({ children, requireRole }) {
+  const { isAuthenticated, isVerifying, role } = useAuth();
 
   if (isVerifying) {
     return (
@@ -24,6 +30,9 @@ function Gate({ children }) {
     );
   }
   if (!isAuthenticated) return <Login />;
+  if (requireRole && role !== requireRole) {
+    return <Navigate to={requireRole === 'superadmin' ? '/' : '/superadmin'} replace />;
+  }
   return children;
 }
 
@@ -35,7 +44,7 @@ export default function App() {
           <Routes>
             <Route
               element={
-                <Gate>
+                <Gate requireRole="owner">
                   <Layout />
                 </Gate>
               }
@@ -48,6 +57,16 @@ export default function App() {
               <Route path="/statistics" element={<Statistics />} />
               <Route path="/promotions" element={<Promotions />} />
               <Route path="/settings" element={<Settings />} />
+            </Route>
+            <Route
+              element={
+                <Gate requireRole="superadmin">
+                  <SuperAdminLayout />
+                </Gate>
+              }
+            >
+              <Route path="/superadmin" element={<SuperAdminDashboard />} />
+              <Route path="/superadmin/shops" element={<SuperAdminShops />} />
             </Route>
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

@@ -17,8 +17,12 @@ export function AuthProvider({ children }) {
   const [session, setSession] = useState(readStoredSession);
   const [isVerifying, setIsVerifying] = useState(!!readStoredSession());
 
-  const login = useCallback((token, shop) => {
-    const next = { token, shop };
+  // `data` is either a shop object (role defaults to 'owner', back-compat
+  // with every existing caller) or `{ role: 'superadmin' }` with no shop
+  // fields — a super admin has no single shop to store.
+  const login = useCallback((token, data) => {
+    const { role = 'owner', ...shop } = data || {};
+    const next = { token, role, shop: role === 'superadmin' ? null : shop };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
     setSession(next);
   }, []);
@@ -32,8 +36,9 @@ export function AuthProvider({ children }) {
 
   // A stored token can have expired since the last visit — confirm it still
   // works once on load rather than showing stale shop data that 401s later.
+  // Super admin sessions have no single shop to revalidate against.
   useEffect(() => {
-    if (!session?.token) {
+    if (!session?.token || session?.role === 'superadmin') {
       setIsVerifying(false);
       return;
     }
@@ -56,6 +61,7 @@ export function AuthProvider({ children }) {
   const value = useMemo(() => ({
     token: session?.token || null,
     shop: session?.shop || null,
+    role: session?.role || 'owner',
     isAuthenticated: !!session?.token,
     isVerifying,
     login,

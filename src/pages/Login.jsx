@@ -31,6 +31,8 @@ export default function Login() {
             setIdentityToken(res.identityToken);
             setShopOptions(res.shops);
             setStatus('select-shop');
+          } else if (res.role === 'superadmin') {
+            login(res.token, { role: 'superadmin' });
           } else {
             login(res.token, res.shop);
           }
