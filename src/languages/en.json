@@ -388,7 +388,7 @@
       "newClaimCodeDesc": "Share this code with the shop owner — they'll enter it in the shop-control bot to claim this shop. Generating a new code clears the current owner link.",
       "qrCode": "QR code",
       "qrCodeTitle": "Shop QR code",
-      "qrCodeDesc": "Print this and hang it in the shop — scanning it opens the app straight on this shop's page, ready to book.",
+      "qrCodeDesc": "Print this and hang it in the shop. Scanning it opens the bot — tapping Start, then Open shop, takes the customer straight to this shop's page.",
       "downloadQr": "Download PNG",
       "copyLink": "Copy link",
       "toastQrLinkError": "Couldn't generate the QR code."

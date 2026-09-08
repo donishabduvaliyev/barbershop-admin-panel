@@ -388,7 +388,7 @@
       "newClaimCodeDesc": "Bu kodni do'kon egasiga bering — u do'konni tasdiqlash uchun uni do'kon boshqaruv botiga kiritadi. Yangi kod joriy egalik bog'lanishini bekor qiladi.",
       "qrCode": "QR-kod",
       "qrCodeTitle": "Do'kon QR-kodi",
-      "qrCodeDesc": "Uni chop etib do'konga osib qo'ying — skanerlanganda ilova to'g'ridan-to'g'ri shu do'konning sahifasida ochiladi va band qilishga tayyor bo'ladi.",
+      "qrCodeDesc": "Uni chop etib do'konga osib qo'ying. Skanerlanganda bot ochiladi — Start, so'ng «Do'konni ochish» tugmasini bosgach, mijoz to'g'ridan-to'g'ri shu do'kon sahifasiga o'tadi.",
       "downloadQr": "PNG yuklab olish",
       "copyLink": "Havolani nusxalash",
       "toastQrLinkError": "QR-kodni yaratib bo'lmadi."
