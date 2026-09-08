@@ -2,9 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import clsx from 'clsx';
+import QRCode from 'qrcode';
 import {
   MagnifyingGlassIcon, PencilSquareIcon, KeyIcon, ArrowTopRightOnSquareIcon,
-  TrashIcon, ArrowUturnLeftIcon, PauseIcon, PlayIcon, ClipboardDocumentIcon,
+  TrashIcon, ArrowUturnLeftIcon, PauseIcon, PlayIcon, ClipboardDocumentIcon, QrCodeIcon,
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../../lib/AuthContext';
 import { useToast } from '../../components/ToastProvider';
@@ -51,6 +52,11 @@ export default function SuperAdminShops() {
   const [claimTarget, setClaimTarget] = useState(null);
   const [claimCode, setClaimCode] = useState(null);
   const [claimBusy, setClaimBusy] = useState(false);
+
+  const [qrTarget, setQrTarget] = useState(null);
+  const [qrLink, setQrLink] = useState(null);
+  const [qrImage, setQrImage] = useState(null);
+  const [qrError, setQrError] = useState(null);
 
   const load = () => {
     const query = new URLSearchParams();
@@ -161,6 +167,27 @@ export default function SuperAdminShops() {
 
   const copyClaimCode = () => {
     navigator.clipboard?.writeText(claimCode || '').then(() => showToast(t('superadmin.shops.codeCopied')));
+  };
+
+  const openQr = async (shop) => {
+    setQrTarget(shop);
+    setQrLink(null);
+    setQrImage(null);
+    setQrError(null);
+    try {
+      const res = await api.get(`/superadmin/shops/${shop.id}/qr-link`);
+      // Generated client-side from the returned link — no backend image
+      // rendering needed, matches this being a thin JSON API elsewhere.
+      const dataUrl = await QRCode.toDataURL(res.url, { width: 320, margin: 2 });
+      setQrLink(res.url);
+      setQrImage(dataUrl);
+    } catch (err) {
+      setQrError(err.message || t('superadmin.shops.toastQrLinkError'));
+    }
+  };
+
+  const copyQrLink = () => {
+    navigator.clipboard?.writeText(qrLink || '').then(() => showToast(t('superadmin.shops.codeCopied')));
   };
 
   const manageAsShop = async (shop) => {
@@ -276,6 +303,9 @@ export default function SuperAdminShops() {
                               </button>
                               <button title={t('superadmin.shops.generateClaimCode')} onClick={() => openClaimCode(shop)} className="p-1.5 rounded-lg text-text-faint hover:text-text hover:bg-surface-3 transition-colors">
                                 <KeyIcon className="w-4 h-4" />
+                              </button>
+                              <button title={t('superadmin.shops.qrCode')} onClick={() => openQr(shop)} className="p-1.5 rounded-lg text-text-faint hover:text-text hover:bg-surface-3 transition-colors">
+                                <QrCodeIcon className="w-4 h-4" />
                               </button>
                               <button
                                 title={shop.isOperational ? t('superadmin.shops.suspend') : t('superadmin.shops.reactivate')}
@@ -407,6 +437,42 @@ export default function SuperAdminShops() {
                 <ClipboardDocumentIcon className="w-4 h-4" />
               </button>
             </div>
+          )}
+        </div>
+      </Modal>
+
+      {/* QR code */}
+      <Modal
+        open={!!qrTarget}
+        onClose={() => setQrTarget(null)}
+        title={t('superadmin.shops.qrCodeTitle')}
+        footer={<Button variant="ghost" onClick={() => setQrTarget(null)}>{t('common.cancel')}</Button>}
+      >
+        <div className="space-y-4">
+          <p className="text-sm text-text-muted">{t('superadmin.shops.qrCodeDesc')}</p>
+          {qrError ? (
+            <p className="text-sm text-danger">{qrError}</p>
+          ) : qrImage ? (
+            <>
+              <div className="flex justify-center">
+                <img src={qrImage} alt={t('superadmin.shops.qrCodeTitle')} className="w-56 h-56 rounded-xl border border-border bg-white p-2" />
+              </div>
+              <div className="flex items-center gap-2 bg-surface-3 border border-border rounded-lg px-3 py-2.5">
+                <span className="font-mono text-xs text-text-muted truncate flex-1">{qrLink}</span>
+                <button onClick={copyQrLink} className="p-1.5 rounded-lg text-text-faint hover:text-text hover:bg-surface transition-colors shrink-0" title={t('superadmin.shops.copyLink')}>
+                  <ClipboardDocumentIcon className="w-4 h-4" />
+                </button>
+              </div>
+              <a
+                href={qrImage}
+                download={`${qrTarget?.name?.en || 'shop'}-qr.png`}
+                className="inline-flex items-center justify-center gap-2 w-full rounded-xl text-sm font-medium px-4 py-2.5 bg-accent text-black hover:bg-accent-hover shadow-lg shadow-accent/20 transition-colors"
+              >
+                {t('superadmin.shops.downloadQr')}
+              </a>
+            </>
+          ) : (
+            <Skeleton className="h-56 w-full" />
           )}
         </div>
       </Modal>

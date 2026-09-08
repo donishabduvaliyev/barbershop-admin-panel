@@ -385,7 +385,13 @@
       "toastClaimCodeError": "Couldn't generate a claim code.",
       "toastManageError": "Couldn't open this shop.",
       "newClaimCodeTitle": "New claim code",
-      "newClaimCodeDesc": "Share this code with the shop owner — they'll enter it in the shop-control bot to claim this shop. Generating a new code clears the current owner link."
+      "newClaimCodeDesc": "Share this code with the shop owner — they'll enter it in the shop-control bot to claim this shop. Generating a new code clears the current owner link.",
+      "qrCode": "QR code",
+      "qrCodeTitle": "Shop QR code",
+      "qrCodeDesc": "Print this and hang it in the shop — scanning it opens the app straight on this shop's page, ready to book.",
+      "downloadQr": "Download PNG",
+      "copyLink": "Copy link",
+      "toastQrLinkError": "Couldn't generate the QR code."
     }
   }
 }

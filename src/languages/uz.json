@@ -385,7 +385,13 @@
       "toastClaimCodeError": "Tasdiqlash kodini yaratib bo'lmadi.",
       "toastManageError": "Bu do'konni ochib bo'lmadi.",
       "newClaimCodeTitle": "Yangi tasdiqlash kodi",
-      "newClaimCodeDesc": "Bu kodni do'kon egasiga bering — u do'konni tasdiqlash uchun uni do'kon boshqaruv botiga kiritadi. Yangi kod joriy egalik bog'lanishini bekor qiladi."
+      "newClaimCodeDesc": "Bu kodni do'kon egasiga bering — u do'konni tasdiqlash uchun uni do'kon boshqaruv botiga kiritadi. Yangi kod joriy egalik bog'lanishini bekor qiladi.",
+      "qrCode": "QR-kod",
+      "qrCodeTitle": "Do'kon QR-kodi",
+      "qrCodeDesc": "Uni chop etib do'konga osib qo'ying — skanerlanganda ilova to'g'ridan-to'g'ri shu do'konning sahifasida ochiladi va band qilishga tayyor bo'ladi.",
+      "downloadQr": "PNG yuklab olish",
+      "copyLink": "Havolani nusxalash",
+      "toastQrLinkError": "QR-kodni yaratib bo'lmadi."
     }
   }
 }
