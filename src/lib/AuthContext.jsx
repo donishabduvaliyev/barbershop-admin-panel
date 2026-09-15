@@ -34,15 +34,56 @@ export function AuthProvider({ children }) {
 
   const api = useMemo(() => createApiClient(session?.token), [session?.token]);
 
-  // A stored token can have expired since the last visit — confirm it still
-  // works once on load rather than showing stale shop data that 401s later.
-  // Super admin sessions have no single shop to revalidate against.
+  // Runs once, only for a session already cached from a previous visit
+  // (a brand-new visitor has no session yet and goes through Login.jsx's
+  // own from-scratch check instead). Whenever real Telegram identity is
+  // available, this always re-runs the same /admin/auth/telegram check
+  // Login.jsx does on a fresh visit and lets it override whatever the
+  // cached session claims.
+  //
+  // Without this, a browser that ever held someone else's session — a
+  // shared/test device, or a super-admin session left over from earlier
+  // testing — would keep presenting THEIR role and shop to whoever opens
+  // the app next, for the full token lifetime (TOKEN_TTL is 12h, see
+  // middleware/adminAuth.js), regardless of who Telegram says is actually
+  // opening it now. A cached role must never be trusted over the fresh,
+  // cryptographically-signed identity Telegram hands the mini app on every
+  // real launch.
+  //
+  // Deliberately NOT reactive on session.token — running only once per
+  // mount avoids the effect re-triggering itself every time a successful
+  // check mints a fresh token (JWTs embed an issue time, so even an
+  // identical identity gets a new token string each call).
   useEffect(() => {
-    if (!session?.token || session?.role === 'superadmin') {
-      setIsVerifying(false);
-      return;
-    }
+    if (!session?.token) { setIsVerifying(false); return; }
+
     let cancelled = false;
+    const tg = window.Telegram?.WebApp;
+
+    if (tg?.initData) {
+      createApiClient().post('/admin/auth/telegram', { initData: tg.initData })
+        .then((res) => {
+          if (cancelled) return;
+          if (res.needsShopSelection) {
+            // Can't resolve a multi-shop pick silently — drop back to a
+            // clean logged-out state so Login's own picker UI takes over.
+            logout();
+          } else if (res.role === 'superadmin') {
+            login(res.token, { role: 'superadmin' });
+          } else {
+            login(res.token, res.shop);
+          }
+        })
+        .catch(() => { if (!cancelled) logout(); })
+        .finally(() => { if (!cancelled) setIsVerifying(false); });
+      return () => { cancelled = true; };
+    }
+
+    // No Telegram context (dev/testing outside Telegram): fall back to the
+    // previous lighter check. Superadmin sessions have no single shop to
+    // revalidate against here — only reachable via the dev-login carve-out,
+    // itself gated off in production (see routes/adminAuth.js).
+    if (session.role === 'superadmin') { setIsVerifying(false); return; }
     api.get('/admin/shop')
       .then((shop) => {
         if (cancelled) return;
@@ -56,7 +97,7 @@ export function AuthProvider({ children }) {
       });
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session?.token]);
+  }, []);
 
   const value = useMemo(() => ({
     token: session?.token || null,
