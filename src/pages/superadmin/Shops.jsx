@@ -205,7 +205,7 @@ export default function SuperAdminShops() {
     try {
       await api.patch(`/superadmin/shops/${promoTarget.id}`, {
         isPromoted: promoForm.isPromoted,
-        promotionRank: promoForm.isPromoted ? Number(promoForm.promotionRank) || 1 : null,
+        promotionRank: promoForm.isPromoted ? Math.max(1, Math.round(Number(promoForm.promotionRank)) || 1) : null,
       });
       showToast(t('superadmin.shops.toastUpdated'));
       setPromoTarget(null);
@@ -519,11 +519,11 @@ export default function SuperAdminShops() {
       {/* Promotion */}
       <Modal
         open={!!promoTarget}
-        onClose={() => setPromoTarget(null)}
+        onClose={() => { if (!promoSaving) setPromoTarget(null); }}
         title={t('superadmin.shops.promotionTitle')}
         footer={(
           <>
-            <Button variant="ghost" onClick={() => setPromoTarget(null)}>{t('common.cancel')}</Button>
+            <Button variant="ghost" disabled={promoSaving} onClick={() => setPromoTarget(null)}>{t('common.cancel')}</Button>
             <Button disabled={promoSaving} onClick={savePromo}>{t('superadmin.shops.save')}</Button>
           </>
         )}

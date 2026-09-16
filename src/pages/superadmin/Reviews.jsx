@@ -144,11 +144,11 @@ export default function SuperAdminReviews() {
 
       <Modal
         open={!!hideTarget}
-        onClose={() => setHideTarget(null)}
+        onClose={() => { if (!hiding) setHideTarget(null); }}
         title={t('superadmin.reviews.hideTitle')}
         footer={(
           <>
-            <Button variant="ghost" onClick={() => setHideTarget(null)}>{t('common.cancel')}</Button>
+            <Button variant="ghost" disabled={hiding} onClick={() => setHideTarget(null)}>{t('common.cancel')}</Button>
             <Button variant="danger" disabled={hiding} onClick={confirmHide}>{hiding ? t('common.saving') : t('superadmin.reviews.hide')}</Button>
           </>
         )}

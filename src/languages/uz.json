@@ -197,7 +197,8 @@
     "blockAction": "Band qilishdan bloklash",
     "unblockAction": "Blokdan chiqarish — qayta band qilishga ruxsat",
     "toastBlocked": "Mijoz band qilishdan bloklandi.",
-    "toastUnblocked": "Mijoz qayta band qila oladi."
+    "toastUnblocked": "Mijoz qayta band qila oladi.",
+    "blockConfirm": "{{name}} ushbu do'konda band qilishdan bloklansinmi? Siz blokdan chiqarmaguningizcha u qayta band qila olmaydi."
   },
   "services": {
     "title": "Xizmatlar",

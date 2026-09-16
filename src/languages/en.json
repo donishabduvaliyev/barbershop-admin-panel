@@ -197,7 +197,8 @@
     "blockAction": "Block from booking",
     "unblockAction": "Unblock — allow booking again",
     "toastBlocked": "Customer blocked from booking.",
-    "toastUnblocked": "Customer can book again."
+    "toastUnblocked": "Customer can book again.",
+    "blockConfirm": "Block {{name}} from booking at this shop? They won’t be able to book again until you unblock them."
   },
   "services": {
     "title": "Services",

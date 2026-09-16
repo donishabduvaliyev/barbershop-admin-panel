@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { MagnifyingGlassIcon, PlusIcon, PencilSquareIcon, PhoneIcon } from '@heroicons/react/24/outline';
 import { useTranslation } from 'react-i18next';
@@ -32,6 +32,16 @@ export default function Customers() {
   const [createNumber, setCreateNumber] = useState('');
   const [creating, setCreating] = useState(false);
   const [blockBusy, setBlockBusy] = useState(false);
+  const [blockConfirmOpen, setBlockConfirmOpen] = useState(false);
+  // Tracks whichever customer is currently "active" in the detail modal —
+  // every async action below (load detail, save notes/info, toggle block)
+  // checks this before writing to `detail`, so a slow response for a
+  // customer the admin has since navigated away from can never clobber
+  // whatever's now showing (a real bug: without this, opening customer A
+  // then quickly opening B before A's fetch resolves could leave the modal
+  // titled B but showing A's data, and saving from there would silently
+  // overwrite B's notes with A's).
+  const activeCustomerRef = useRef(null);
 
   const load = (searchTerm) => {
     const query = searchTerm ? `?search=${encodeURIComponent(searchTerm)}` : '';
@@ -49,17 +59,26 @@ export default function Customers() {
   }, [search]);
 
   const openDetail = async (telegramId) => {
+    activeCustomerRef.current = telegramId;
     setSelectedId(telegramId);
     setDetail(null);
     setEditingInfo(false);
     try {
       const res = await api.get(`/admin/customers/${telegramId}`);
+      if (activeCustomerRef.current !== telegramId) return; // superseded by a later open/close
       setDetail(res);
       setNotesDraft(res.notes || '');
     } catch (err) {
+      if (activeCustomerRef.current !== telegramId) return;
       showToast(err.message || t('customers.toastLoadError'), 'error');
+      activeCustomerRef.current = null;
       setSelectedId(null);
     }
+  };
+
+  const closeDetail = () => {
+    activeCustomerRef.current = null;
+    setSelectedId(null);
   };
 
   const startEditInfo = () => {
@@ -70,12 +89,15 @@ export default function Customers() {
 
   const saveInfo = async () => {
     if (!editName.trim()) return;
+    const targetId = selectedId;
     setSavingInfo(true);
     try {
-      await api.patch(`/admin/customers/${selectedId}`, { name: editName.trim(), number: editNumber.trim() });
-      setDetail((d) => ({ ...d, userName: editName.trim(), userNumber: editNumber.trim() }));
-      setCustomers((prev) => prev.map((c) => (c.telegramId === selectedId ? { ...c, userName: editName.trim(), userNumber: editNumber.trim() } : c)));
-      setEditingInfo(false);
+      await api.patch(`/admin/customers/${targetId}`, { name: editName.trim(), number: editNumber.trim() });
+      setCustomers((prev) => prev.map((c) => (c.telegramId === targetId ? { ...c, userName: editName.trim(), userNumber: editNumber.trim() } : c)));
+      if (activeCustomerRef.current === targetId) {
+        setDetail((d) => ({ ...d, userName: editName.trim(), userNumber: editNumber.trim() }));
+        setEditingInfo(false);
+      }
       showToast(t('customers.toastSaved'));
     } catch (err) {
       showToast(err.message || t('customers.toastSaveError'), 'error');
@@ -101,13 +123,28 @@ export default function Customers() {
     }
   };
 
+  // Blocking a real customer needs a deliberate confirm step (matches
+  // Reviews.jsx's hide flow) — a misclick shouldn't instantly cut someone
+  // off from booking. Unblocking is harmless to allow immediately.
+  const requestToggleBlock = () => {
+    if (detail.isBlocked) {
+      toggleBlock();
+    } else {
+      setBlockConfirmOpen(true);
+    }
+  };
+
   const toggleBlock = async () => {
+    const targetId = selectedId;
+    const isBlocked = !detail.isBlocked;
+    setBlockConfirmOpen(false);
     setBlockBusy(true);
     try {
-      const isBlocked = !detail.isBlocked;
-      await api.patch(`/admin/customers/${selectedId}/block`, { isBlocked });
-      setDetail((d) => ({ ...d, isBlocked }));
-      setCustomers((prev) => prev.map((c) => (c.telegramId === selectedId ? { ...c, isBlocked } : c)));
+      await api.patch(`/admin/customers/${targetId}/block`, { isBlocked });
+      setCustomers((prev) => prev.map((c) => (c.telegramId === targetId ? { ...c, isBlocked } : c)));
+      if (activeCustomerRef.current === targetId) {
+        setDetail((d) => ({ ...d, isBlocked }));
+      }
       showToast(isBlocked ? t('customers.toastBlocked') : t('customers.toastUnblocked'));
     } catch (err) {
       showToast(err.message || t('customers.toastSaveError'), 'error');
@@ -117,11 +154,15 @@ export default function Customers() {
   };
 
   const saveNotes = async () => {
+    const targetId = selectedId;
+    const notes = notesDraft;
     setSavingNotes(true);
     try {
-      await api.patch(`/admin/customers/${selectedId}/notes`, { notes: notesDraft });
-      setDetail((d) => ({ ...d, notes: notesDraft }));
-      setCustomers((prev) => prev.map((c) => (c.telegramId === selectedId ? { ...c, notes: notesDraft } : c)));
+      await api.patch(`/admin/customers/${targetId}/notes`, { notes });
+      setCustomers((prev) => prev.map((c) => (c.telegramId === targetId ? { ...c, notes } : c)));
+      if (activeCustomerRef.current === targetId) {
+        setDetail((d) => ({ ...d, notes }));
+      }
       showToast(t('customers.toastSaved'));
     } catch (err) {
       showToast(err.message || t('customers.toastSaveError'), 'error');
@@ -207,7 +248,7 @@ export default function Customers() {
         )}
       </Card>
 
-      <Modal open={!!selectedId} onClose={() => setSelectedId(null)} title={detail?.userName || t('customers.customerFallback')} maxWidth="max-w-lg">
+      <Modal open={!!selectedId} onClose={closeDetail} title={detail?.userName || t('customers.customerFallback')} maxWidth="max-w-lg">
         {!detail ? (
           <div className="space-y-3">
             {Array.from({ length: 3 }).map((_, i) => <div key={i} className="h-4 bg-surface-3 rounded shimmer-bg" />)}
@@ -234,7 +275,7 @@ export default function Customers() {
             </div>
 
             <button
-              onClick={toggleBlock}
+              onClick={requestToggleBlock}
               disabled={blockBusy}
               className={`w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium border transition-colors disabled:opacity-50 ${detail.isBlocked ? 'bg-danger/10 border-danger/30 text-danger' : 'bg-surface-3 border-border text-text-muted hover:text-text'}`}
             >
@@ -307,6 +348,20 @@ export default function Customers() {
             </div>
           </div>
         )}
+      </Modal>
+
+      <Modal
+        open={blockConfirmOpen}
+        onClose={() => setBlockConfirmOpen(false)}
+        title={t('customers.blockAction')}
+        footer={(
+          <>
+            <Button variant="ghost" onClick={() => setBlockConfirmOpen(false)}>{t('common.cancel')}</Button>
+            <Button variant="danger" disabled={blockBusy} onClick={toggleBlock}>{t('customers.blockAction')}</Button>
+          </>
+        )}
+      >
+        <p className="text-sm text-text-muted">{t('customers.blockConfirm', { name: detail?.userName })}</p>
       </Modal>
 
       <Modal
