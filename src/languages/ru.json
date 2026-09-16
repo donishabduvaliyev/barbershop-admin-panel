@@ -193,7 +193,17 @@
     "toastSaveError": "Не удалось сохранить заметки",
     "newClient": "Новый клиент",
     "call": "Позвонить",
-    "toastCreated": "Клиент добавлен."
+    "toastCreated": "Клиент добавлен.",
+    "noShows": "Неявки",
+    "noShowCount": "{{count}} неявка",
+    "noShowCount_few": "{{count}} неявки",
+    "noShowCount_many": "{{count}} неявок",
+    "noShowCount_other": "{{count}} неявок",
+    "blocked": "Заблокирован",
+    "blockAction": "Заблокировать запись",
+    "unblockAction": "Разблокировать — снова разрешить запись",
+    "toastBlocked": "Клиенту запрещена запись.",
+    "toastUnblocked": "Клиент снова может записываться."
   },
   "services": {
     "title": "Услуги",
@@ -482,7 +492,13 @@
       "copyLink": "Скопировать ссылку",
       "toastQrLinkError": "Не удалось создать QR-код.",
       "categoryMassageTherapy": "Massage Therapy",
-      "categoryBeautySpas": "Beauty Spas"
+      "categoryBeautySpas": "Beauty Spas",
+      "advertised": "Реклама",
+      "promotion": "Продвижение",
+      "promotionTitle": "Продвижение",
+      "promotionDesc": "Рекламируемый магазин появляется в карусели «Реклама» вверху страницы поиска — порядок задаётся числом ниже (меньше — выше).",
+      "promotionRank": "Место",
+      "promotionRankHint": "Магазины с меньшим числом показываются раньше."
     },
     "navCategories": "Категории",
     "categories": {
@@ -525,6 +541,28 @@
         "nearYou": "Автоматически — по расположению клиента.",
         "specialOffers": "Автоматически — магазины с активной акцией."
       }
+    },
+    "navReviews": "Отзывы",
+    "reviews": {
+      "title": "Отзывы",
+      "subtitle": "Все оценки на платформе — скройте оскорбительный, мстительный или поддельный отзыв.",
+      "filterAll": "Все",
+      "filterVisible": "Видимые",
+      "filterHidden": "Скрытые",
+      "hidden": "Скрыт",
+      "unknownCustomer": "Клиент",
+      "hide": "Скрыть",
+      "restore": "Восстановить",
+      "hideTitle": "Скрыть этот отзыв",
+      "hideDesc": "Скрытие сразу убирает отзыв из публичного рейтинга магазина (и мастера) — рейтинг пересчитывается по остальным отзывам. Позже его можно восстановить.",
+      "hideReasonLabel": "Причина (необязательно, для ваших записей)",
+      "hideReasonPlaceholder": "например, месть после отклонённой записи",
+      "hiddenReasonLabel": "Причина",
+      "noReviewsTitle": "Отзывов пока нет",
+      "noReviewsDesc": "Отзывы клиентов появятся здесь, как только начнут поступать.",
+      "toastHidden": "Отзыв скрыт.",
+      "toastRestored": "Отзыв восстановлен.",
+      "toastError": "Что-то пошло не так."
     }
   }
 }

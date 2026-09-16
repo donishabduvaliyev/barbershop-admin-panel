@@ -31,6 +31,7 @@ export default function Customers() {
   const [createName, setCreateName] = useState('');
   const [createNumber, setCreateNumber] = useState('');
   const [creating, setCreating] = useState(false);
+  const [blockBusy, setBlockBusy] = useState(false);
 
   const load = (searchTerm) => {
     const query = searchTerm ? `?search=${encodeURIComponent(searchTerm)}` : '';
@@ -100,6 +101,21 @@ export default function Customers() {
     }
   };
 
+  const toggleBlock = async () => {
+    setBlockBusy(true);
+    try {
+      const isBlocked = !detail.isBlocked;
+      await api.patch(`/admin/customers/${selectedId}/block`, { isBlocked });
+      setDetail((d) => ({ ...d, isBlocked }));
+      setCustomers((prev) => prev.map((c) => (c.telegramId === selectedId ? { ...c, isBlocked } : c)));
+      showToast(isBlocked ? t('customers.toastBlocked') : t('customers.toastUnblocked'));
+    } catch (err) {
+      showToast(err.message || t('customers.toastSaveError'), 'error');
+    } finally {
+      setBlockBusy(false);
+    }
+  };
+
   const saveNotes = async () => {
     setSavingNotes(true);
     try {
@@ -158,10 +174,14 @@ export default function Customers() {
                   {(c.userName || '?').slice(0, 1).toUpperCase()}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-text truncate">{c.userName || t('common.guest')} <span className="text-text-faint font-normal">· {c.userNumber}</span></p>
+                  <p className="text-sm font-medium text-text truncate flex items-center gap-1.5">
+                    {c.userName || t('common.guest')} <span className="text-text-faint font-normal">· {c.userNumber}</span>
+                    {c.isBlocked && <span className="text-[10px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded bg-danger/15 text-danger shrink-0">{t('customers.blocked')}</span>}
+                  </p>
                   <p className="text-xs text-text-muted truncate">
                     {c.favoriteServices.length > 0 ? c.favoriteServices.join(', ') : t('customers.noFavoriteService')}
                     {c.preferredStaff ? ` · ${t('customers.usuallyWith', { name: c.preferredStaff })}` : ''}
+                    {c.noShowCount > 0 ? ` · ${t('customers.noShowCount', { count: c.noShowCount })}` : ''}
                   </p>
                 </div>
                 <div className="text-right shrink-0 hidden sm:block">
@@ -194,7 +214,7 @@ export default function Customers() {
           </div>
         ) : (
           <div className="space-y-5">
-            <div className="grid grid-cols-3 gap-3 text-center">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
               <div className="bg-surface-3 rounded-xl p-3">
                 <p className="text-lg font-semibold text-text">{detail.visitCount}</p>
                 <p className="text-[11px] text-text-muted mt-0.5">{t('customers.visits')}</p>
@@ -207,7 +227,19 @@ export default function Customers() {
                 <p className="text-lg font-semibold text-text">{detail.lastVisit ? formatDate(detail.lastVisit) : '—'}</p>
                 <p className="text-[11px] text-text-muted mt-0.5">{t('customers.lastVisit')}</p>
               </div>
+              <div className="bg-surface-3 rounded-xl p-3">
+                <p className={`text-lg font-semibold ${detail.noShowCount > 0 ? 'text-danger' : 'text-text'}`}>{detail.noShowCount}</p>
+                <p className="text-[11px] text-text-muted mt-0.5">{t('customers.noShows')}</p>
+              </div>
             </div>
+
+            <button
+              onClick={toggleBlock}
+              disabled={blockBusy}
+              className={`w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium border transition-colors disabled:opacity-50 ${detail.isBlocked ? 'bg-danger/10 border-danger/30 text-danger' : 'bg-surface-3 border-border text-text-muted hover:text-text'}`}
+            >
+              {detail.isBlocked ? t('customers.unblockAction') : t('customers.blockAction')}
+            </button>
 
             <div className="grid sm:grid-cols-2 gap-4 text-sm">
               <div>

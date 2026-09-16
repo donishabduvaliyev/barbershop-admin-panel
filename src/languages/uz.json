@@ -189,7 +189,15 @@
     "toastSaveError": "Eslatmalarni saqlab bo'lmadi",
     "newClient": "Yangi mijoz",
     "call": "Qo'ng'iroq",
-    "toastCreated": "Mijoz qo'shildi."
+    "toastCreated": "Mijoz qo'shildi.",
+    "noShows": "Kelmay qolganlar",
+    "noShowCount": "{{count}} marta kelmagan",
+    "noShowCount_other": "{{count}} marta kelmagan",
+    "blocked": "Bloklangan",
+    "blockAction": "Band qilishdan bloklash",
+    "unblockAction": "Blokdan chiqarish — qayta band qilishga ruxsat",
+    "toastBlocked": "Mijoz band qilishdan bloklandi.",
+    "toastUnblocked": "Mijoz qayta band qila oladi."
   },
   "services": {
     "title": "Xizmatlar",
@@ -460,7 +468,13 @@
       "copyLink": "Havolani nusxalash",
       "toastQrLinkError": "QR-kodni yaratib bo'lmadi.",
       "categoryMassageTherapy": "Massage Therapy",
-      "categoryBeautySpas": "Beauty Spas"
+      "categoryBeautySpas": "Beauty Spas",
+      "advertised": "Reklama",
+      "promotion": "Reklama qilish",
+      "promotionTitle": "Reklama qilish",
+      "promotionDesc": "Reklama qilingan do‘kon qidiruv sahifasi tepasidagi \"Reklama\" karuselida ko‘rinadi — tartib quyidagi raqam bilan belgilanadi (kichikroq raqam avval ko‘rinadi).",
+      "promotionRank": "Tartib raqami",
+      "promotionRankHint": "Kichikroq raqamli do‘konlar avval ko‘rsatiladi."
     },
     "navCategories": "Kategoriyalar",
     "categories": {
@@ -501,6 +515,28 @@
         "nearYou": "Avtomatik — mijoz joylashuvi bo‘yicha.",
         "specialOffers": "Avtomatik — faol aksiyasi bor do'konlar."
       }
+    },
+    "navReviews": "Sharhlar",
+    "reviews": {
+      "title": "Sharhlar",
+      "subtitle": "Platformadagi barcha baholar — haqoratli, o'ch olish maqsadidagi yoki soxta sharhni yashiring.",
+      "filterAll": "Barchasi",
+      "filterVisible": "Ko'rinadigan",
+      "filterHidden": "Yashirilgan",
+      "hidden": "Yashirilgan",
+      "unknownCustomer": "Mijoz",
+      "hide": "Yashirish",
+      "restore": "Qaytarish",
+      "hideTitle": "Bu sharhni yashirish",
+      "hideDesc": "Yashirish uni do'kon (va usta)ning ochiq reytingidan darhol olib tashlaydi — reyting qolgan sharhlar bo'yicha qayta hisoblanadi. Keyinroq qaytarishingiz mumkin.",
+      "hideReasonLabel": "Sabab (ixtiyoriy, o'zingiz uchun)",
+      "hideReasonPlaceholder": "masalan, rad etilgan bandlovdan keyingi o'ch olish",
+      "hiddenReasonLabel": "Sabab",
+      "noReviewsTitle": "Hozircha sharhlar yo'q",
+      "noReviewsDesc": "Mijozlarning baholari kelib tusha boshlagach shu yerda ko'rinadi.",
+      "toastHidden": "Sharh yashirildi.",
+      "toastRestored": "Sharh qaytarildi.",
+      "toastError": "Nimadir xato ketdi."
     }
   }
 }

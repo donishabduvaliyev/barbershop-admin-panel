@@ -6,10 +6,11 @@ import QRCode from 'qrcode';
 import {
   MagnifyingGlassIcon, PencilSquareIcon, KeyIcon, ArrowTopRightOnSquareIcon,
   TrashIcon, ArrowUturnLeftIcon, PauseIcon, PlayIcon, ClipboardDocumentIcon, QrCodeIcon,
+  MegaphoneIcon,
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../../lib/AuthContext';
 import { useToast } from '../../components/ToastProvider';
-import { Card, Button, Field, Input, EmptyState } from '../../components/ui';
+import { Card, Button, Field, Input, Switch, EmptyState } from '../../components/ui';
 import Modal from '../../components/Modal';
 import { Skeleton } from '../../components/Skeleton';
 
@@ -57,6 +58,10 @@ export default function SuperAdminShops() {
   const [qrLink, setQrLink] = useState(null);
   const [qrImage, setQrImage] = useState(null);
   const [qrError, setQrError] = useState(null);
+
+  const [promoTarget, setPromoTarget] = useState(null);
+  const [promoForm, setPromoForm] = useState({ isPromoted: false, promotionRank: 1 });
+  const [promoSaving, setPromoSaving] = useState(false);
 
   const load = () => {
     const query = new URLSearchParams();
@@ -190,6 +195,28 @@ export default function SuperAdminShops() {
     navigator.clipboard?.writeText(qrLink || '').then(() => showToast(t('superadmin.shops.codeCopied')));
   };
 
+  const openPromo = (shop) => {
+    setPromoTarget(shop);
+    setPromoForm({ isPromoted: !!shop.isPromoted, promotionRank: shop.promotionRank ?? 1 });
+  };
+
+  const savePromo = async () => {
+    setPromoSaving(true);
+    try {
+      await api.patch(`/superadmin/shops/${promoTarget.id}`, {
+        isPromoted: promoForm.isPromoted,
+        promotionRank: promoForm.isPromoted ? Number(promoForm.promotionRank) || 1 : null,
+      });
+      showToast(t('superadmin.shops.toastUpdated'));
+      setPromoTarget(null);
+      load();
+    } catch (err) {
+      showToast(err.message || t('superadmin.shops.toastUpdateError'), 'error');
+    } finally {
+      setPromoSaving(false);
+    }
+  };
+
   const manageAsShop = async (shop) => {
     setBusyId(shop.id);
     try {
@@ -286,13 +313,16 @@ export default function SuperAdminShops() {
                         )}
                       </td>
                       <td className="px-4 py-3">
-                        {shop.isArchived ? (
-                          <Badge color="var(--color-text-faint)">{t('superadmin.shops.archived')}</Badge>
-                        ) : shop.isOperational ? (
-                          <Badge color="var(--color-success)">{t('superadmin.shops.active')}</Badge>
-                        ) : (
-                          <Badge color="var(--color-danger)">{t('superadmin.shops.suspended')}</Badge>
-                        )}
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          {shop.isArchived ? (
+                            <Badge color="var(--color-text-faint)">{t('superadmin.shops.archived')}</Badge>
+                          ) : shop.isOperational ? (
+                            <Badge color="var(--color-success)">{t('superadmin.shops.active')}</Badge>
+                          ) : (
+                            <Badge color="var(--color-danger)">{t('superadmin.shops.suspended')}</Badge>
+                          )}
+                          {shop.isPromoted && <Badge color="var(--color-accent)">{t('superadmin.shops.advertised')}</Badge>}
+                        </div>
                       </td>
                       <td className="px-4 py-3 text-text-muted text-right whitespace-nowrap">{shop.bookings}</td>
                       <td className="px-4 py-3 text-text text-right whitespace-nowrap">{currency(shop.revenue)}</td>
@@ -308,6 +338,13 @@ export default function SuperAdminShops() {
                               </button>
                               <button title={t('superadmin.shops.qrCode')} onClick={() => openQr(shop)} className="p-1.5 rounded-lg text-text-faint hover:text-text hover:bg-surface-3 transition-colors">
                                 <QrCodeIcon className="w-4 h-4" />
+                              </button>
+                              <button
+                                title={t('superadmin.shops.promotion')}
+                                onClick={() => openPromo(shop)}
+                                className={clsx('p-1.5 rounded-lg transition-colors', shop.isPromoted ? 'text-accent hover:bg-accent/10' : 'text-text-faint hover:text-text hover:bg-surface-3')}
+                              >
+                                <MegaphoneIcon className="w-4 h-4" />
                               </button>
                               <button
                                 title={shop.isOperational ? t('superadmin.shops.suspend') : t('superadmin.shops.reactivate')}
@@ -475,6 +512,38 @@ export default function SuperAdminShops() {
             </>
           ) : (
             <Skeleton className="h-56 w-full" />
+          )}
+        </div>
+      </Modal>
+
+      {/* Promotion */}
+      <Modal
+        open={!!promoTarget}
+        onClose={() => setPromoTarget(null)}
+        title={t('superadmin.shops.promotionTitle')}
+        footer={(
+          <>
+            <Button variant="ghost" onClick={() => setPromoTarget(null)}>{t('common.cancel')}</Button>
+            <Button disabled={promoSaving} onClick={savePromo}>{t('superadmin.shops.save')}</Button>
+          </>
+        )}
+      >
+        <div className="space-y-4">
+          <p className="text-sm text-text-muted">{t('superadmin.shops.promotionDesc')}</p>
+          <Switch
+            checked={promoForm.isPromoted}
+            onChange={(checked) => setPromoForm({ ...promoForm, isPromoted: checked })}
+            label={t('superadmin.shops.advertised')}
+          />
+          {promoForm.isPromoted && (
+            <Field label={t('superadmin.shops.promotionRank')} hint={t('superadmin.shops.promotionRankHint')}>
+              <Input
+                type="number"
+                min="1"
+                value={promoForm.promotionRank}
+                onChange={(e) => setPromoForm({ ...promoForm, promotionRank: e.target.value })}
+              />
+            </Field>
           )}
         </div>
       </Modal>

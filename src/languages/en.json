@@ -189,7 +189,15 @@
     "toastSaveError": "Could not save notes",
     "newClient": "New client",
     "call": "Call",
-    "toastCreated": "Client added."
+    "toastCreated": "Client added.",
+    "noShows": "No-shows",
+    "noShowCount": "{{count}} no-show",
+    "noShowCount_other": "{{count}} no-shows",
+    "blocked": "Blocked",
+    "blockAction": "Block from booking",
+    "unblockAction": "Unblock — allow booking again",
+    "toastBlocked": "Customer blocked from booking.",
+    "toastUnblocked": "Customer can book again."
   },
   "services": {
     "title": "Services",
@@ -460,7 +468,13 @@
       "copyLink": "Copy link",
       "toastQrLinkError": "Couldn't generate the QR code.",
       "categoryMassageTherapy": "Massage Therapy",
-      "categoryBeautySpas": "Beauty Spas"
+      "categoryBeautySpas": "Beauty Spas",
+      "advertised": "Advertised",
+      "promotion": "Promotion",
+      "promotionTitle": "Promotion",
+      "promotionDesc": "An advertised shop appears in the \"Advertised\" carousel at the top of the search page, ranked by the number below (lower shows first).",
+      "promotionRank": "Rank",
+      "promotionRankHint": "Lower numbers show first among advertised shops."
     },
     "navCategories": "Categories",
     "categories": {
@@ -501,6 +515,28 @@
         "nearYou": "Automatic — ranked by the customer's location.",
         "specialOffers": "Automatic — shops with an active promotion."
       }
+    },
+    "navReviews": "Reviews",
+    "reviews": {
+      "title": "Reviews",
+      "subtitle": "Every rating left across the platform — hide one that’s abusive, retaliatory, or fake.",
+      "filterAll": "All",
+      "filterVisible": "Visible",
+      "filterHidden": "Hidden",
+      "hidden": "Hidden",
+      "unknownCustomer": "Customer",
+      "hide": "Hide",
+      "restore": "Restore",
+      "hideTitle": "Hide this review",
+      "hideDesc": "Hiding removes it from the shop’s (and staff member’s) public rating immediately — the rating is recalculated from every other review. You can restore it later.",
+      "hideReasonLabel": "Reason (optional, for your own records)",
+      "hideReasonPlaceholder": "e.g. Retaliatory after a rejected booking",
+      "hiddenReasonLabel": "Reason",
+      "noReviewsTitle": "No reviews yet",
+      "noReviewsDesc": "Customer ratings will show up here once they start coming in.",
+      "toastHidden": "Review hidden.",
+      "toastRestored": "Review restored.",
+      "toastError": "Something went wrong."
     }
   }
 }
