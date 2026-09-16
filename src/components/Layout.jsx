@@ -1,204 +1,60 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import clsx from 'clsx';
 import { useTranslation } from 'react-i18next';
 import {
-  Squares2X2Icon, CalendarDaysIcon, ScissorsIcon, UserGroupIcon,
-  ChartBarIcon, Cog6ToothIcon, ArrowLeftStartOnRectangleIcon, Bars3Icon, XMarkIcon,
-  ChevronUpDownIcon, CheckIcon, UsersIcon, MegaphoneIcon,
+  Squares2X2Icon, CalendarDaysIcon, UsersIcon, Bars3Icon,
 } from '@heroicons/react/24/outline';
-import { useAuth } from '../lib/AuthContext';
-import { createApiClient } from '../lib/api';
-import Modal from './Modal';
-import LanguageSwitcher from './LanguageSwitcher';
+import {
+  Squares2X2Icon as Squares2X2IconSolid, CalendarDaysIcon as CalendarDaysIconSolid,
+  UsersIcon as UsersIconSolid, Bars3Icon as Bars3IconSolid,
+} from '@heroicons/react/24/solid';
 
-const NAV_ITEMS = [
-  { to: '/', key: 'dashboard', icon: Squares2X2Icon, end: true },
-  { to: '/appointments', key: 'appointments', icon: CalendarDaysIcon },
-  { to: '/customers', key: 'customers', icon: UsersIcon },
-  { to: '/services', key: 'services', icon: ScissorsIcon },
-  { to: '/staff', key: 'staff', icon: UserGroupIcon },
-  { to: '/statistics', key: 'statistics', icon: ChartBarIcon },
-  { to: '/promotions', key: 'promotions', icon: MegaphoneIcon },
-  { to: '/settings', key: 'settings', icon: Cog6ToothIcon },
+// Four tabs only — a bottom bar can't hold the full page list the old
+// sidebar had, so Services/Staff/Statistics/Promotions/Settings all live
+// behind the "Manage" tab's own hub screen (src/pages/Manage.jsx) instead.
+const TABS = [
+  { to: '/', key: 'today', icon: Squares2X2Icon, activeIcon: Squares2X2IconSolid, end: true },
+  { to: '/appointments', key: 'bookings', icon: CalendarDaysIcon, activeIcon: CalendarDaysIconSolid },
+  { to: '/customers', key: 'clients', icon: UsersIcon, activeIcon: UsersIconSolid },
+  { to: '/manage', key: 'manage', icon: Bars3Icon, activeIcon: Bars3IconSolid },
 ];
 
-function NavItems({ onNavigate }) {
+function BottomNav() {
   const { t } = useTranslation();
   return (
-    <nav className="flex flex-col gap-1">
-      {NAV_ITEMS.map(({ to, key, icon: Icon, end }) => (
-        <NavLink
-          key={to}
-          to={to}
-          end={end}
-          onClick={onNavigate}
-          className={({ isActive }) =>
-            clsx(
-              'group relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors',
-              isActive ? 'text-text' : 'text-text-muted hover:text-text hover:bg-surface-2'
-            )
-          }
-        >
-          {({ isActive }) => (
-            <>
-              {isActive && (
-                <motion.div
-                  layoutId="nav-active"
-                  className="absolute inset-0 bg-surface-2 border border-border-soft rounded-xl"
-                  transition={{ type: 'spring', stiffness: 500, damping: 40 }}
-                />
-              )}
-              <Icon className={clsx('w-[18px] h-[18px] relative z-10 shrink-0', isActive && 'text-accent')} />
-              <span className="relative z-10">{t(`nav.${key}`)}</span>
-            </>
-          )}
-        </NavLink>
-      ))}
+    <nav className="fixed bottom-0 left-0 right-0 z-40 bg-surface/95 backdrop-blur-xl border-t border-border-soft pb-[env(safe-area-inset-bottom)]">
+      <div className="max-w-lg mx-auto grid grid-cols-4">
+        {TABS.map(({ to, key, icon: Icon, activeIcon: ActiveIcon, end }) => (
+          <NavLink
+            key={to}
+            to={to}
+            end={end}
+            className="relative flex flex-col items-center justify-center gap-1 py-2.5 text-text-faint"
+          >
+            {({ isActive }) => (
+              <>
+                {isActive ? <ActiveIcon className="w-6 h-6 text-accent" /> : <Icon className="w-6 h-6" />}
+                <span className={clsx('text-[11px] font-medium', isActive ? 'text-accent' : 'text-text-faint')}>
+                  {t(`nav.${key}`)}
+                </span>
+              </>
+            )}
+          </NavLink>
+        ))}
+      </div>
     </nav>
   );
 }
 
-// Shown only once we know the account actually owns more than one shop —
-// lets them jump between shops without re-verifying via Telegram each time.
-function ShopSwitcher({ shopName, shopInitial }) {
-  const { t, i18n } = useTranslation();
-  const { token, shop, login } = useAuth();
-  const [myShops, setMyShops] = useState(null);
-  const [open, setOpen] = useState(false);
-  const [switching, setSwitching] = useState(false);
-
-  useEffect(() => {
-    if (!token) return;
-    createApiClient(token).get('/admin/auth/my-shops')
-      .then((res) => setMyShops(res.shops))
-      .catch(() => setMyShops([]));
-  }, [token]);
-
-  const switchTo = async (shopId) => {
-    setSwitching(true);
-    try {
-      const api = createApiClient(token);
-      const { token: newToken, shop: newShop } = await api.post('/admin/auth/select-shop', { token, shopId });
-      login(newToken, newShop);
-      setOpen(false);
-    } catch {
-      // Silently keep the picker open — the user can just try again.
-    } finally {
-      setSwitching(false);
-    }
-  };
-
-  const hasMultiple = (myShops?.length || 0) > 1;
-
-  return (
-    <>
-      <button
-        onClick={() => hasMultiple && setOpen(true)}
-        className={clsx('flex items-center gap-3 min-w-0 flex-1 text-left', hasMultiple && 'cursor-pointer')}
-      >
-        <div className="w-8 h-8 rounded-full bg-surface-3 flex items-center justify-center text-xs font-semibold text-text-muted shrink-0">
-          {shopInitial}
-        </div>
-        <div className="min-w-0 flex-1">
-          <p className="text-sm font-medium truncate">{shopName}</p>
-        </div>
-        {hasMultiple && <ChevronUpDownIcon className="w-4 h-4 text-text-faint shrink-0" />}
-      </button>
-
-      <Modal open={open} onClose={() => setOpen(false)} title={t('common.switchShop')}>
-        <div className="space-y-1.5">
-          {(myShops || []).map((s) => (
-            <button
-              key={s.id}
-              disabled={switching}
-              onClick={() => switchTo(s.id)}
-              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl border border-border bg-surface-3 hover:border-accent/60 transition-colors disabled:opacity-50"
-            >
-              <img src={s.image} alt="" className="w-8 h-8 rounded-lg object-cover shrink-0" />
-              <span className="text-sm font-medium text-text truncate flex-1 text-left">{s.name?.[i18n.language] || s.name?.en || s.name?.ru}</span>
-              {s.id === shop?.id && <CheckIcon className="w-4 h-4 text-accent shrink-0" />}
-            </button>
-          ))}
-        </div>
-      </Modal>
-    </>
-  );
-}
-
 export default function Layout() {
-  const { t } = useTranslation();
-  const { shop, logout } = useAuth();
   const location = useLocation();
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const shopName = shop?.name?.en || shop?.name?.ru || t('common.yourShop');
-  const shopInitial = shopName.slice(0, 1).toUpperCase();
 
   return (
-    <div className="min-h-screen bg-bg text-text flex">
-      {/* Desktop sidebar */}
-      <aside className="hidden lg:flex w-64 shrink-0 flex-col border-r border-border-soft px-4 py-6">
-        <div className="flex items-center gap-2.5 px-2 mb-8">
-          <div className="w-8 h-8 rounded-lg bg-accent/15 text-accent flex items-center justify-center font-display font-semibold text-sm">T</div>
-          <span className="font-display text-lg font-semibold tracking-tight">Tezkor</span>
-        </div>
-        <NavItems />
-        <div className="mt-auto pt-4 border-t border-border-soft px-2">
-          <LanguageSwitcher className="mb-3 w-full justify-center" />
-          <div className="flex items-center gap-3">
-            <ShopSwitcher shopName={shopName} shopInitial={shopInitial} />
-            <button onClick={logout} title={t('common.logOut')} className="text-text-faint hover:text-danger transition-colors p-1.5 shrink-0">
-              <ArrowLeftStartOnRectangleIcon className="w-[18px] h-[18px]" />
-            </button>
-          </div>
-        </div>
-      </aside>
-
-      {/* Mobile topbar + drawer */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-4 h-14 bg-bg/80 backdrop-blur-xl border-b border-border-soft">
-        <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg bg-accent/15 text-accent flex items-center justify-center font-display font-semibold text-xs">S</div>
-          <span className="font-display font-semibold">SmartChair</span>
-        </div>
-        <button onClick={() => setMobileOpen(true)} className="p-1.5 text-text-muted">
-          <Bars3Icon className="w-6 h-6" />
-        </button>
-      </div>
-      <AnimatePresence>
-        {mobileOpen && (
-          <motion.div className="lg:hidden fixed inset-0 z-50 flex" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-            <motion.div
-              className="absolute inset-0 bg-black/60"
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              onClick={() => setMobileOpen(false)}
-            />
-            <motion.div
-              className="relative w-72 bg-surface border-r border-border-soft h-full px-4 py-6 flex flex-col"
-              initial={{ x: -288 }} animate={{ x: 0 }} exit={{ x: -288 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 38 }}
-            >
-              <div className="flex items-center justify-between mb-8 px-2">
-                <span className="font-display text-lg font-semibold">Tezkor</span>
-                <button onClick={() => setMobileOpen(false)} className="text-text-muted"><XMarkIcon className="w-5 h-5" /></button>
-              </div>
-              <NavItems onNavigate={() => setMobileOpen(false)} />
-              <div className="mt-auto pt-4 border-t border-border-soft px-2">
-                <LanguageSwitcher className="mb-3" />
-                <div className="flex items-center gap-3">
-                  <ShopSwitcher shopName={shopName} shopInitial={shopInitial} />
-                </div>
-              </div>
-              <button onClick={logout} className="flex items-center gap-2 text-sm text-text-faint hover:text-danger transition-colors px-2 py-2 mt-2">
-                <ArrowLeftStartOnRectangleIcon className="w-[18px] h-[18px]" /> {t('common.logOut')}
-              </button>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      <main className="flex-1 min-w-0 pt-14 lg:pt-0">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-10 py-6 lg:py-10">
+    <div className="min-h-screen bg-bg text-text">
+      <main className="pb-20">
+        <div className="max-w-lg mx-auto px-4 py-5">
           <AnimatePresence mode="wait">
             <motion.div
               key={location.pathname}
@@ -212,6 +68,7 @@ export default function Layout() {
           </AnimatePresence>
         </div>
       </main>
+      <BottomNav />
     </div>
   );
 }

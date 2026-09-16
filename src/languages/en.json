@@ -21,7 +21,12 @@
       "Friday": "Fri",
       "Saturday": "Sat",
       "Sunday": "Sun"
-    }
+    },
+    "change": "Change",
+    "min": "min",
+    "phoneNumber": "Phone number",
+    "status": "Status",
+    "edit": "Edit"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -33,7 +38,11 @@
     "promotions": "Promotions",
     "settings": "Settings",
     "superadminDashboard": "Dashboard",
-    "superadminShops": "Shops"
+    "superadminShops": "Shops",
+    "today": "Today",
+    "bookings": "Bookings",
+    "clients": "Clients",
+    "manage": "Manage"
   },
   "login": {
     "title": "Tezkor Shop Control",
@@ -104,7 +113,53 @@
     "toastError": "Something went wrong",
     "prev": "Prev",
     "next": "Next",
-    "pageOf": "Page {{current}} of {{total}}"
+    "pageOf": "Page {{current}} of {{total}}",
+    "manual": {
+      "title": "New booking",
+      "client": "Client",
+      "searchPlaceholder": "Search by name or phone",
+      "addNewClient": "Add new client",
+      "newClientName": "Client's name",
+      "newClientNumber": "Phone number",
+      "searchInstead": "Search an existing client instead",
+      "service": "Service",
+      "staff": "Staff",
+      "anyStaff": "Any available",
+      "date": "Date",
+      "time": "Time",
+      "source": "How did they reach out?",
+      "note": "Note",
+      "notePlaceholder": "e.g. wants the same style as last time",
+      "summary": "Summary",
+      "newBooking": "New booking",
+      "create": "Create booking",
+      "creating": "Creating…",
+      "toastCreated": "Booking created.",
+      "toastError": "Couldn't create the booking."
+    },
+    "calendar": {
+      "closedTitle": "Closed this day",
+      "closedDesc": "This shop isn't open on the selected day.",
+      "pool": "{{capacity}} slot(s)",
+      "unassigned": "Any-available bookings"
+    },
+    "source": {
+      "bot": "Telegram",
+      "phone": "Phone",
+      "walkIn": "Walk-in"
+    },
+    "reschedule": "Change time",
+    "rescheduleTitle": "Change appointment time",
+    "cancel": "Cancel",
+    "cancelTitle": "Cancel appointment",
+    "cancelBody": "Cancel {{name}}'s appointment? They'll be notified on Telegram.",
+    "toastCancelled": "Appointment cancelled.",
+    "toastRescheduled": "Appointment rescheduled.",
+    "noteTitle": "Note",
+    "notePlaceholder": "What did the customer ask for?",
+    "searchPlaceholder": "Search by name or phone",
+    "allStaff": "All staff",
+    "colSource": "Source"
   },
   "customers": {
     "title": "Customers",
@@ -130,7 +185,10 @@
     "customerFallback": "Customer",
     "toastLoadError": "Could not load customer",
     "toastSaved": "Notes saved",
-    "toastSaveError": "Could not save notes"
+    "toastSaveError": "Could not save notes",
+    "newClient": "New client",
+    "call": "Call",
+    "toastCreated": "Client added."
   },
   "services": {
     "title": "Services",
@@ -154,7 +212,11 @@
     "toastAdded": "Service added",
     "toastSaveError": "Could not save service",
     "toastRemoved": "Service removed",
-    "toastRemoveError": "Could not remove service"
+    "toastRemoveError": "Could not remove service",
+    "performedBy": "Performed by",
+    "noOneAssigned": "No one assigned yet",
+    "active": "Active",
+    "inactive": "Inactive — hidden from customers"
   },
   "staff": {
     "title": "Staff",
@@ -200,7 +262,11 @@
     "toastRemoved": "Staff member removed",
     "toastRemoveError": "Could not remove staff member",
     "conflictWillReject_one": "Marking this day off will reject it and notify the client.",
-    "conflictWillReject_other": "Marking this day off will reject them and notify the clients."
+    "conflictWillReject_other": "Marking this day off will reject them and notify the clients.",
+    "unavailableNow": "Unavailable right now",
+    "lunchBreak": "Lunch break",
+    "busyNow": "Busy now",
+    "availableNow": "Available now"
   },
   "statistics": {
     "title": "Statistics",

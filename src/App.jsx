@@ -12,6 +12,7 @@ import Staff from './pages/Staff';
 import Statistics from './pages/Statistics';
 import Promotions from './pages/Promotions';
 import Settings from './pages/Settings';
+import Manage from './pages/Manage';
 import SuperAdminLayout from './components/SuperAdminLayout';
 import SuperAdminDashboard from './pages/superadmin/Dashboard';
 import SuperAdminShops from './pages/superadmin/Shops';
@@ -57,6 +58,7 @@ export default function App() {
               <Route path="/statistics" element={<Statistics />} />
               <Route path="/promotions" element={<Promotions />} />
               <Route path="/settings" element={<Settings />} />
+              <Route path="/manage" element={<Manage />} />
             </Route>
             <Route
               element={

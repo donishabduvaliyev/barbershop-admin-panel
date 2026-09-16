@@ -23,6 +23,7 @@ export default function Staff() {
   const [staff, setStaff] = useState(null);
   const [services, setServices] = useState([]);
   const [shopHours, setShopHours] = useState([]);
+  const [busyStaffIds, setBusyStaffIds] = useState(new Set());
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(EMPTY_FORM);
@@ -31,6 +32,7 @@ export default function Staff() {
   const [upcomingCount, setUpcomingCount] = useState(0);
   const [newDayOffDate, setNewDayOffDate] = useState('');
   const [dayOffConflict, setDayOffConflict] = useState(null);
+  const [availabilityBusyId, setAvailabilityBusyId] = useState(null);
 
   useEffect(() => {
     api.get('/admin/shop').then((shop) => {
@@ -38,7 +40,35 @@ export default function Staff() {
       setServices(shop.services || []);
       setShopHours(shop.workingHours || []);
     });
+    // "Busy right now" is purely a computed display — a confirmed booking
+    // whose hour is the current hour — no new field needed.
+    const now = new Date();
+    const dayStart = new Date(now); dayStart.setHours(0, 0, 0, 0);
+    const dayEnd = new Date(now); dayEnd.setHours(23, 59, 59, 999);
+    api.get(`/admin/appointments?status=confirmed&from=${dayStart.toISOString()}&to=${dayEnd.toISOString()}&limit=100`)
+      .then((res) => {
+        const currentHour = now.getHours();
+        const busy = new Set(
+          (res.appointments || [])
+            .filter((a) => a.staffId && new Date(a.requestedTime).getHours() === currentHour)
+            .map((a) => String(a.staffId))
+        );
+        setBusyStaffIds(busy);
+      })
+      .catch(() => {});
   }, [api]);
+
+  const toggleAvailableNow = async (member) => {
+    setAvailabilityBusyId(member._id);
+    try {
+      const updated = await api.patch(`/admin/shop/staff/${member._id}/availability`, { isAvailableNow: !(member.isAvailableNow !== false) });
+      setStaff(updated);
+    } catch (err) {
+      showToast(err.message || t('staff.toastSaveError'), 'error');
+    } finally {
+      setAvailabilityBusyId(null);
+    }
+  };
 
   const openCreate = () => { setEditing(null); setForm(EMPTY_FORM); setModalOpen(true); };
   const openEdit = (member) => {
@@ -175,15 +205,31 @@ export default function Staff() {
                   <span>{member.rating?.toFixed(1) || '0.0'}</span>
                   <span className="text-text-faint">({member.reviewsCount || 0})</span>
                 </div>
-                {member.daysOff?.includes(todayKey()) ? (
-                  <span className="mt-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-warning/15 text-warning text-[11px] font-medium">
-                    <CalendarDaysIcon className="w-3 h-3" /> {t('staff.offToday')}
-                  </span>
-                ) : member.daysOff?.filter((d) => d >= todayKey()).length > 0 ? (
-                  <span className="mt-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-surface-3 text-text-faint text-[11px]">
-                    <CalendarDaysIcon className="w-3 h-3" /> {t('staff.dayOffScheduled', { count: member.daysOff.filter((d) => d >= todayKey()).length })}
-                  </span>
-                ) : null}
+
+                <div className="flex flex-wrap items-center justify-center gap-1.5 mt-2">
+                  {member.daysOff?.includes(todayKey()) ? (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-warning/15 text-warning text-[11px] font-medium">
+                      <CalendarDaysIcon className="w-3 h-3" /> {t('staff.offToday')}
+                    </span>
+                  ) : member.daysOff?.filter((d) => d >= todayKey()).length > 0 ? (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-surface-3 text-text-faint text-[11px]">
+                      <CalendarDaysIcon className="w-3 h-3" /> {t('staff.dayOffScheduled', { count: member.daysOff.filter((d) => d >= todayKey()).length })}
+                    </span>
+                  ) : null}
+                  {member.isAvailableNow !== false && busyStaffIds.has(String(member._id)) && (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-info/15 text-info text-[11px] font-medium">
+                      {t('staff.busyNow')}
+                    </span>
+                  )}
+                </div>
+
+                <button
+                  onClick={() => toggleAvailableNow(member)}
+                  disabled={availabilityBusyId === member._id}
+                  className={`mt-3 w-full flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium border transition-colors disabled:opacity-50 ${member.isAvailableNow !== false ? 'bg-success/10 border-success/30 text-success' : 'bg-danger/10 border-danger/30 text-danger'}`}
+                >
+                  {member.isAvailableNow !== false ? t('staff.availableNow') : t('staff.unavailableNow')}
+                </button>
               </Card>
             </motion.div>
           ))}

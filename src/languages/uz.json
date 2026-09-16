@@ -21,7 +21,12 @@
       "Friday": "Juma",
       "Saturday": "Shan",
       "Sunday": "Yak"
-    }
+    },
+    "change": "O'zgartirish",
+    "min": "daq",
+    "phoneNumber": "Telefon raqami",
+    "status": "Holati",
+    "edit": "Tahrirlash"
   },
   "nav": {
     "dashboard": "Boshqaruv paneli",
@@ -33,7 +38,11 @@
     "promotions": "Aksiyalar",
     "settings": "Sozlamalar",
     "superadminDashboard": "Boshqaruv paneli",
-    "superadminShops": "Do'konlar"
+    "superadminShops": "Do'konlar",
+    "today": "Bugun",
+    "bookings": "Bandlovlar",
+    "clients": "Mijozlar",
+    "manage": "Boshqaruv"
   },
   "login": {
     "title": "Tezkor Shop Control",
@@ -104,7 +113,53 @@
     "toastError": "Nimadir xato ketdi",
     "prev": "Oldingi",
     "next": "Keyingi",
-    "pageOf": "{{current}}/{{total}} sahifa"
+    "pageOf": "{{current}}/{{total}} sahifa",
+    "manual": {
+      "title": "Yangi bandlov",
+      "client": "Mijoz",
+      "searchPlaceholder": "Ism yoki telefon raqami bo'yicha qidirish",
+      "addNewClient": "Yangi mijoz qo'shish",
+      "newClientName": "Mijoz ismi",
+      "newClientNumber": "Telefon raqami",
+      "searchInstead": "Mavjud mijozni qidirish",
+      "service": "Xizmat",
+      "staff": "Mutaxassis",
+      "anyStaff": "Istalgan mavjud",
+      "date": "Sana",
+      "time": "Vaqt",
+      "source": "Qanday murojaat qildi?",
+      "note": "Izoh",
+      "notePlaceholder": "masalan, o'tgan safargidek qilishni xohlaydi",
+      "summary": "Xulosa",
+      "newBooking": "Yangi bandlov",
+      "create": "Bandlov yaratish",
+      "creating": "Yaratilmoqda…",
+      "toastCreated": "Bandlov yaratildi.",
+      "toastError": "Bandlovni yaratib bo'lmadi."
+    },
+    "calendar": {
+      "closedTitle": "Bu kuni yopiq",
+      "closedDesc": "Do'kon tanlangan kuni ishlamaydi.",
+      "pool": "{{capacity}} ta joy",
+      "unassigned": "Istalgan mavjud bandlovlar"
+    },
+    "source": {
+      "bot": "Telegram",
+      "phone": "Telefon",
+      "walkIn": "Kelib qolgan"
+    },
+    "reschedule": "Vaqtni o'zgartirish",
+    "rescheduleTitle": "Bandlov vaqtini o'zgartirish",
+    "cancel": "Bekor qilish",
+    "cancelTitle": "Bandlovni bekor qilish",
+    "cancelBody": "{{name}}ning bandlovini bekor qilasizmi? U Telegramda xabar oladi.",
+    "toastCancelled": "Bandlov bekor qilindi.",
+    "toastRescheduled": "Bandlov vaqti o'zgartirildi.",
+    "noteTitle": "Izoh",
+    "notePlaceholder": "Mijoz nima so'radi?",
+    "searchPlaceholder": "Ism yoki telefon raqami bo'yicha qidirish",
+    "allStaff": "Barcha xodimlar",
+    "colSource": "Manba"
   },
   "customers": {
     "title": "Mijozlar",
@@ -130,7 +185,10 @@
     "customerFallback": "Mijoz",
     "toastLoadError": "Mijozni yuklab bo'lmadi",
     "toastSaved": "Eslatmalar saqlandi",
-    "toastSaveError": "Eslatmalarni saqlab bo'lmadi"
+    "toastSaveError": "Eslatmalarni saqlab bo'lmadi",
+    "newClient": "Yangi mijoz",
+    "call": "Qo'ng'iroq",
+    "toastCreated": "Mijoz qo'shildi."
   },
   "services": {
     "title": "Xizmatlar",
@@ -154,7 +212,11 @@
     "toastAdded": "Xizmat qo'shildi",
     "toastSaveError": "Xizmatni saqlab bo'lmadi",
     "toastRemoved": "Xizmat o'chirildi",
-    "toastRemoveError": "Xizmatni o'chirib bo'lmadi"
+    "toastRemoveError": "Xizmatni o'chirib bo'lmadi",
+    "performedBy": "Bajaruvchilar",
+    "noOneAssigned": "Hali hech kim tayinlanmagan",
+    "active": "Faol",
+    "inactive": "Nofaol — mijozlardan yashirilgan"
   },
   "staff": {
     "title": "Xodimlar",
@@ -200,7 +262,11 @@
     "toastRemoved": "Xodim o'chirildi",
     "toastRemoveError": "Xodimni o'chirib bo'lmadi",
     "conflictWillReject_one": "Bu kunni dam olish kuni deb belgilash uchrashuvni rad etadi va mijozga xabar beradi.",
-    "conflictWillReject_other": "Bu kunni dam olish kuni deb belgilash uchrashuvlarni rad etadi va mijozlarga xabar beradi."
+    "conflictWillReject_other": "Bu kunni dam olish kuni deb belgilash uchrashuvlarni rad etadi va mijozlarga xabar beradi.",
+    "unavailableNow": "Hozir mavjud emas",
+    "lunchBreak": "Tushlik tanaffusi",
+    "busyNow": "Hozir band",
+    "availableNow": "Hozir mavjud"
   },
   "statistics": {
     "title": "Statistika",

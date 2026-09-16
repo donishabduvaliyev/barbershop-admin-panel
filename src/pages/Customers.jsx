@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import { MagnifyingGlassIcon, PlusIcon, PencilSquareIcon, PhoneIcon } from '@heroicons/react/24/outline';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../lib/AuthContext';
 import { useToast } from '../components/ToastProvider';
-import { Card, Button, Textarea, EmptyState } from '../components/ui';
+import { Card, Button, Textarea, EmptyState, Field, Input } from '../components/ui';
 import Modal from '../components/Modal';
 import { TableRowSkeleton } from '../components/Skeleton';
 import StatusBadge from '../components/StatusBadge';
@@ -23,6 +23,14 @@ export default function Customers() {
   const [detail, setDetail] = useState(null);
   const [notesDraft, setNotesDraft] = useState('');
   const [savingNotes, setSavingNotes] = useState(false);
+  const [editingInfo, setEditingInfo] = useState(false);
+  const [editName, setEditName] = useState('');
+  const [editNumber, setEditNumber] = useState('');
+  const [savingInfo, setSavingInfo] = useState(false);
+  const [createOpen, setCreateOpen] = useState(false);
+  const [createName, setCreateName] = useState('');
+  const [createNumber, setCreateNumber] = useState('');
+  const [creating, setCreating] = useState(false);
 
   const load = (searchTerm) => {
     const query = searchTerm ? `?search=${encodeURIComponent(searchTerm)}` : '';
@@ -42,6 +50,7 @@ export default function Customers() {
   const openDetail = async (telegramId) => {
     setSelectedId(telegramId);
     setDetail(null);
+    setEditingInfo(false);
     try {
       const res = await api.get(`/admin/customers/${telegramId}`);
       setDetail(res);
@@ -49,6 +58,45 @@ export default function Customers() {
     } catch (err) {
       showToast(err.message || t('customers.toastLoadError'), 'error');
       setSelectedId(null);
+    }
+  };
+
+  const startEditInfo = () => {
+    setEditName(detail.userName || '');
+    setEditNumber(detail.userNumber || '');
+    setEditingInfo(true);
+  };
+
+  const saveInfo = async () => {
+    if (!editName.trim()) return;
+    setSavingInfo(true);
+    try {
+      await api.patch(`/admin/customers/${selectedId}`, { name: editName.trim(), number: editNumber.trim() });
+      setDetail((d) => ({ ...d, userName: editName.trim(), userNumber: editNumber.trim() }));
+      setCustomers((prev) => prev.map((c) => (c.telegramId === selectedId ? { ...c, userName: editName.trim(), userNumber: editNumber.trim() } : c)));
+      setEditingInfo(false);
+      showToast(t('customers.toastSaved'));
+    } catch (err) {
+      showToast(err.message || t('customers.toastSaveError'), 'error');
+    } finally {
+      setSavingInfo(false);
+    }
+  };
+
+  const createCustomer = async () => {
+    if (!createName.trim()) return;
+    setCreating(true);
+    try {
+      await api.post('/admin/customers', { name: createName.trim(), number: createNumber.trim() });
+      showToast(t('customers.toastCreated'));
+      setCreateOpen(false);
+      setCreateName('');
+      setCreateNumber('');
+      load(search);
+    } catch (err) {
+      showToast(err.message || t('customers.toastSaveError'), 'error');
+    } finally {
+      setCreating(false);
     }
   };
 
@@ -73,14 +121,17 @@ export default function Customers() {
           <h1 className="font-display text-2xl font-semibold text-text">{t('customers.title')}</h1>
           <p className="text-text-muted text-sm mt-1">{t('customers.subtitle')}</p>
         </div>
-        <div className="relative">
-          <MagnifyingGlassIcon className="w-4 h-4 text-text-faint absolute left-3 top-1/2 -translate-y-1/2" />
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder={t('customers.searchPlaceholder')}
-            className="bg-surface-3 border border-border rounded-lg pl-9 pr-3 py-2 text-sm text-text placeholder:text-text-faint outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 transition-all w-56"
-          />
+        <div className="flex items-center gap-2">
+          <div className="relative">
+            <MagnifyingGlassIcon className="w-4 h-4 text-text-faint absolute left-3 top-1/2 -translate-y-1/2" />
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder={t('customers.searchPlaceholder')}
+              className="bg-surface-3 border border-border rounded-lg pl-9 pr-3 py-2 text-sm text-text placeholder:text-text-faint outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 transition-all w-56"
+            />
+          </div>
+          <Button onClick={() => setCreateOpen(true)} className="!px-3 !py-2 text-sm"><PlusIcon className="w-4 h-4" /> {t('customers.newClient')}</Button>
         </div>
       </div>
 
@@ -92,13 +143,16 @@ export default function Customers() {
         ) : (
           <div>
             {customers.map((c, i) => (
-              <motion.button
+              <motion.div
                 key={c.telegramId}
                 initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.03 }}
                 onClick={() => openDetail(c.telegramId)}
-                className="w-full flex items-center gap-4 px-5 py-4 border-b border-border-soft last:border-0 text-left hover:bg-surface-2 transition-colors"
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => { if (e.key === 'Enter') openDetail(c.telegramId); }}
+                className="w-full flex items-center gap-4 px-5 py-4 border-b border-border-soft last:border-0 text-left hover:bg-surface-2 transition-colors cursor-pointer"
               >
                 <div className="w-9 h-9 rounded-full bg-surface-3 flex items-center justify-center text-sm font-medium text-text-muted shrink-0">
                   {(c.userName || '?').slice(0, 1).toUpperCase()}
@@ -117,7 +171,17 @@ export default function Customers() {
                 <div className="text-right shrink-0 w-24">
                   <p className="text-sm font-semibold text-accent">{currency(c.totalSpent)}</p>
                 </div>
-              </motion.button>
+                {c.userNumber && (
+                  <a
+                    href={`tel:${c.userNumber}`}
+                    onClick={(e) => e.stopPropagation()}
+                    className="p-1.5 rounded-lg text-text-faint hover:text-accent hover:bg-surface-3 transition-colors shrink-0"
+                    title={t('customers.call')}
+                  >
+                    <PhoneIcon className="w-4 h-4" />
+                  </a>
+                )}
+              </motion.div>
             ))}
           </div>
         )}
@@ -157,9 +221,32 @@ export default function Customers() {
               <div>
                 <p className="text-xs font-medium text-text-muted mb-1.5">{t('customers.preferredSpecialist')}</p>
                 <p className="text-text">{detail.preferredStaff || <span className="text-text-faint">{t('customers.none')}</span>}</p>
-                <p className="text-xs text-text-faint mt-2">{detail.userNumber}{detail.userTelegramUsername ? ` · @${detail.userTelegramUsername}` : ''}</p>
+                {!editingInfo && (
+                  <div className="flex items-center gap-2 mt-2">
+                    <p className="text-xs text-text-faint">{detail.userNumber}{detail.userTelegramUsername ? ` · @${detail.userTelegramUsername}` : ''}</p>
+                    {detail.userNumber && (
+                      <a href={`tel:${detail.userNumber}`} className="text-text-faint hover:text-accent transition-colors" title={t('customers.call')}>
+                        <PhoneIcon className="w-3.5 h-3.5" />
+                      </a>
+                    )}
+                    <button onClick={startEditInfo} className="text-text-faint hover:text-accent transition-colors" title={t('common.edit')}>
+                      <PencilSquareIcon className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
+
+            {editingInfo && (
+              <div className="grid sm:grid-cols-2 gap-3 bg-surface-3 border border-border rounded-lg p-3">
+                <Field label={t('appointments.manual.newClientName')}><Input value={editName} onChange={(e) => setEditName(e.target.value)} /></Field>
+                <Field label={t('common.phoneNumber')}><Input value={editNumber} onChange={(e) => setEditNumber(e.target.value)} /></Field>
+                <div className="sm:col-span-2 flex justify-end gap-2">
+                  <Button variant="ghost" className="!px-3 !py-1.5 text-xs" onClick={() => setEditingInfo(false)}>{t('common.cancel')}</Button>
+                  <Button className="!px-3 !py-1.5 text-xs" disabled={!editName.trim() || savingInfo} onClick={saveInfo}>{savingInfo ? t('common.saving') : t('common.save')}</Button>
+                </div>
+              </div>
+            )}
 
             <div>
               <p className="text-xs font-medium text-text-muted mb-1.5">{t('customers.notes')}</p>
@@ -188,6 +275,23 @@ export default function Customers() {
             </div>
           </div>
         )}
+      </Modal>
+
+      <Modal
+        open={createOpen}
+        onClose={() => setCreateOpen(false)}
+        title={t('customers.newClient')}
+        footer={(
+          <>
+            <Button variant="ghost" onClick={() => setCreateOpen(false)}>{t('common.cancel')}</Button>
+            <Button disabled={!createName.trim() || creating} onClick={createCustomer}>{creating ? t('common.saving') : t('common.save')}</Button>
+          </>
+        )}
+      >
+        <div className="space-y-3">
+          <Field label={t('appointments.manual.newClientName')}><Input value={createName} onChange={(e) => setCreateName(e.target.value)} autoFocus /></Field>
+          <Field label={t('common.phoneNumber')}><Input value={createNumber} onChange={(e) => setCreateNumber(e.target.value)} /></Field>
+        </div>
       </Modal>
     </div>
   );

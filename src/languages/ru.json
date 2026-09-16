@@ -21,7 +21,12 @@
       "Friday": "Пт",
       "Saturday": "Сб",
       "Sunday": "Вс"
-    }
+    },
+    "change": "Изменить",
+    "min": "мин",
+    "phoneNumber": "Номер телефона",
+    "status": "Статус",
+    "edit": "Изменить"
   },
   "nav": {
     "dashboard": "Дашборд",
@@ -33,7 +38,11 @@
     "promotions": "Акции",
     "settings": "Настройки",
     "superadminDashboard": "Дашборд",
-    "superadminShops": "Заведения"
+    "superadminShops": "Заведения",
+    "today": "Сегодня",
+    "bookings": "Записи",
+    "clients": "Клиенты",
+    "manage": "Управление"
   },
   "login": {
     "title": "Tezkor Shop Control",
@@ -106,7 +115,53 @@
     "toastError": "Что-то пошло не так",
     "prev": "Назад",
     "next": "Далее",
-    "pageOf": "Страница {{current}} из {{total}}"
+    "pageOf": "Страница {{current}} из {{total}}",
+    "manual": {
+      "title": "Новая запись",
+      "client": "Клиент",
+      "searchPlaceholder": "Поиск по имени или телефону",
+      "addNewClient": "Добавить нового клиента",
+      "newClientName": "Имя клиента",
+      "newClientNumber": "Номер телефона",
+      "searchInstead": "Найти существующего клиента",
+      "service": "Услуга",
+      "staff": "Мастер",
+      "anyStaff": "Любой доступный",
+      "date": "Дата",
+      "time": "Время",
+      "source": "Как они обратились?",
+      "note": "Заметка",
+      "notePlaceholder": "например, хочет как в прошлый раз",
+      "summary": "Итого",
+      "newBooking": "Новая запись",
+      "create": "Создать запись",
+      "creating": "Создаётся…",
+      "toastCreated": "Запись создана.",
+      "toastError": "Не удалось создать запись."
+    },
+    "calendar": {
+      "closedTitle": "Закрыто в этот день",
+      "closedDesc": "Заведение не работает в выбранный день.",
+      "pool": "{{capacity}} мест(а)",
+      "unassigned": "Записи \"любой доступный\""
+    },
+    "source": {
+      "bot": "Telegram",
+      "phone": "Телефон",
+      "walkIn": "Без записи"
+    },
+    "reschedule": "Изменить время",
+    "rescheduleTitle": "Изменить время записи",
+    "cancel": "Отменить",
+    "cancelTitle": "Отменить запись",
+    "cancelBody": "Отменить запись клиента {{name}}? Он получит уведомление в Telegram.",
+    "toastCancelled": "Запись отменена.",
+    "toastRescheduled": "Время записи изменено.",
+    "noteTitle": "Заметка",
+    "notePlaceholder": "Что просил клиент?",
+    "searchPlaceholder": "Поиск по имени или телефону",
+    "allStaff": "Весь персонал",
+    "colSource": "Источник"
   },
   "customers": {
     "title": "Клиенты",
@@ -134,7 +189,10 @@
     "customerFallback": "Клиент",
     "toastLoadError": "Не удалось загрузить клиента",
     "toastSaved": "Заметки сохранены",
-    "toastSaveError": "Не удалось сохранить заметки"
+    "toastSaveError": "Не удалось сохранить заметки",
+    "newClient": "Новый клиент",
+    "call": "Позвонить",
+    "toastCreated": "Клиент добавлен."
   },
   "services": {
     "title": "Услуги",
@@ -158,7 +216,11 @@
     "toastAdded": "Услуга добавлена",
     "toastSaveError": "Не удалось сохранить услугу",
     "toastRemoved": "Услуга удалена",
-    "toastRemoveError": "Не удалось удалить услугу"
+    "toastRemoveError": "Не удалось удалить услугу",
+    "performedBy": "Выполняют",
+    "noOneAssigned": "Пока никто не назначен",
+    "active": "Активна",
+    "inactive": "Неактивна — скрыта от клиентов"
   },
   "staff": {
     "title": "Персонал",
@@ -210,7 +272,11 @@
     "conflictWillReject_one": "Если отметить этот день выходным, запись будет отклонена, а клиент уведомлён.",
     "conflictWillReject_few": "Если отметить этот день выходным, записи будут отклонены, а клиенты уведомлены.",
     "conflictWillReject_many": "Если отметить этот день выходным, записи будут отклонены, а клиенты уведомлены.",
-    "conflictWillReject_other": "Если отметить этот день выходным, записи будут отклонены, а клиенты уведомлены."
+    "conflictWillReject_other": "Если отметить этот день выходным, записи будут отклонены, а клиенты уведомлены.",
+    "unavailableNow": "Сейчас недоступен",
+    "lunchBreak": "Обеденный перерыв",
+    "busyNow": "Занят сейчас",
+    "availableNow": "Доступен сейчас"
   },
   "statistics": {
     "title": "Статистика",

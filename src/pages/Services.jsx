@@ -15,16 +15,35 @@ export default function Services() {
   const { api } = useAuth();
   const { showToast } = useToast();
   const [services, setServices] = useState(null);
+  const [staff, setStaff] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [upcomingCount, setUpcomingCount] = useState(0);
+  const [activeBusyId, setActiveBusyId] = useState(null);
 
   useEffect(() => {
-    api.get('/admin/shop').then((shop) => setServices(shop.services));
+    api.get('/admin/shop').then((shop) => { setServices(shop.services); setStaff(shop.staff || []); });
   }, [api]);
+
+  // Empty serviceIds on a staff member means "performs everything" (see
+  // models/shopData.js) — no reverse-lookup endpoint needed, just
+  // cross-referencing data this page already has.
+  const performedBy = (serviceId) => staff.filter((s) => !s.serviceIds?.length || s.serviceIds.some((id) => String(id) === String(serviceId)));
+
+  const toggleActive = async (service) => {
+    setActiveBusyId(service._id);
+    try {
+      const updated = await api.patch(`/admin/shop/services/${service._id}`, { isActive: service.isActive === false });
+      setServices(updated);
+    } catch (err) {
+      showToast(err.message || t('services.toastSaveError'), 'error');
+    } finally {
+      setActiveBusyId(null);
+    }
+  };
 
   const openCreate = () => { setEditing(null); setForm(EMPTY_FORM); setModalOpen(true); };
   const openEdit = (service) => {
@@ -99,7 +118,7 @@ export default function Services() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.04 }}
             >
-              <Card className="p-5 h-full flex flex-col">
+              <Card className={`p-5 h-full flex flex-col ${service.isActive === false ? 'opacity-60' : ''}`}>
                 <div className="flex items-start justify-between gap-2">
                   <h3 className="font-medium text-text leading-snug">{service.name.en}</h3>
                   <div className="flex gap-1 shrink-0">
@@ -108,10 +127,24 @@ export default function Services() {
                   </div>
                 </div>
                 <p className="text-xs text-text-faint mt-1">{service.name.ru} · {service.name.uz}</p>
-                <div className="mt-auto pt-4 flex items-baseline gap-2">
-                  <span className="text-lg font-semibold text-accent">{service.price.toLocaleString()}</span>
-                  <span className="text-xs text-text-faint">UZS · {service.durationMinutes} min</span>
+                {staff.length > 0 && (
+                  <p className="text-xs text-text-muted mt-2 truncate">
+                    {t('services.performedBy')}: {performedBy(service._id).map((s) => s.name).join(', ') || t('services.noOneAssigned')}
+                  </p>
+                )}
+                <div className="mt-auto pt-4 flex items-center justify-between gap-2">
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-lg font-semibold text-accent">{service.price.toLocaleString()}</span>
+                    <span className="text-xs text-text-faint">UZS · {service.durationMinutes} min</span>
+                  </div>
                 </div>
+                <button
+                  onClick={() => toggleActive(service)}
+                  disabled={activeBusyId === service._id}
+                  className={`mt-3 w-full flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium border transition-colors disabled:opacity-50 ${service.isActive !== false ? 'bg-success/10 border-success/30 text-success' : 'bg-danger/10 border-danger/30 text-danger'}`}
+                >
+                  {service.isActive !== false ? t('services.active') : t('services.inactive')}
+                </button>
               </Card>
             </motion.div>
           ))}
