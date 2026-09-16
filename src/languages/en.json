@@ -458,7 +458,9 @@
       "qrCodeDesc": "Print this and hang it in the shop. Scanning it opens the bot — tapping Start, then Open shop, takes the customer straight to this shop's page.",
       "downloadQr": "Download PNG",
       "copyLink": "Copy link",
-      "toastQrLinkError": "Couldn't generate the QR code."
+      "toastQrLinkError": "Couldn't generate the QR code.",
+      "categoryMassageTherapy": "Massage Therapy",
+      "categoryBeautySpas": "Beauty Spas"
     },
     "navCategories": "Categories",
     "categories": {

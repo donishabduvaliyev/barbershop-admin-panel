@@ -480,7 +480,9 @@
       "qrCodeDesc": "Распечатайте и повесьте в заведении. При сканировании открывается бот — после нажатия Start и затем «Открыть заведение» клиент сразу попадает на страницу этого заведения.",
       "downloadQr": "Скачать PNG",
       "copyLink": "Скопировать ссылку",
-      "toastQrLinkError": "Не удалось создать QR-код."
+      "toastQrLinkError": "Не удалось создать QR-код.",
+      "categoryMassageTherapy": "Massage Therapy",
+      "categoryBeautySpas": "Beauty Spas"
     },
     "navCategories": "Категории",
     "categories": {

@@ -14,7 +14,7 @@ import Modal from '../../components/Modal';
 import { Skeleton } from '../../components/Skeleton';
 
 const FILTERS = ['all', 'active', 'suspended', 'unclaimed', 'archived'];
-const CATEGORY_OPTIONS = ['Barbershop', 'Hair Salon', 'Nail Salon'];
+const CATEGORY_OPTIONS = ['Barbershop', 'Hair Salon', 'Nail Salon', 'Massage Therapy', 'Beauty Spas'];
 const emptyForm = { nameEn: '', nameUz: '', nameRu: '', category: 'Barbershop', phone: '', address: '' };
 const currency = (n) => `${Math.round(n).toLocaleString()} UZS`;
 
@@ -205,6 +205,8 @@ export default function SuperAdminShops() {
   const categoryLabel = (cat) => {
     if (cat === 'Nail Salon') return t('superadmin.shops.categoryNailSalon');
     if (cat === 'Hair Salon') return t('superadmin.shops.categoryHairSalon');
+    if (cat === 'Massage Therapy') return t('superadmin.shops.categoryMassageTherapy');
+    if (cat === 'Beauty Spas') return t('superadmin.shops.categoryBeautySpas');
     return t('superadmin.shops.categoryBarbershop');
   };
 
