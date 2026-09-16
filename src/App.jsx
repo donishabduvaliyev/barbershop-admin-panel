@@ -16,6 +16,7 @@ import Manage from './pages/Manage';
 import SuperAdminLayout from './components/SuperAdminLayout';
 import SuperAdminDashboard from './pages/superadmin/Dashboard';
 import SuperAdminShops from './pages/superadmin/Shops';
+import SuperAdminCategories from './pages/superadmin/Categories';
 
 // `requireRole` sends a signed-in user of the wrong role to their own home
 // instead of showing them a broken page — an owner has no platform view,
@@ -69,6 +70,7 @@ export default function App() {
             >
               <Route path="/superadmin" element={<SuperAdminDashboard />} />
               <Route path="/superadmin/shops" element={<SuperAdminShops />} />
+              <Route path="/superadmin/categories" element={<SuperAdminCategories />} />
             </Route>
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

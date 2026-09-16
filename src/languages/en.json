@@ -26,7 +26,8 @@
     "min": "min",
     "phoneNumber": "Phone number",
     "status": "Status",
-    "edit": "Edit"
+    "edit": "Edit",
+    "close": "Close"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -458,6 +459,46 @@
       "downloadQr": "Download PNG",
       "copyLink": "Copy link",
       "toastQrLinkError": "Couldn't generate the QR code."
+    },
+    "navCategories": "Categories",
+    "categories": {
+      "title": "Search Categories",
+      "subtitle": "Control the shelves customers see on the search page — reorder them, curate which shops appear, or add a brand-new one.",
+      "addCategory": "New category",
+      "editCategory": "Edit category",
+      "create": "Create category",
+      "key": "Key",
+      "keyHint": "A short id used internally, e.g. \"new-in-town\". Can't be changed later.",
+      "icon": "Icon",
+      "iconHint": "An emoji shown next to the category name.",
+      "labelEn": "Name (English)",
+      "labelUz": "Name (Uzbek)",
+      "labelRu": "Name (Russian)",
+      "autoBadge": "Auto",
+      "manualBadge": "Manual",
+      "shopCount_one": "{{count}} shop",
+      "shopCount_other": "{{count}} shops",
+      "manageShops": "Manage shops",
+      "deleteCategory": "Delete category",
+      "deleteConfirm": "Delete \"{{name}}\"? This only removes the shelf — the shops in it are unaffected.",
+      "noCategoriesTitle": "No categories yet",
+      "noCategoriesDesc": "Add one to start curating the search page.",
+      "shopsInCategory": "Shops in \"{{name}}\"",
+      "currentMembers": "Currently in this category",
+      "noMembers": "No shops added yet.",
+      "addShops": "Add a shop",
+      "noMoreShops": "No more shops match your search.",
+      "toastCreated": "Category created.",
+      "toastUpdated": "Category updated.",
+      "toastDeleted": "Category deleted.",
+      "toastSaveError": "Couldn't save the category.",
+      "toastDeleteError": "Couldn't delete the category.",
+      "autoRule": {
+        "topRated": "Automatic — ranked by rating.",
+        "bestPrice": "Automatic — ranked by price.",
+        "nearYou": "Automatic — ranked by the customer's location.",
+        "specialOffers": "Automatic — shops with an active promotion."
+      }
     }
   }
 }

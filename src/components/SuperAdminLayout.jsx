@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import clsx from 'clsx';
 import { useTranslation } from 'react-i18next';
 import {
-  Squares2X2Icon, BuildingStorefrontIcon,
+  Squares2X2Icon, BuildingStorefrontIcon, RectangleGroupIcon,
   ArrowLeftStartOnRectangleIcon, Bars3Icon, XMarkIcon,
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../lib/AuthContext';
@@ -13,6 +13,7 @@ import LanguageSwitcher from './LanguageSwitcher';
 const NAV_ITEMS = [
   { to: '/superadmin', key: 'navDashboard', icon: Squares2X2Icon, end: true },
   { to: '/superadmin/shops', key: 'navShops', icon: BuildingStorefrontIcon },
+  { to: '/superadmin/categories', key: 'navCategories', icon: RectangleGroupIcon },
 ];
 
 function NavItems({ onNavigate }) {

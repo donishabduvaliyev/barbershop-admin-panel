@@ -26,7 +26,8 @@
     "min": "daq",
     "phoneNumber": "Telefon raqami",
     "status": "Holati",
-    "edit": "Tahrirlash"
+    "edit": "Tahrirlash",
+    "close": "Yopish"
   },
   "nav": {
     "dashboard": "Boshqaruv paneli",
@@ -458,6 +459,46 @@
       "downloadQr": "PNG yuklab olish",
       "copyLink": "Havolani nusxalash",
       "toastQrLinkError": "QR-kodni yaratib bo'lmadi."
+    },
+    "navCategories": "Kategoriyalar",
+    "categories": {
+      "title": "Qidiruv kategoriyalari",
+      "subtitle": "Mijozlar qidiruv sahifasida ko‘radigan bo‘limlarni boshqaring — tartibini o‘zgartiring, do‘konlarni tanlang yoki yangi bo‘lim qo‘shing.",
+      "addCategory": "Yangi kategoriya",
+      "editCategory": "Kategoriyani tahrirlash",
+      "create": "Kategoriya yaratish",
+      "key": "Kalit",
+      "keyHint": "Ichki foydalanish uchun qisqa id, masalan \"new-in-town\". Keyinroq o'zgartirib bo'lmaydi.",
+      "icon": "Belgicha",
+      "iconHint": "Kategoriya nomi yonida ko‘rsatiladigan emoji.",
+      "labelEn": "Nomi (Ingliz)",
+      "labelUz": "Nomi (O‘zbek)",
+      "labelRu": "Nomi (Rus)",
+      "autoBadge": "Avtomatik",
+      "manualBadge": "Qo'lda",
+      "shopCount_one": "{{count}} do‘kon",
+      "shopCount_other": "{{count}} do‘kon",
+      "manageShops": "Do'konlarni boshqarish",
+      "deleteCategory": "Kategoriyani o‘chirish",
+      "deleteConfirm": "\"{{name}}\" o‘chirilsinmi? Faqat bo‘lim o‘chadi — undagi do‘konlarga ta’sir qilmaydi.",
+      "noCategoriesTitle": "Hozircha kategoriya yo‘q",
+      "noCategoriesDesc": "Qidiruv sahifasini boshqarishni boshlash uchun kategoriya qo'shing.",
+      "shopsInCategory": "\"{{name}}\" dagi do‘konlar",
+      "currentMembers": "Hozir bu kategoriyada",
+      "noMembers": "Hali do'kon qo'shilmagan.",
+      "addShops": "Do'kon qo'shish",
+      "noMoreShops": "Qidiruvingizga mos boshqa do'kon yo'q.",
+      "toastCreated": "Kategoriya yaratildi.",
+      "toastUpdated": "Kategoriya yangilandi.",
+      "toastDeleted": "Kategoriya o‘chirildi.",
+      "toastSaveError": "Kategoriyani saqlab bo'lmadi.",
+      "toastDeleteError": "Kategoriyani o'chirib bo'lmadi.",
+      "autoRule": {
+        "topRated": "Avtomatik — reyting bo‘yicha.",
+        "bestPrice": "Avtomatik — narx bo‘yicha.",
+        "nearYou": "Avtomatik — mijoz joylashuvi bo‘yicha.",
+        "specialOffers": "Avtomatik — faol aksiyasi bor do'konlar."
+      }
     }
   }
 }
