@@ -1,11 +1,13 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
+import { PlusIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '../lib/AuthContext';
 import { useShopSocket } from '../lib/socket';
 import StatCard from '../components/StatCard';
 import StatusBadge from '../components/StatusBadge';
-import { Card, EmptyState } from '../components/ui';
+import { Card, Button, EmptyState } from '../components/ui';
+import ManualBookingModal from '../components/ManualBookingModal';
 import { StatCardSkeleton, TableRowSkeleton } from '../components/Skeleton';
 import { Link } from 'react-router-dom';
 import { localeFor } from '../lib/locale';
@@ -21,6 +23,24 @@ export default function Dashboard() {
   const [shopInfo, setShopInfo] = useState(shop);
   const [recent, setRecent] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [manualOpen, setManualOpen] = useState(false);
+
+  useEffect(() => {
+    const handleMsg = (e) => {
+      try {
+        const d = typeof e.data === 'string' ? JSON.parse(e.data) : e.data;
+        if (d === 'OPEN_NEW_BOOKING' || d?.type === 'OPEN_NEW_BOOKING') {
+          setManualOpen(true);
+        }
+      } catch {}
+    };
+    window.addEventListener('message', handleMsg);
+    document.addEventListener('message', handleMsg);
+    return () => {
+      window.removeEventListener('message', handleMsg);
+      document.removeEventListener('message', handleMsg);
+    };
+  }, []);
 
   const loadRecent = () => api.get('/admin/appointments?limit=6').then((res) => setRecent(res.appointments));
   const loadStats = () => Promise.all([
@@ -61,9 +81,14 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="font-display text-2xl font-semibold text-text">{t('dashboard.greeting')}</h1>
-        <p className="text-text-muted text-sm mt-1">{t('dashboard.subtitlePrefix')} <span className="text-text">{shopName}</span> {t('dashboard.subtitleSuffix')}</p>
+      <div className="flex items-center justify-between flex-wrap gap-4">
+        <div>
+          <h1 className="font-display text-2xl font-semibold text-text">{t('dashboard.greeting')}</h1>
+          <p className="text-text-muted text-sm mt-1">{t('dashboard.subtitlePrefix')} <span className="text-text">{shopName}</span> {t('dashboard.subtitleSuffix')}</p>
+        </div>
+        <Button onClick={() => setManualOpen(true)} className="!px-4 !py-2.5 text-sm font-semibold shadow-lg shadow-accent/20 flex items-center gap-2">
+          <PlusIcon className="w-4 h-4 stroke-[2.5]" /> {t('appointments.manual.newBooking')}
+        </Button>
       </div>
 
       <div>
@@ -152,6 +177,16 @@ export default function Dashboard() {
           </div>
         )}
       </Card>
+
+      <ManualBookingModal
+        open={manualOpen}
+        onClose={() => setManualOpen(false)}
+        onCreated={() => {
+          loadRecent();
+          loadStats();
+        }}
+        shop={shopInfo}
+      />
     </div>
   );
 }
