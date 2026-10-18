@@ -20,7 +20,7 @@ export default function ManualBookingModal({ open, onClose, onCreated, shop, pre
   const { showToast } = useToast();
 
   const [shopData, setShopData] = useState(shop);
-  const [clientMode, setClientMode] = useState('new'); // 'new' | 'search'
+  const [clientMode, setClientMode] = useState('search'); // 'search' | 'new'
   const [search, setSearch] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
@@ -70,7 +70,7 @@ export default function ManualBookingModal({ open, onClose, onCreated, shop, pre
 
   useEffect(() => {
     if (!open) return;
-    setClientMode('new');
+    setClientMode('search');
     setSearch('');
     setSearchResults([]);
     setSelectedCustomer(null);
@@ -175,25 +175,7 @@ export default function ManualBookingModal({ open, onClose, onCreated, shop, pre
     >
       <div className="space-y-4">
         <div>
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-xs font-medium text-text-muted">{t('appointments.manual.client') || 'Mijoz'}</p>
-            <div className="flex bg-surface-3 p-0.5 rounded-lg border border-border">
-              <button
-                type="button"
-                onClick={() => setClientMode('new')}
-                className={clsx('px-2.5 py-1 rounded text-xs font-medium transition-all', clientMode === 'new' ? 'bg-accent text-black font-semibold' : 'text-text-muted hover:text-text')}
-              >
-                + {t('appointments.manual.addNewClient') || 'Yangi mijoz'}
-              </button>
-              <button
-                type="button"
-                onClick={() => setClientMode('search')}
-                className={clsx('px-2.5 py-1 rounded text-xs font-medium transition-all', clientMode === 'search' ? 'bg-accent text-black font-semibold' : 'text-text-muted hover:text-text')}
-              >
-                🔍 {t('appointments.manual.searchInstead') || 'Qidirish'}
-              </button>
-            </div>
-          </div>
+          <p className="text-xs font-medium text-text-muted mb-2">{t('appointments.manual.client')}</p>
           {clientMode === 'search' ? (
             <>
               {selectedCustomer ? (
@@ -205,7 +187,7 @@ export default function ManualBookingModal({ open, onClose, onCreated, shop, pre
                     <p className="text-sm font-medium text-text truncate">{selectedCustomer.userName}</p>
                     <p className="text-xs text-text-faint truncate">{selectedCustomer.userNumber}</p>
                   </div>
-                  <button onClick={() => setSelectedCustomer(null)} className="text-xs text-accent shrink-0">{t('common.change')}</button>
+                  <button type="button" onClick={() => setSelectedCustomer(null)} className="text-xs text-accent shrink-0">{t('common.change')}</button>
                 </div>
               ) : (
                 <>
@@ -217,6 +199,7 @@ export default function ManualBookingModal({ open, onClose, onCreated, shop, pre
                     <div className="mt-2 space-y-1 max-h-40 overflow-y-auto">
                       {searchResults.map((c) => (
                         <button
+                          type="button"
                           key={c.telegramId}
                           onClick={() => setSelectedCustomer(c)}
                           className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-surface-3 transition-colors text-left"
@@ -232,7 +215,7 @@ export default function ManualBookingModal({ open, onClose, onCreated, shop, pre
                       ))}
                     </div>
                   )}
-                  <button onClick={() => setClientMode('new')} className="mt-2 flex items-center gap-1.5 text-sm text-accent font-medium">
+                  <button type="button" onClick={() => setClientMode('new')} className="mt-2 flex items-center gap-1.5 text-sm text-accent font-medium">
                     <PlusIcon className="w-4 h-4" /> {t('appointments.manual.addNewClient')}
                   </button>
                 </>
@@ -242,7 +225,7 @@ export default function ManualBookingModal({ open, onClose, onCreated, shop, pre
             <div className="space-y-2">
               <Input value={newName} onChange={(e) => setNewName(e.target.value)} placeholder={t('appointments.manual.newClientName')} autoFocus />
               <Input value={newNumber} onChange={(e) => setNewNumber(e.target.value)} placeholder={t('appointments.manual.newClientNumber')} />
-              <button onClick={() => setClientMode('search')} className="text-sm text-text-muted">{t('appointments.manual.searchInstead')}</button>
+              <button type="button" onClick={() => setClientMode('search')} className="text-sm text-text-muted">{t('appointments.manual.searchInstead')}</button>
             </div>
           )}
         </div>
