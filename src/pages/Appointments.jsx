@@ -140,6 +140,13 @@ export default function Appointments() {
   const [noteTarget, setNoteTarget] = useState(null);
   const [noteDraft, setNoteDraft] = useState('');
 
+  useEffect(() => {
+    window.__openManualBooking = () => setManualOpen(true);
+    return () => {
+      delete window.__openManualBooking;
+    };
+  }, []);
+
   useEffect(() => { api.get('/admin/shop').then(setShop); }, [api]);
 
   const load = useCallback(() => {

@@ -26,6 +26,7 @@ export default function Dashboard() {
   const [manualOpen, setManualOpen] = useState(false);
 
   useEffect(() => {
+    window.__openManualBooking = () => setManualOpen(true);
     const handleMsg = (e) => {
       try {
         const d = typeof e.data === 'string' ? JSON.parse(e.data) : e.data;
@@ -37,6 +38,7 @@ export default function Dashboard() {
     window.addEventListener('message', handleMsg);
     document.addEventListener('message', handleMsg);
     return () => {
+      delete window.__openManualBooking;
       window.removeEventListener('message', handleMsg);
       document.removeEventListener('message', handleMsg);
     };
@@ -86,8 +88,16 @@ export default function Dashboard() {
           <h1 className="font-display text-2xl font-semibold text-text">{t('dashboard.greeting')}</h1>
           <p className="text-text-muted text-sm mt-1">{t('dashboard.subtitlePrefix')} <span className="text-text">{shopName}</span> {t('dashboard.subtitleSuffix')}</p>
         </div>
-        <Button onClick={() => setManualOpen(true)} className="!px-4 !py-2.5 text-sm font-semibold shadow-lg shadow-accent/20 flex items-center gap-2">
-          <PlusIcon className="w-4 h-4 stroke-[2.5]" /> {t('appointments.manual.newBooking')}
+        <Button
+          type="button"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setManualOpen(true);
+          }}
+          className="!px-4 !py-2.5 text-sm font-semibold shadow-lg shadow-accent/20 flex items-center gap-2 cursor-pointer active:scale-95"
+        >
+          <PlusIcon className="w-4 h-4 stroke-[2.5]" /> {t('appointments.manual.newBooking', 'Yangi bandlov')}
         </Button>
       </div>
 

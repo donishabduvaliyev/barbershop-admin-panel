@@ -19,7 +19,8 @@ export default function ManualBookingModal({ open, onClose, onCreated, shop, pre
   const { api } = useAuth();
   const { showToast } = useToast();
 
-  const [clientMode, setClientMode] = useState('search'); // 'search' | 'new'
+  const [shopData, setShopData] = useState(shop);
+  const [clientMode, setClientMode] = useState('new'); // 'new' | 'search'
   const [search, setSearch] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
@@ -35,32 +36,17 @@ export default function ManualBookingModal({ open, onClose, onCreated, shop, pre
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    if (!open) return;
-    setClientMode('search');
-    setSearch('');
-    setSearchResults([]);
-    setSelectedCustomer(null);
-    setNewName('');
-    setNewNumber('');
-    setServiceId(shop?.services?.find((s) => s.isActive !== false)?._id || null);
-    setStaffId(presetStaffId || null);
-    setDate(presetDate || new Date());
-    setHour(presetHour ?? null);
-    setSource('phone');
-    setNote('');
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]);
+    if (shop) setShopData(shop);
+  }, [shop]);
 
+  // Fetch shop data if missing services or staff
   useEffect(() => {
-    if (!open || clientMode !== 'search' || !search.trim()) { setSearchResults([]); return; }
-    const timeout = setTimeout(() => {
-      api.get(`/admin/customers?search=${encodeURIComponent(search.trim())}`)
-        .then((res) => setSearchResults(res.customers || []))
-        .catch(() => setSearchResults([]));
-    }, 300);
-    return () => clearTimeout(timeout);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search, clientMode, open]);
+    if (open && (!shopData || !shopData.services?.length)) {
+      api.get('/admin/shop')
+        .then((s) => { if (s) setShopData(s); })
+        .catch(() => {});
+    }
+  }, [open, shopData, api]);
 
   const dates = useMemo(() => [...Array(7)].map((_, i) => {
     const d = new Date();
@@ -78,32 +64,90 @@ export default function ManualBookingModal({ open, onClose, onCreated, shop, pre
     return list;
   }, [date]);
 
-  const activeServices = shop?.services?.filter((s) => s.isActive !== false) || [];
+  const effectiveShop = shopData || shop;
+  const activeServices = effectiveShop?.services?.filter((s) => s.isActive !== false) || [];
   const selectedService = activeServices.find((s) => String(s._id) === String(serviceId));
 
-  const canSubmit = (
-    (clientMode === 'search' ? !!selectedCustomer : (newName.trim() && newNumber.trim())) &&
-    serviceId && date && hour !== null && !saving
-  );
+  useEffect(() => {
+    if (!open) return;
+    setClientMode('new');
+    setSearch('');
+    setSearchResults([]);
+    setSelectedCustomer(null);
+    setNewName('');
+    setNewNumber('');
+    const defaultServiceId = activeServices[0]?._id || null;
+    setServiceId(defaultServiceId);
+    setStaffId(presetStaffId || null);
+    setDate(presetDate || new Date());
+    setHour(presetHour ?? (hours[0] || 10));
+    setSource('phone');
+    setNote('');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+
+  // If services load after modal was opened
+  useEffect(() => {
+    if (open && !serviceId && activeServices.length > 0) {
+      setServiceId(activeServices[0]._id);
+    }
+  }, [open, serviceId, activeServices]);
+
+  // If hour is null when date changes
+  useEffect(() => {
+    if (hour === null && hours.length > 0) {
+      setHour(hours[0]);
+    }
+  }, [hour, hours]);
+
+  useEffect(() => {
+    if (!open || clientMode !== 'search' || !search.trim()) { setSearchResults([]); return; }
+    const timeout = setTimeout(() => {
+      api.get(`/admin/customers?search=${encodeURIComponent(search.trim())}`)
+        .then((res) => setSearchResults(res.customers || []))
+        .catch(() => setSearchResults([]));
+    }, 300);
+    return () => clearTimeout(timeout);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search, clientMode, open]);
+
+  const hasClient = clientMode === 'search' ? !!selectedCustomer : !!newName.trim();
+  const canSubmit = hasClient && !!serviceId && !!date && hour !== null && !saving;
 
   const submit = async () => {
+    if (!hasClient) {
+      showToast(clientMode === 'search' ? (t('appointments.manual.selectClientError') || 'Mijozni tanlang') : (t('appointments.manual.enterNameError') || 'Mijoz ismini kiriting'), 'error');
+      return;
+    }
+    if (!serviceId) {
+      showToast(t('appointments.manual.selectServiceError') || 'Xizmatni tanlang', 'error');
+      return;
+    }
+    if (hour === null) {
+      showToast(t('appointments.manual.selectHourError') || 'Vaqtni tanlang', 'error');
+      return;
+    }
+
     setSaving(true);
     try {
       const requestedDate = new Date(date);
       requestedDate.setHours(hour, 0, 0, 0);
       const payload = {
-        serviceId, staffId: staffId || undefined, requestedTime: requestedDate.toISOString(),
-        source, note: note.trim() || undefined,
+        serviceId,
+        staffId: staffId || undefined,
+        requestedTime: requestedDate.toISOString(),
+        source,
+        note: note.trim() || undefined,
         ...(clientMode === 'search'
           ? { telegramId: selectedCustomer.telegramId }
-          : { name: newName.trim(), number: newNumber.trim() }),
+          : { name: newName.trim(), number: (newNumber.trim() || '+998900000000') }),
       };
       const booking = await api.post('/admin/appointments', payload);
-      showToast(t('appointments.manual.toastCreated'));
+      showToast(t('appointments.manual.toastCreated') || 'Bandlov muvaffaqiyatli yaratildi!');
       onCreated?.(booking);
       onClose();
     } catch (err) {
-      showToast(err.message || t('appointments.manual.toastError'), 'error');
+      showToast(err.message || t('appointments.manual.toastError') || 'Xatolik yuz berdi', 'error');
     } finally {
       setSaving(false);
     }
@@ -113,20 +157,43 @@ export default function ManualBookingModal({ open, onClose, onCreated, shop, pre
     <Modal
       open={open}
       onClose={onClose}
-      title={t('appointments.manual.title')}
+      title={t('appointments.manual.title') || 'Yangi bandlov'}
       maxWidth="max-w-lg"
       footer={(
         <>
           <Button variant="ghost" onClick={onClose}>{t('common.cancel')}</Button>
-          <Button disabled={!canSubmit} onClick={submit}>
-            {saving ? t('appointments.manual.creating') : t('appointments.manual.create')}
+          <Button
+            type="button"
+            disabled={saving}
+            onClick={submit}
+            className={!canSubmit ? 'opacity-50' : ''}
+          >
+            {saving ? (t('appointments.manual.creating') || 'Yaratilmoqda...') : (t('appointments.manual.create') || 'Bandlov yaratish')}
           </Button>
         </>
       )}
     >
       <div className="space-y-4">
         <div>
-          <p className="text-xs font-medium text-text-muted mb-2">{t('appointments.manual.client')}</p>
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-xs font-medium text-text-muted">{t('appointments.manual.client') || 'Mijoz'}</p>
+            <div className="flex bg-surface-3 p-0.5 rounded-lg border border-border">
+              <button
+                type="button"
+                onClick={() => setClientMode('new')}
+                className={clsx('px-2.5 py-1 rounded text-xs font-medium transition-all', clientMode === 'new' ? 'bg-accent text-black font-semibold' : 'text-text-muted hover:text-text')}
+              >
+                + {t('appointments.manual.addNewClient') || 'Yangi mijoz'}
+              </button>
+              <button
+                type="button"
+                onClick={() => setClientMode('search')}
+                className={clsx('px-2.5 py-1 rounded text-xs font-medium transition-all', clientMode === 'search' ? 'bg-accent text-black font-semibold' : 'text-text-muted hover:text-text')}
+              >
+                🔍 {t('appointments.manual.searchInstead') || 'Qidirish'}
+              </button>
+            </div>
+          </div>
           {clientMode === 'search' ? (
             <>
               {selectedCustomer ? (
@@ -186,22 +253,37 @@ export default function ManualBookingModal({ open, onClose, onCreated, shop, pre
             onChange={(e) => setServiceId(e.target.value)}
             className="w-full bg-surface-3 border border-border rounded-lg px-3 py-2.5 text-sm text-text outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 transition-all"
           >
-            {activeServices.map((s) => <option key={s._id} value={s._id}>{s.name?.en} · {s.durationMinutes} min</option>)}
+            {activeServices.length === 0 ? (
+              <option value="">{t('common.loading') || 'Yuklanmoqda...'}</option>
+            ) : (
+              activeServices.map((s) => {
+                const sName = typeof s.name === 'object'
+                  ? (s.name[i18n.language] || s.name.uz || s.name.en || s.name.ru || 'Xizmat')
+                  : (s.name || 'Xizmat');
+                return (
+                  <option key={s._id} value={s._id}>
+                    {sName} · {s.durationMinutes} min {s.price ? `· ${s.price.toLocaleString()} UZS` : ''}
+                  </option>
+                );
+              })
+            )}
           </select>
         </Field>
 
-        {shop?.staff?.length > 0 && (
+        {effectiveShop?.staff?.length > 0 && (
           <div>
             <p className="text-xs font-medium text-text-muted mb-2">{t('appointments.manual.staff')}</p>
             <div className="flex gap-2 overflow-x-auto no-scrollbar">
               <button
+                type="button"
                 onClick={() => setStaffId(null)}
                 className={clsx('px-3 py-1.5 rounded-lg border text-xs font-medium whitespace-nowrap transition-all', !staffId ? 'bg-accent text-black border-accent' : 'bg-surface-3 text-text-muted border-border')}
               >
                 {t('appointments.manual.anyStaff')}
               </button>
-              {shop.staff.map((s) => (
+              {effectiveShop.staff.map((s) => (
                 <button
+                  type="button"
                   key={s._id}
                   onClick={() => setStaffId(s._id)}
                   className={clsx('px-3 py-1.5 rounded-lg border text-xs font-medium whitespace-nowrap transition-all', String(staffId) === String(s._id) ? 'bg-accent text-black border-accent' : 'bg-surface-3 text-text-muted border-border')}

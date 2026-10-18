@@ -1,19 +1,26 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 
 export default function Modal({ open, onClose, title, children, footer, maxWidth = 'max-w-md' }) {
-  return (
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const modalContent = (
     <AnimatePresence>
       {open && (
         <motion.div
-          className="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+          className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={onClose}
         >
           <motion.div
-            className={`w-full ${maxWidth} max-h-[85vh] flex flex-col bg-surface-2 border border-border rounded-2xl shadow-2xl shadow-black/50 overflow-hidden`}
+            className={`w-full ${maxWidth} max-h-[88vh] flex flex-col bg-surface-2 border border-border rounded-2xl shadow-2xl shadow-black/80 overflow-hidden`}
             initial={{ opacity: 0, y: 16, scale: 0.97 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 8, scale: 0.98, transition: { duration: 0.15 } }}
@@ -24,10 +31,11 @@ export default function Modal({ open, onClose, title, children, footer, maxWidth
               <div className="px-6 pt-5 pb-4 border-b border-border-soft flex items-center justify-between shrink-0">
                 <h3 className="text-base font-semibold text-text">{title}</h3>
                 <button
+                  type="button"
                   onClick={onClose}
-                  className="w-7 h-7 rounded-full flex items-center justify-center text-text-muted hover:text-text hover:bg-surface-3 transition-colors"
+                  className="w-8 h-8 rounded-full flex items-center justify-center text-text-muted hover:text-text hover:bg-surface-3 transition-colors text-base font-bold"
                 >
-                  ×
+                  ✕
                 </button>
               </div>
             )}
@@ -41,4 +49,8 @@ export default function Modal({ open, onClose, title, children, footer, maxWidth
       )}
     </AnimatePresence>
   );
+
+  if (!mounted || typeof document === 'undefined') return null;
+  return createPortal(modalContent, document.body);
 }
+
