@@ -6,6 +6,20 @@ const STORAGE_KEY = 'tezkor_admin_session';
 
 function readStoredSession() {
   try {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const urlToken = params.get('adminToken') || params.get('token');
+      const urlRole = params.get('role');
+      if (urlToken) {
+        const next = { token: urlToken, role: urlRole || 'owner', shop: null };
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+          const cleanUrl = window.location.pathname + window.location.hash;
+          window.history.replaceState({}, document.title, cleanUrl);
+        } catch {}
+        return next;
+      }
+    }
     const raw = localStorage.getItem(STORAGE_KEY);
     return raw ? JSON.parse(raw) : null;
   } catch {
@@ -31,6 +45,25 @@ export function AuthProvider({ children }) {
     localStorage.removeItem(STORAGE_KEY);
     setSession(null);
   }, []);
+
+  // Receive token & session dispatched from React Native WebView
+  useEffect(() => {
+    const handleMessage = (event) => {
+      try {
+        const payload = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
+        if (payload?.type === 'SET_ADMIN_SESSION' && payload.token) {
+          login(payload.token, { role: payload.role || 'owner', ...(payload.shop || {}) });
+        }
+      } catch {}
+    };
+
+    window.addEventListener('message', handleMessage);
+    document.addEventListener('message', handleMessage);
+    return () => {
+      window.removeEventListener('message', handleMessage);
+      document.removeEventListener('message', handleMessage);
+    };
+  }, [login]);
 
   const api = useMemo(() => createApiClient(session?.token), [session?.token]);
 
