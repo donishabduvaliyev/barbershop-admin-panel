@@ -29,7 +29,11 @@ function readStoredSession() {
 
 export function AuthProvider({ children }) {
   const [session, setSession] = useState(readStoredSession);
-  const [isVerifying, setIsVerifying] = useState(!!readStoredSession());
+  // Do not block UI if a valid session token is already present (optimistic render)
+  const [isVerifying, setIsVerifying] = useState(() => {
+    const s = readStoredSession();
+    return !s?.token && typeof window !== 'undefined' && !!window.Telegram?.WebApp?.initData;
+  });
 
   // `data` is either a shop object (role defaults to 'owner', back-compat
   // with every existing caller) or `{ role: 'superadmin' }` with no shop
@@ -122,8 +126,10 @@ export function AuthProvider({ children }) {
         if (cancelled) return;
         setSession((prev) => (prev ? { ...prev, shop } : prev));
       })
-      .catch(() => {
-        if (!cancelled) logout();
+      .catch((err) => {
+        if (!cancelled && (err?.status === 401 || err?.status === 403)) {
+          logout();
+        }
       })
       .finally(() => {
         if (!cancelled) setIsVerifying(false);
