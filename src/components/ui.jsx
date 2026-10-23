@@ -4,16 +4,17 @@ import { motion } from 'framer-motion';
 
 export function Button({ variant = 'primary', className, children, ...props }) {
   const variants = {
-    primary: 'bg-accent text-black hover:bg-accent-hover shadow-lg shadow-accent/20',
-    ghost: 'bg-transparent text-text-muted hover:text-text hover:bg-surface-3 border border-border',
-    danger: 'bg-danger/15 text-danger hover:bg-danger/25 border border-danger/30',
-    subtle: 'bg-surface-3 text-text hover:bg-border border border-border',
+    primary: 'btn-gold-admin font-semibold',
+    ghost: 'bg-transparent text-text-muted hover:text-text hover:bg-surface-3 border border-border/80',
+    danger: 'bg-danger/15 text-danger hover:bg-danger/25 border border-danger/30 font-medium',
+    subtle: 'bg-surface-3 text-text hover:bg-surface-2 border border-border/80 font-medium',
   };
   return (
     <motion.button
-      whileTap={{ scale: 0.97 }}
+      whileTap={{ scale: 0.98 }}
+      transition={{ type: 'spring', stiffness: 450, damping: 28 }}
       className={clsx(
-        'inline-flex items-center justify-center gap-2 rounded-xl text-sm font-medium px-4 py-2.5 transition-colors disabled:opacity-40 disabled:pointer-events-none',
+        'inline-flex items-center justify-center gap-2 rounded-xl text-sm font-medium px-4 py-2.5 transition-colors disabled:opacity-40 disabled:pointer-events-none cursor-pointer',
         variants[variant],
         className
       )}
@@ -84,7 +85,7 @@ export function Switch({ checked, onChange, label }) {
 
 export function Card({ className, children, ...props }) {
   return (
-    <div className={clsx('bg-surface border border-border-soft rounded-2xl', className)} {...props}>
+    <div className={clsx('bg-surface border border-border-soft rounded-2xl card-bevel', className)} {...props}>
       {children}
     </div>
   );

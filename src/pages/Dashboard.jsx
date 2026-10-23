@@ -95,7 +95,7 @@ export default function Dashboard() {
             e.stopPropagation();
             setManualOpen(true);
           }}
-          className="!px-4 !py-2.5 text-sm font-semibold shadow-lg shadow-accent/20 flex items-center gap-2 cursor-pointer active:scale-95"
+          className="!px-4 !py-2.5 text-sm font-semibold flex items-center gap-2"
         >
           <PlusIcon className="w-4 h-4 stroke-[2.5]" /> {t('appointments.manual.newBooking', 'Yangi bandlov')}
         </Button>

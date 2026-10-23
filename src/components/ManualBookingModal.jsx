@@ -260,7 +260,7 @@ export default function ManualBookingModal({ open, onClose, onCreated, shop, pre
               <button
                 type="button"
                 onClick={() => setStaffId(null)}
-                className={clsx('px-3 py-1.5 rounded-lg border text-xs font-medium whitespace-nowrap transition-all', !staffId ? 'bg-accent text-black border-accent' : 'bg-surface-3 text-text-muted border-border')}
+                className={clsx('press-spring px-3 py-1.5 rounded-lg border text-xs font-medium whitespace-nowrap cursor-pointer', !staffId ? 'btn-gold-admin border-accent font-semibold' : 'bg-surface-3 text-text-muted border-border/80 hover:text-text hover:bg-surface-2')}
               >
                 {t('appointments.manual.anyStaff')}
               </button>
@@ -269,7 +269,7 @@ export default function ManualBookingModal({ open, onClose, onCreated, shop, pre
                   type="button"
                   key={s._id}
                   onClick={() => setStaffId(s._id)}
-                  className={clsx('px-3 py-1.5 rounded-lg border text-xs font-medium whitespace-nowrap transition-all', String(staffId) === String(s._id) ? 'bg-accent text-black border-accent' : 'bg-surface-3 text-text-muted border-border')}
+                  className={clsx('press-spring px-3 py-1.5 rounded-lg border text-xs font-medium whitespace-nowrap cursor-pointer', String(staffId) === String(s._id) ? 'btn-gold-admin border-accent font-semibold' : 'bg-surface-3 text-text-muted border-border/80 hover:text-text hover:bg-surface-2')}
                 >
                   {s.name}
                 </button>
@@ -285,10 +285,10 @@ export default function ManualBookingModal({ open, onClose, onCreated, shop, pre
               <button
                 key={d.toISOString()}
                 onClick={() => setDate(d)}
-                className={clsx('px-3 py-2 rounded-lg border text-xs font-medium whitespace-nowrap transition-all text-center min-w-[64px]', d.toDateString() === date.toDateString() ? 'bg-accent text-black border-accent' : 'bg-surface-3 text-text-muted border-border')}
+                className={clsx('press-spring px-3 py-2 rounded-lg border text-xs font-medium whitespace-nowrap text-center min-w-[64px] cursor-pointer', d.toDateString() === date.toDateString() ? 'btn-gold-admin border-accent font-semibold' : 'bg-surface-3 text-text-muted border-border/80 hover:text-text hover:bg-surface-2')}
               >
                 <div>{d.toLocaleDateString(i18n.language, { weekday: 'short' })}</div>
-                <div>{d.toLocaleDateString(i18n.language, { month: 'short', day: 'numeric' })}</div>
+                <div className="tabular-nums">{d.toLocaleDateString(i18n.language, { month: 'short', day: 'numeric' })}</div>
               </button>
             ))}
           </div>
@@ -301,7 +301,7 @@ export default function ManualBookingModal({ open, onClose, onCreated, shop, pre
               <button
                 key={h}
                 onClick={() => setHour(h)}
-                className={clsx('px-3 py-1.5 rounded-lg border text-sm transition-all', hour === h ? 'bg-accent text-black border-accent font-semibold' : 'bg-surface-3 text-text-muted border-border')}
+                className={clsx('press-spring px-3 py-1.5 rounded-lg border text-sm tabular-nums cursor-pointer', hour === h ? 'btn-gold-admin border-accent font-semibold' : 'bg-surface-3 text-text-muted border-border/80 hover:text-text hover:bg-surface-2')}
               >
                 {pad(h)}:00
               </button>
@@ -316,7 +316,7 @@ export default function ManualBookingModal({ open, onClose, onCreated, shop, pre
               <button
                 key={s}
                 onClick={() => setSource(s)}
-                className={clsx('flex-1 px-3 py-2 rounded-lg border text-sm font-medium transition-all', source === s ? 'bg-accent text-black border-accent' : 'bg-surface-3 text-text-muted border-border')}
+                className={clsx('press-spring flex-1 px-3 py-2 rounded-lg border text-sm font-medium cursor-pointer', source === s ? 'btn-gold-admin border-accent font-semibold' : 'bg-surface-3 text-text-muted border-border/80 hover:text-text hover:bg-surface-2')}
               >
                 {t(`appointments.source.${s === 'walk-in' ? 'walkIn' : 'phone'}`)}
               </button>

@@ -31,12 +31,12 @@ function BottomNav() {
             key={to}
             to={to}
             end={end}
-            className="relative flex flex-col items-center justify-center gap-1 py-2.5 text-text-faint"
+            className="press-spring relative flex flex-col items-center justify-center gap-1 py-2.5 text-text-faint cursor-pointer"
           >
             {({ isActive }) => (
               <>
                 {isActive ? <ActiveIcon className="w-6 h-6 text-accent" /> : <Icon className="w-6 h-6" />}
-                <span className={clsx('text-[11px] font-medium', isActive ? 'text-accent' : 'text-text-faint')}>
+                <span className={clsx('text-[11px] font-medium transition-colors', isActive ? 'text-accent font-semibold' : 'text-text-faint')}>
                   {t(`nav.${key}`)}
                 </span>
               </>

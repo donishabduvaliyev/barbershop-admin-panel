@@ -91,10 +91,10 @@ function RescheduleModal({ booking, onClose, onSaved }) {
             <button
               key={d.toISOString()}
               onClick={() => setDate(d)}
-              className={clsx('px-3 py-2 rounded-lg border text-xs font-medium whitespace-nowrap text-center min-w-[64px]', d.toDateString() === date.toDateString() ? 'bg-accent text-black border-accent' : 'bg-surface-3 text-text-muted border-border')}
+              className={clsx('press-spring px-3 py-2 rounded-lg border text-xs font-medium whitespace-nowrap text-center min-w-[64px] cursor-pointer', d.toDateString() === date.toDateString() ? 'btn-gold-admin border-accent font-semibold' : 'bg-surface-3 text-text-muted border-border/80 hover:text-text hover:bg-surface-2')}
             >
               <div>{d.toLocaleDateString(i18n.language, { weekday: 'short' })}</div>
-              <div>{d.toLocaleDateString(i18n.language, { month: 'short', day: 'numeric' })}</div>
+              <div className="tabular-nums">{d.toLocaleDateString(i18n.language, { month: 'short', day: 'numeric' })}</div>
             </button>
           ))}
         </div>
@@ -103,7 +103,7 @@ function RescheduleModal({ booking, onClose, onSaved }) {
             <button
               key={h}
               onClick={() => setHour(h)}
-              className={clsx('px-3 py-1.5 rounded-lg border text-sm transition-all', hour === h ? 'bg-accent text-black border-accent font-semibold' : 'bg-surface-3 text-text-muted border-border')}
+              className={clsx('press-spring px-3 py-1.5 rounded-lg border text-sm tabular-nums cursor-pointer', hour === h ? 'btn-gold-admin border-accent font-semibold' : 'bg-surface-3 text-text-muted border-border/80 hover:text-text hover:bg-surface-2')}
             >
               {pad(h)}:00
             </button>
@@ -231,10 +231,10 @@ export default function Appointments() {
         <h1 className="font-display text-2xl font-semibold text-text">{t('appointments.title')}</h1>
         <div className="flex items-center gap-2">
           <div className="flex bg-surface border border-border-soft rounded-lg p-1">
-            <button onClick={() => setView('list')} className={clsx('p-1.5 rounded-md', view === 'list' ? 'bg-accent text-black' : 'text-text-muted')}><ListBulletIcon className="w-4 h-4" /></button>
-            <button onClick={() => setView('calendar')} className={clsx('p-1.5 rounded-md', view === 'calendar' ? 'bg-accent text-black' : 'text-text-muted')}><CalendarDaysIcon className="w-4 h-4" /></button>
+            <button onClick={() => setView('list')} className={clsx('press-spring p-1.5 rounded-md cursor-pointer', view === 'list' ? 'btn-gold-admin font-semibold' : 'text-text-muted hover:text-text')}><ListBulletIcon className="w-4 h-4" /></button>
+            <button onClick={() => setView('calendar')} className={clsx('press-spring p-1.5 rounded-md cursor-pointer', view === 'calendar' ? 'btn-gold-admin font-semibold' : 'text-text-muted hover:text-text')}><CalendarDaysIcon className="w-4 h-4" /></button>
           </div>
-          <Button onClick={() => setManualOpen(true)} className="!px-3 !py-2 text-sm"><PlusIcon className="w-4 h-4" /> {t('appointments.manual.newBooking')}</Button>
+          <Button onClick={() => setManualOpen(true)} className="!px-3 !py-2 text-sm"><PlusIcon className="w-4 h-4 stroke-[2.5]" /> {t('appointments.manual.newBooking')}</Button>
         </div>
       </div>
 
@@ -248,8 +248,8 @@ export default function Appointments() {
                 key={tab.key}
                 onClick={() => { setStatus(tab.key); setPage(1); }}
                 className={clsx(
-                  'px-3.5 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors',
-                  status === tab.key ? 'bg-accent text-black' : 'bg-surface text-text-muted hover:text-text border border-border-soft'
+                  'press-spring px-3.5 py-2 rounded-lg text-sm font-medium whitespace-nowrap cursor-pointer transition-colors',
+                  status === tab.key ? 'btn-gold-admin font-semibold' : 'bg-surface text-text-muted hover:text-text border border-border-soft hover:bg-surface-2'
                 )}
               >
                 {t(`appointments.${tab.label}`)}
