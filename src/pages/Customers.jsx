@@ -282,31 +282,59 @@ export default function Customers() {
               {detail.isBlocked ? t('customers.unblockAction') : t('customers.blockAction')}
             </button>
 
-            <div className="grid sm:grid-cols-2 gap-4 text-sm">
-              <div>
-                <p className="text-xs font-medium text-text-muted mb-1.5">{t('customers.favoriteServices')}</p>
-                {detail.favoriteServices.length > 0 ? (
-                  <ul className="space-y-1">
-                    {detail.favoriteServices.map((s) => <li key={s} className="text-text">• {s}</li>)}
-                  </ul>
-                ) : <p className="text-text-faint">{t('customers.none')}</p>}
-              </div>
-              <div>
-                <p className="text-xs font-medium text-text-muted mb-1.5">{t('customers.preferredSpecialist')}</p>
-                <p className="text-text">{detail.preferredStaff || <span className="text-text-faint">{t('customers.none')}</span>}</p>
-                {!editingInfo && (
-                  <div className="flex items-center gap-2 mt-2">
-                    <p className="text-xs text-text-faint">{detail.userNumber}{detail.userTelegramUsername ? ` · @${detail.userTelegramUsername}` : ''}</p>
-                    {detail.userNumber && (
-                      <a href={`tel:${detail.userNumber}`} className="text-text-faint hover:text-accent transition-colors" title={t('customers.call')}>
-                        <PhoneIcon className="w-3.5 h-3.5" />
-                      </a>
-                    )}
-                    <button onClick={startEditInfo} className="text-text-faint hover:text-accent transition-colors" title={t('common.edit')}>
-                      <PencilSquareIcon className="w-3.5 h-3.5" />
-                    </button>
+            <div className="bg-surface-3 border border-border-soft rounded-xl p-4 space-y-3 text-xs">
+              <h3 className="font-semibold text-text text-sm mb-2">{t('customers.clientDetails', 'Mijoz ma\'lumotlari')}</h3>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="p-2.5 rounded-lg bg-surface-2 border border-border/60">
+                  <span className="text-text-muted block text-[11px] mb-0.5">{t('customers.fullName', 'To\'liq ism')}:</span>
+                  <span className="font-semibold text-text text-sm">{detail.userName || '—'}</span>
+                </div>
+
+                <div className="p-2.5 rounded-lg bg-surface-2 border border-border/60 flex items-center justify-between">
+                  <div>
+                    <span className="text-text-muted block text-[11px] mb-0.5">{t('common.phoneNumber', 'Telefon raqam')}:</span>
+                    <span className="font-semibold text-text text-sm font-mono">{detail.userNumber || '—'}</span>
                   </div>
-                )}
+                  {!editingInfo && (
+                    <div className="flex items-center gap-1.5 ml-2 shrink-0">
+                      {detail.userNumber && (
+                        <a href={`tel:${detail.userNumber}`} className="p-1.5 rounded-lg bg-surface-3 text-text-faint hover:text-accent transition-colors" title={t('customers.call')}>
+                          <PhoneIcon className="w-3.5 h-3.5" />
+                        </a>
+                      )}
+                      <button onClick={startEditInfo} className="p-1.5 rounded-lg bg-surface-3 text-text-faint hover:text-accent transition-colors" title={t('common.edit')}>
+                        <PencilSquareIcon className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                <div className="p-2.5 rounded-lg bg-surface-2 border border-border/60">
+                  <span className="text-text-muted block text-[11px] mb-0.5">{t('customers.telegramProfile', 'Telegram profil')}:</span>
+                  <span className="font-medium text-text">
+                    {detail.userTelegramUsername ? `@${detail.userTelegramUsername}` : `ID: ${detail.telegramId}`}
+                  </span>
+                </div>
+
+                <div className="p-2.5 rounded-lg bg-surface-2 border border-border/60">
+                  <span className="text-text-muted block text-[11px] mb-0.5">{t('customers.firstVisit', 'Birinchi tashrif')}:</span>
+                  <span className="font-medium text-text">
+                    {detail.firstVisit ? formatDate(detail.firstVisit) : '—'}
+                  </span>
+                </div>
+
+                <div className="p-2.5 rounded-lg bg-surface-2 border border-border/60">
+                  <span className="text-text-muted block text-[11px] mb-0.5">{t('customers.preferredSpecialist', 'Doimiy mutaxassis')}:</span>
+                  <span className="font-medium text-text">{detail.preferredStaff || t('customers.none', 'Mavjud emas')}</span>
+                </div>
+
+                <div className="p-2.5 rounded-lg bg-surface-2 border border-border/60">
+                  <span className="text-text-muted block text-[11px] mb-0.5">{t('customers.favoriteServices', 'Sevimli xizmatlar')}:</span>
+                  <span className="font-medium text-text">
+                    {detail.favoriteServices.length > 0 ? detail.favoriteServices.join(', ') : t('customers.none', 'Mavjud emas')}
+                  </span>
+                </div>
               </div>
             </div>
 

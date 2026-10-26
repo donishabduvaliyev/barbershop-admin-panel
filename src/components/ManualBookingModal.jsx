@@ -35,6 +35,9 @@ export default function ManualBookingModal({ open, onClose, onCreated, shop, pre
   const [note, setNote] = useState('');
   const [saving, setSaving] = useState(false);
 
+  const [daySchedule, setDaySchedule] = useState(null);
+  const [scheduleLoading, setScheduleLoading] = useState(false);
+
   useEffect(() => {
     if (shop) setShopData(shop);
   }, [shop]);
@@ -48,6 +51,20 @@ export default function ManualBookingModal({ open, onClose, onCreated, shop, pre
     }
   }, [open, shopData, api]);
 
+  // Fetch schedule for the selected date to know booked slots and staff presence
+  useEffect(() => {
+    if (!open || !date) return;
+    const y = date.getFullYear();
+    const m = pad(date.getMonth() + 1);
+    const d = pad(date.getDate());
+    const dateKey = `${y}-${m}-${d}`;
+    setScheduleLoading(true);
+    api.get(`/admin/shop/schedule?date=${dateKey}`)
+      .then(setDaySchedule)
+      .catch(() => setDaySchedule(null))
+      .finally(() => setScheduleLoading(false));
+  }, [open, date, api]);
+
   const dates = useMemo(() => [...Array(7)].map((_, i) => {
     const d = new Date();
     d.setHours(0, 0, 0, 0);
@@ -55,18 +72,116 @@ export default function ManualBookingModal({ open, onClose, onCreated, shop, pre
     return d;
   }), []);
 
-  const hours = useMemo(() => {
-    const now = new Date();
-    const isToday = date.toDateString() === now.toDateString();
-    const start = isToday ? now.getHours() + 1 : 8;
-    const list = [];
-    for (let h = Math.max(start, 8); h <= 22; h++) list.push(h);
-    return list;
-  }, [date]);
-
   const effectiveShop = shopData || shop;
   const activeServices = effectiveShop?.services?.filter((s) => s.isActive !== false) || [];
   const selectedService = activeServices.find((s) => String(s._id) === String(serviceId));
+
+  const selectedStaffMember = useMemo(() => {
+    if (!staffId || !daySchedule?.staff) return null;
+    return daySchedule.staff.find((s) => String(s.id) === String(staffId));
+  }, [staffId, daySchedule]);
+
+  const isStaffOff = selectedStaffMember?.isOffToday;
+
+  const availableHours = useMemo(() => {
+    const now = new Date();
+    const isToday = date.toDateString() === now.toDateString();
+    const startHour = isToday ? now.getHours() + 1 : 8;
+
+    const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const dayName = dayNames[date.getDay()];
+
+    const effectiveWH = (staffId && selectedStaffMember?.workingHours?.length)
+      ? selectedStaffMember.workingHours
+      : (daySchedule?.workingHours || effectiveShop?.workingHours || []);
+
+    const todaysWH = effectiveWH.filter((wh) => wh.days?.includes(dayName));
+    if (todaysWH.length === 0 && effectiveWH.length > 0) return [];
+
+    const minHour = todaysWH.length > 0
+      ? Math.max(startHour, Math.min(...todaysWH.map((w) => Number(w.from.split(':')[0]))))
+      : Math.max(startHour, 8);
+    const maxHour = todaysWH.length > 0
+      ? Math.max(...todaysWH.map((w) => Number(w.to.split(':')[0])))
+      : 22;
+
+    const list = [];
+
+    if (staffId) {
+      if (isStaffOff) return [];
+      if (isToday && selectedStaffMember?.isAvailableNow === false) return [];
+      if (serviceId && selectedStaffMember?.serviceIds?.length > 0 && !selectedStaffMember.serviceIds.some((id) => String(id) === String(serviceId))) {
+        return [];
+      }
+      const bookedHours = new Set(
+        (selectedStaffMember?.bookings || [])
+          .filter((b) => b.status === 'pending' || b.status === 'confirmed')
+          .map((b) => b.hour)
+      );
+
+      for (let h = minHour; h < maxHour; h++) {
+        const inSchedule = todaysWH.length === 0 || todaysWH.some((w) => {
+          const from = Number(w.from.split(':')[0]);
+          const to = Number(w.to.split(':')[0]);
+          return h >= from && h < to;
+        });
+        if (inSchedule && !bookedHours.has(h)) {
+          list.push({ hour: h, freeCount: 1 });
+        }
+      }
+    } else {
+      const allStaff = daySchedule?.staff || [];
+      const unassigned = daySchedule?.unassignedBookings || [];
+
+      for (let h = minHour; h < maxHour; h++) {
+        const inSchedule = todaysWH.length === 0 || todaysWH.some((w) => {
+          const from = Number(w.from.split(':')[0]);
+          const to = Number(w.to.split(':')[0]);
+          return h >= from && h < to;
+        });
+        if (!inSchedule) continue;
+
+        if (allStaff.length > 0) {
+          const freeStaffAtHour = allStaff.filter((s) => {
+            if (s.isOffToday) return false;
+            if (isToday && s.isAvailableNow === false) return false;
+            if (serviceId && s.serviceIds?.length > 0 && !s.serviceIds.some((id) => String(id) === String(serviceId))) {
+              return false;
+            }
+            const sWH = s.workingHours?.length ? s.workingHours : daySchedule?.workingHours;
+            if (sWH?.length) {
+              const sTodayWH = sWH.filter((w) => w.days?.includes(dayName));
+              const sOpen = sTodayWH.some((w) => {
+                const [f] = w.from.split(':').map(Number);
+                const [t] = w.to.split(':').map(Number);
+                return h >= f && h < t;
+              });
+              if (!sOpen) return false;
+            }
+            const isBooked = (s.bookings || []).some(
+              (b) => b.hour === h && (b.status === 'pending' || b.status === 'confirmed')
+            );
+            return !isBooked;
+          });
+
+          const unassignedCount = unassigned.filter((b) => b.hour === h && (b.status === 'pending' || b.status === 'confirmed')).length;
+          const availableCount = freeStaffAtHour.length - unassignedCount;
+
+          if (availableCount > 0) {
+            list.push({ hour: h, freeCount: availableCount });
+          }
+        } else {
+          const capacity = daySchedule?.capacity || effectiveShop?.capacity || 1;
+          const bookingsAtHour = unassigned.filter((b) => b.hour === h && (b.status === 'pending' || b.status === 'confirmed')).length;
+          if (bookingsAtHour < capacity) {
+            list.push({ hour: h, freeCount: capacity - bookingsAtHour });
+          }
+        }
+      }
+    }
+
+    return list;
+  }, [date, staffId, selectedStaffMember, isStaffOff, daySchedule, effectiveShop, serviceId]);
 
   useEffect(() => {
     if (!open) return;
@@ -80,7 +195,7 @@ export default function ManualBookingModal({ open, onClose, onCreated, shop, pre
     setServiceId(defaultServiceId);
     setStaffId(presetStaffId || null);
     setDate(presetDate || new Date());
-    setHour(presetHour ?? (hours[0] || 10));
+    setHour(presetHour ?? null);
     setSource('phone');
     setNote('');
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -93,12 +208,16 @@ export default function ManualBookingModal({ open, onClose, onCreated, shop, pre
     }
   }, [open, serviceId, activeServices]);
 
-  // If hour is null when date changes
+  // Ensure selected hour is always valid among availableHours
   useEffect(() => {
-    if (hour === null && hours.length > 0) {
-      setHour(hours[0]);
+    if (availableHours.length > 0) {
+      if (hour === null || !availableHours.some((item) => item.hour === hour)) {
+        setHour(availableHours[0].hour);
+      }
+    } else {
+      setHour(null);
     }
-  }, [hour, hours]);
+  }, [availableHours, hour]);
 
   useEffect(() => {
     if (!open || clientMode !== 'search' || !search.trim()) { setSearchResults([]); return; }
@@ -295,18 +414,42 @@ export default function ManualBookingModal({ open, onClose, onCreated, shop, pre
         </div>
 
         <div>
-          <p className="text-xs font-medium text-text-muted mb-2">{t('appointments.manual.time')}</p>
-          <div className="flex flex-wrap gap-2">
-            {hours.map((h) => (
-              <button
-                key={h}
-                onClick={() => setHour(h)}
-                className={clsx('press-spring px-3 py-1.5 rounded-lg border text-sm tabular-nums cursor-pointer', hour === h ? 'btn-gold-admin border-accent font-semibold' : 'bg-surface-3 text-text-muted border-border/80 hover:text-text hover:bg-surface-2')}
-              >
-                {pad(h)}:00
-              </button>
-            ))}
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-xs font-medium text-text-muted">{t('appointments.manual.time')}</p>
+            {scheduleLoading && <span className="text-[11px] text-accent animate-pulse">{t('common.loading', 'Yuklanmoqda...')}</span>}
           </div>
+          {availableHours.length === 0 ? (
+            <div className="p-3 bg-surface-3 rounded-lg border border-border text-center">
+              <p className="text-xs text-danger font-medium">
+                {isStaffOff
+                  ? (t('appointments.manual.staffOff', `${selectedStaffMember?.name || 'Sartarosh'} tanlangan kunda dam oladi`))
+                  : (date.toDateString() === new Date().toDateString() && selectedStaffMember?.isAvailableNow === false)
+                  ? (`${selectedStaffMember?.name || 'Sartarosh'} bugun ishda emas (mavjud emas)`)
+                  : (serviceId && selectedStaffMember?.serviceIds?.length > 0 && !selectedStaffMember.serviceIds.some((id) => String(id) === String(serviceId)))
+                  ? (`${selectedStaffMember?.name || 'Sartarosh'} bu xizmatni bajarmaydi`)
+                  : t('appointments.manual.noSlots', 'Tanlangan kunda bo\'sh vaqt mavjud emas')}
+              </p>
+            </div>
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              {availableHours.map((item) => (
+                <button
+                  type="button"
+                  key={item.hour}
+                  onClick={() => setHour(item.hour)}
+                  className={clsx(
+                    'press-spring px-3 py-1.5 rounded-lg border text-sm tabular-nums cursor-pointer flex items-center gap-1',
+                    hour === item.hour ? 'btn-gold-admin border-accent font-semibold' : 'bg-surface-3 text-text-muted border-border/80 hover:text-text hover:bg-surface-2'
+                  )}
+                >
+                  <span>{pad(item.hour)}:00</span>
+                  {!staffId && item.freeCount > 1 && (
+                    <span className="text-[10px] opacity-75">({item.freeCount})</span>
+                  )}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         <div>
