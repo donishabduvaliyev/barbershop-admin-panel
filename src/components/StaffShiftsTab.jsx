@@ -109,6 +109,24 @@ export default function StaffShiftsTab({ staff = [] }) {
     return new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
+  const scheduleFullTeam = async () => {
+    if (staff.length === 0) return;
+    setSaving(true);
+    try {
+      await Promise.all(
+        staff.map((member) =>
+          api.post('/admin/staff/shifts', { staffId: member._id, date })
+        )
+      );
+      showToast(t('staff.fullTeamScheduled', 'Full team scheduled'));
+      await loadShifts();
+    } catch (err) {
+      showToast(err.message || t('staff.toastSaveError', 'Failed to schedule shifts'), 'error');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <div className="space-y-4">
       {/* Toolbar */}
@@ -125,16 +143,23 @@ export default function StaffShiftsTab({ staff = [] }) {
           </Button>
         </div>
 
-        <Button
-          onClick={() => {
-            setForm({ staffId: staff[0]?._id || '', notes: '' });
-            setModalOpen(true);
-          }}
-          disabled={staff.length === 0}
-        >
-          <PlusIcon className="w-4 h-4" />
-          {t('staff.scheduleShiftBtn', 'Schedule Shift')}
-        </Button>
+        <div className="flex items-center gap-2">
+          {staff.length > 1 && (shifts?.length || 0) < staff.length && (
+            <Button variant="subtle" onClick={scheduleFullTeam} disabled={saving} className="text-xs">
+              {t('staff.scheduleAllBtn', 'Schedule Full Team')}
+            </Button>
+          )}
+          <Button
+            onClick={() => {
+              setForm({ staffId: staff[0]?._id || '', notes: '' });
+              setModalOpen(true);
+            }}
+            disabled={staff.length === 0}
+          >
+            <PlusIcon className="w-4 h-4" />
+            {t('staff.scheduleShiftBtn', 'Schedule Shift')}
+          </Button>
+        </div>
       </div>
 
       {/* Shift List */}

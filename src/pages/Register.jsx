@@ -493,9 +493,26 @@ export default function Register() {
               value={txForm.amount}
               onChange={(e) => setTxForm((f) => ({ ...f, amount: e.target.value }))}
               placeholder="50000"
-              className="tabular-nums"
+              className="tabular-nums text-base font-semibold"
               required
             />
+            <div className="flex flex-wrap gap-1.5 pt-1">
+              {[50000, 80000, 100000, 150000].map((preset) => (
+                <button
+                  key={preset}
+                  type="button"
+                  onClick={() => setTxForm((f) => ({ ...f, amount: String(preset) }))}
+                  className={clsx(
+                    'px-2.5 py-1 rounded-lg text-[11px] font-medium tabular-nums border transition-colors cursor-pointer',
+                    txForm.amount === String(preset)
+                      ? 'bg-accent/15 border-accent text-accent'
+                      : 'bg-surface-3 border-border text-text-muted hover:text-text'
+                  )}
+                >
+                  {preset.toLocaleString()}
+                </button>
+              ))}
+            </div>
           </Field>
 
           <div className="space-y-1.5">

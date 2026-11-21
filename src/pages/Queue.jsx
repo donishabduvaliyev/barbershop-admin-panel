@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import QRCode from 'qrcode';
 import {
@@ -29,6 +30,7 @@ const STATUS_STYLE = {
 
 export default function Queue() {
   const { t, i18n } = useTranslation();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { api, token, shop } = useAuth();
   const { showToast } = useToast();
 
@@ -39,6 +41,13 @@ export default function Queue() {
 
   // Add Walk-in modal
   const [addOpen, setAddOpen] = useState(false);
+
+  useEffect(() => {
+    if (searchParams.get('new') === '1') {
+      setAddOpen(true);
+      setSearchParams({}, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
   const [form, setForm] = useState({ customerName: '', customerPhone: '', staffId: '', serviceName: '' });
   const [adding, setAdding] = useState(false);
 
@@ -117,6 +126,14 @@ export default function Queue() {
 
   const transition = async (entry, action) => {
     setBusyId(entry._id);
+    // Optimistic UI update for zero-latency feel
+    const nextStatusMap = { call: 'called', seat: 'in_chair' };
+    if (action === 'cancel' || action === 'complete') {
+      setQueue((prev) => (prev || []).filter((e) => e._id !== entry._id));
+    } else if (nextStatusMap[action]) {
+      setQueue((prev) => (prev || []).map((e) => (e._id === entry._id ? { ...e, status: nextStatusMap[action] } : e)));
+    }
+
     try {
       await api.patch(`/admin/waitlist/${entry._id}/${action}`, {});
       await loadQueue();
@@ -141,6 +158,7 @@ export default function Queue() {
         });
       }
     } catch (err) {
+      await loadQueue(); // Revert optimistic update on failure
       showToast(err.message || t('queue.toastError', 'Action failed'), 'error');
     } finally {
       setBusyId(null);
@@ -361,21 +379,30 @@ export default function Queue() {
           )}
 
           {services.length > 0 && (
-            <Field label={t('queue.serviceLabel', 'Service (optional)')}>
-              <select
-                value={form.serviceName}
-                onChange={(e) => setForm((f) => ({ ...f, serviceName: e.target.value }))}
-                className="w-full bg-surface-3 border border-border rounded-lg px-3 py-2.5 text-sm text-text outline-none focus:border-accent"
-              >
-                <option value="">{t('queue.selectService', '— Select Service —')}</option>
-                {services.map((sv) => {
+            <div className="space-y-1.5">
+              <span className="text-sm text-text-muted font-medium block">{t('queue.serviceLabel', 'Service (optional)')}</span>
+              <div className="flex flex-wrap gap-1.5">
+                {services.filter((sv) => sv.isActive !== false).slice(0, 10).map((sv) => {
                   const label = sv.name?.[i18n.language] || sv.name?.uz || sv.name?.en;
+                  const active = form.serviceName === label;
                   return (
-                    <option key={sv._id} value={label}>{label}</option>
+                    <button
+                      key={sv._id}
+                      type="button"
+                      onClick={() => setForm((f) => ({ ...f, serviceName: active ? '' : label }))}
+                      className={clsx(
+                        'px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors cursor-pointer',
+                        active
+                          ? 'bg-accent/15 border-accent text-accent'
+                          : 'bg-surface-3 border-border text-text-muted hover:text-text'
+                      )}
+                    >
+                      {label}
+                    </button>
                   );
                 })}
-              </select>
-            </Field>
+              </div>
+            </div>
           )}
         </form>
       </Modal>

@@ -81,6 +81,36 @@ export default function CheckoutModal({
     }
   };
 
+  const quickOpenAndPay = async () => {
+    const numericAmount = Number(amount);
+    if (!Number.isFinite(numericAmount) || numericAmount < 0 || amount === '') {
+      showToast(t('register.invalidAmount', 'Enter a valid amount'), 'error');
+      return;
+    }
+    setSaving(true);
+    try {
+      await api.post('/admin/register/open', { openingCashBalance: 0 });
+      const res = await api.post('/admin/register/transactions', {
+        type: 'service_payment',
+        amount: numericAmount,
+        paymentMethod,
+        staffId: staffId || null,
+        staffName: staffName || '',
+        bookingId: bookingId || null,
+        customerName: customerName || '',
+        customerPhone: customerPhone || '',
+        description: note.trim(),
+      });
+      showToast(t('register.toastQuickOpenedAndPaid', 'Register opened & payment recorded'));
+      onSuccess?.(res.transaction);
+      onClose();
+    } catch (err) {
+      showToast(err.message || t('register.toastError', 'Failed to record payment'), 'error');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <Modal
       open={open}
@@ -97,15 +127,26 @@ export default function CheckoutModal({
     >
       <form onSubmit={submit} className="space-y-4">
         {registerClosedError && (
-          <div className="p-3.5 rounded-xl bg-warning/10 border border-warning/30 text-xs text-warning space-y-2">
+          <div className="p-3.5 rounded-xl bg-warning/10 border border-warning/30 text-xs text-warning space-y-2.5">
             <p className="font-medium">{t('register.mustOpenFirst', 'No register shift is open right now.')}</p>
-            <Link
-              to="/register"
-              onClick={onClose}
-              className="inline-flex items-center font-semibold underline hover:text-text transition-colors"
-            >
-              {t('register.goToRegister', 'Open Cashier Register →')}
-            </Link>
+            <div className="flex items-center gap-3 flex-wrap">
+              <Button
+                type="button"
+                variant="primary"
+                disabled={saving}
+                onClick={quickOpenAndPay}
+                className="!px-3 !py-1.5 text-xs"
+              >
+                {t('register.quickOpenAndPayBtn', 'Open Register (0 UZS) & Pay')}
+              </Button>
+              <Link
+                to="/register"
+                onClick={onClose}
+                className="inline-flex items-center font-semibold underline hover:text-text transition-colors"
+              >
+                {t('register.goToRegister', 'Open Register Page →')}
+              </Link>
+            </div>
           </div>
         )}
 

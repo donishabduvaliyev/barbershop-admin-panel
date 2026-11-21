@@ -331,7 +331,9 @@
     "payoutShort": "Мастеру",
     "salonShort": "Салону",
     "commissionUpdatedToast": "Процент обновлен",
-    "invalidCommission": "Процент должен быть от 0 до 100"
+    "invalidCommission": "Процент должен быть от 0 до 100",
+    "scheduleAllBtn": "Назначить всю команду",
+    "fullTeamScheduled": "Смены для всей команды созданы"
   },
   "statistics": {
     "title": "Статистика",
@@ -666,7 +668,9 @@
     "toastTxRecorded": "Операция записана",
     "toastLoadError": "Ошибка загрузки кассы",
     "toastError": "Ошибка операции",
-    "invalidAmount": "Введите корректную сумму"
+    "invalidAmount": "Введите корректную сумму",
+    "quickOpenAndPayBtn": "Открыть кассу (0 UZS) и оплатить",
+    "toastQuickOpenedAndPaid": "Касса открыта, оплата записана"
   },
   "queue": {
     "title": "Живая очередь (Walk-In)",
@@ -729,5 +733,12 @@
     "sendBroadcastBtn": "Отправить рассылку",
     "broadcastSentToast": "Отправлено клиентам: {{count}}",
     "broadcastError": "Ошибка отправки рассылки"
+  },
+  "cmd": {
+    "searchBtn": "Быстрый поиск",
+    "placeholder": "Введите команду или раздел...",
+    "noResults": "Ничего не найдено",
+    "quickActions": "Быстрые действия",
+    "navigate": "Навигация"
   }
 }

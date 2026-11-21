@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { PlusIcon, PencilSquareIcon, TrashIcon, XMarkIcon, CalendarDaysIcon } from '@heroicons/react/24/outline';
 import { StarIcon as StarSolid } from '@heroicons/react/24/solid';
@@ -35,7 +36,16 @@ export default function Staff() {
   const [newDayOffDate, setNewDayOffDate] = useState('');
   const [dayOffConflict, setDayOffConflict] = useState(null);
   const [availabilityBusyId, setAvailabilityBusyId] = useState(null);
-  const [activeTab, setActiveTab] = useState('roster'); // 'roster' | 'shifts' | 'payroll'
+  const [searchParams, setSearchParams] = useSearchParams();
+  const initialTab = ['roster', 'shifts', 'payroll'].includes(searchParams.get('tab')) ? searchParams.get('tab') : 'roster';
+  const [activeTab, setActiveTab] = useState(initialTab);
+
+  useEffect(() => {
+    const qTab = searchParams.get('tab');
+    if (qTab && ['roster', 'shifts', 'payroll'].includes(qTab)) {
+      setActiveTab(qTab);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     api.get('/admin/shop').then((shop) => {

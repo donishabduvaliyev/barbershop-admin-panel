@@ -224,6 +224,17 @@ export default function Dashboard() {
           : action === 'cancel' ? t('appointments.toastCancelled', 'Bekor qilindi')
           : t('appointments.toastCompleted', 'Bajarildi deb belgilandi')
       );
+      if (action === 'complete' && updated) {
+        setCheckoutTarget({
+          initialAmount: updated.price || '',
+          staffId: updated.staffId || null,
+          staffName: updated.staffName || '',
+          bookingId: updated._id,
+          customerName: updated.userName || '',
+          customerPhone: updated.userNumber || '',
+          description: updated.serviceName || '',
+        });
+      }
     } catch (err) {
       showToast(err.message || t('appointments.toastError', 'Xatolik yuz berdi'), 'error');
     } finally {

@@ -319,7 +319,9 @@
     "payoutShort": "Usta ulushi",
     "salonShort": "Salon ulushi",
     "commissionUpdatedToast": "Foiz yangilandi",
-    "invalidCommission": "Foiz 0 dan 100 gacha bo‘lishi kerak"
+    "invalidCommission": "Foiz 0 dan 100 gacha bo‘lishi kerak",
+    "scheduleAllBtn": "Butun jamoani belgilash",
+    "fullTeamScheduled": "Butun jamoa uchun smena belgilandi"
   },
   "statistics": {
     "title": "Statistika",
@@ -640,7 +642,9 @@
     "toastTxRecorded": "To‘lov kassaga yozildi",
     "toastLoadError": "Kassani yuklashda xatolik",
     "toastError": "Xatolik yuz berdi",
-    "invalidAmount": "To‘g‘ri summani kiriting"
+    "invalidAmount": "To‘g‘ri summani kiriting",
+    "quickOpenAndPayBtn": "Kassani ochish (0 UZS) va to‘lash",
+    "toastQuickOpenedAndPaid": "Kassa ochildi va to‘lov yozildi"
   },
   "queue": {
     "title": "Jonli navbat (Walk-In)",
@@ -703,5 +707,12 @@
     "sendBroadcastBtn": "Xabar yuborish",
     "broadcastSentToast": "{{count}} ta mijozga yuborildi",
     "broadcastError": "Xabar yuborishda xatolik"
+  },
+  "cmd": {
+    "searchBtn": "Tezkor qidiruv",
+    "placeholder": "Buyruq yozing yoki bo‘limga o‘ting...",
+    "noResults": "Mos buyruq topilmadi",
+    "quickActions": "Tezkor amallar",
+    "navigate": "Bo‘limlar"
   }
 }

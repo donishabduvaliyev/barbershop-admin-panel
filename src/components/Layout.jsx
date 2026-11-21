@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import clsx from 'clsx';
 import { useTranslation } from 'react-i18next';
 import {
-  Squares2X2Icon, CalendarDaysIcon, UsersIcon, Bars3Icon, ChartBarIcon,
+  Squares2X2Icon, CalendarDaysIcon, UsersIcon, Bars3Icon, ChartBarIcon, MagnifyingGlassIcon,
 } from '@heroicons/react/24/outline';
 import {
   Squares2X2Icon as Squares2X2IconSolid, CalendarDaysIcon as CalendarDaysIconSolid,
@@ -12,6 +12,7 @@ import {
 } from '@heroicons/react/24/solid';
 import { useAuth } from '../lib/AuthContext';
 import LanguageSwitcher from './LanguageSwitcher';
+import CommandPalette from './CommandPalette';
 
 const TABS = [
   { to: '/', key: 'today', icon: Squares2X2Icon, activeIcon: Squares2X2IconSolid, end: true },
@@ -21,7 +22,7 @@ const TABS = [
   { to: '/manage', key: 'manage', icon: Bars3Icon, activeIcon: Bars3IconSolid },
 ];
 
-function TopNavbar() {
+function TopNavbar({ onOpenCmd }) {
   const { t } = useTranslation();
   const { shop } = useAuth();
   const shopName = shop?.name?.en || shop?.name?.uz || shop?.name?.ru || 'SmartChair';
@@ -70,8 +71,17 @@ function TopNavbar() {
           ))}
         </nav>
 
-        {/* Right side: Language */}
-        <div className="flex items-center gap-3">
+        {/* Right side: Quick Command + Language */}
+        <div className="flex items-center gap-2.5">
+          <button
+            type="button"
+            onClick={onOpenCmd}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-surface-2/80 border border-border-soft hover:border-accent/40 text-xs text-text-muted hover:text-text transition-colors cursor-pointer"
+          >
+            <MagnifyingGlassIcon className="w-3.5 h-3.5 text-accent" />
+            <span>{t('cmd.searchBtn', 'Quick Action')}</span>
+            <kbd className="px-1.5 py-0.5 text-[10px] font-mono rounded bg-surface-3 border border-border text-text-faint">⌘K</kbd>
+          </button>
           <LanguageSwitcher />
         </div>
       </div>
@@ -108,10 +118,22 @@ function BottomNav() {
 
 export default function Layout() {
   const location = useLocation();
+  const [cmdOpen, setCmdOpen] = useState(false);
+
+  useEffect(() => {
+    const handleKey = (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setCmdOpen((v) => !v);
+      }
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, []);
 
   return (
     <div className="min-h-screen bg-bg text-text">
-      <TopNavbar />
+      <TopNavbar onOpenCmd={() => setCmdOpen(true)} />
       <main className="pb-24 md:pb-12">
         <div className="max-w-lg md:max-w-4xl lg:max-w-6xl mx-auto px-4 py-5 md:py-8">
           <AnimatePresence mode="wait">
@@ -128,6 +150,7 @@ export default function Layout() {
         </div>
       </main>
       <BottomNav />
+      <CommandPalette open={cmdOpen} onClose={() => setCmdOpen(false)} />
     </div>
   );
 }

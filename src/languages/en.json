@@ -319,7 +319,9 @@
     "payoutShort": "Master Cut",
     "salonShort": "Salon Cut",
     "commissionUpdatedToast": "Commission rate updated",
-    "invalidCommission": "Commission must be between 0 and 100%"
+    "invalidCommission": "Commission must be between 0 and 100%",
+    "scheduleAllBtn": "Schedule Full Team",
+    "fullTeamScheduled": "Full team scheduled"
   },
   "statistics": {
     "title": "Statistics",
@@ -640,7 +642,9 @@
     "toastTxRecorded": "Transaction recorded",
     "toastLoadError": "Failed to load register",
     "toastError": "Action failed",
-    "invalidAmount": "Enter a valid amount"
+    "invalidAmount": "Enter a valid amount",
+    "quickOpenAndPayBtn": "Open Register (0 UZS) & Pay",
+    "toastQuickOpenedAndPaid": "Register opened & payment recorded"
   },
   "queue": {
     "title": "Live Walk-In Queue",
@@ -703,5 +707,12 @@
     "sendBroadcastBtn": "Send Broadcast",
     "broadcastSentToast": "Sent to {{count}} clients",
     "broadcastError": "Failed to send broadcast"
+  },
+  "cmd": {
+    "searchBtn": "Quick Action",
+    "placeholder": "Type a command or jump to page...",
+    "noResults": "No matching commands",
+    "quickActions": "Quick Actions",
+    "navigate": "Navigate"
   }
 }
