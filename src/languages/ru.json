@@ -710,7 +710,8 @@
     "toastCancelled": "Удален из очереди",
     "toastLoadError": "Ошибка загрузки очереди",
     "toastError": "Ошибка действия",
-    "namePhoneRequired": "Введите имя и телефон"
+    "namePhoneRequired": "Введите имя и телефон",
+    "upcomingBookingsTitle": "Ближайшие записи (в теч. 2 ч.)"
   },
   "crm": {
     "winBackBtn": "Возврат (CRM)",

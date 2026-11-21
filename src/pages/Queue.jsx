@@ -48,8 +48,9 @@ export default function Queue() {
       setSearchParams({}, { replace: true });
     }
   }, [searchParams, setSearchParams]);
-  const [form, setForm] = useState({ customerName: '', customerPhone: '', staffId: '', serviceName: '' });
+  const [form, setForm] = useState({ customerName: '', customerPhone: '', staffId: '', serviceId: '', serviceName: '' });
   const [adding, setAdding] = useState(false);
+  const [upcomingBookings, setUpcomingBookings] = useState([]);
 
   // QR Poster modal
   const [qrOpen, setQrOpen] = useState(false);
@@ -57,6 +58,21 @@ export default function Queue() {
 
   // Optional 1-click Checkout after completing
   const [checkoutTarget, setCheckoutTarget] = useState(null);
+
+  const loadUpcoming = useCallback(() => {
+    const now = new Date();
+    const hourStart = new Date(now);
+    hourStart.setMinutes(0, 0, 0);
+    const twoHoursLater = new Date(now.getTime() + 2 * 60 * 60 * 1000);
+    api.get(`/admin/appointments?from=${hourStart.toISOString()}&to=${twoHoursLater.toISOString()}&limit=20`)
+      .then((res) => {
+        const active = (res.appointments || []).filter(
+          (a) => a.status === 'pending' || a.status === 'confirmed'
+        );
+        setUpcomingBookings(active);
+      })
+      .catch(() => {});
+  }, [api]);
 
   const loadQueue = useCallback(async () => {
     try {
@@ -69,25 +85,31 @@ export default function Queue() {
 
   useEffect(() => {
     loadQueue();
+    loadUpcoming();
     api.get('/admin/shop').then((s) => {
       setStaff(s.staff || []);
       setServices(s.services || []);
     }).catch(() => {});
-  }, [api, loadQueue]);
+  }, [api, loadQueue, loadUpcoming]);
 
-  // Real-time live queue updates via Socket.io
+  // Real-time live queue & appointment updates via Socket.io
   useShopSocket(token, () => {
     loadQueue();
+    loadUpcoming();
   }, 'waitlist:update');
 
-  const checkInUrl = shop?._id
-    ? `${window.location.origin.replace(/admin/i, 'app')}/waitlist/${shop._id}`
-    : '';
+  useShopSocket(token, () => {
+    loadUpcoming();
+  }, 'appointment:update');
+
+  const customerBaseUrl = import.meta.env.VITE_CUSTOMER_APP_URL || 'https://barbershop-telegram-bot.netlify.app';
+  const shopObjectId = shop?._id || shop?.id;
+  const checkInUrl = shopObjectId ? `${customerBaseUrl}/waitlist/${shopObjectId}` : '';
 
   const openQrModal = async () => {
     setQrOpen(true);
     try {
-      const url = checkInUrl || `${window.location.origin}/waitlist/${shop?._id || 'shop'}`;
+      const url = checkInUrl || `${customerBaseUrl}/waitlist/shop`;
       const dataUrl = await QRCode.toDataURL(url, {
         width: 512,
         margin: 2,
@@ -111,11 +133,12 @@ export default function Queue() {
         customerName: form.customerName.trim(),
         customerPhone: form.customerPhone.trim(),
         staffId: form.staffId || null,
+        serviceId: form.serviceId || null,
         serviceName: form.serviceName.trim(),
       });
       showToast(t('queue.toastAdded', 'Client added to queue'));
       setAddOpen(false);
-      setForm({ customerName: '', customerPhone: '', staffId: '', serviceName: '' });
+      setForm({ customerName: '', customerPhone: '', staffId: '', serviceId: '', serviceName: '' });
       await loadQueue();
     } catch (err) {
       showToast(err.message || t('queue.toastError', 'Failed to add client'), 'error');
@@ -209,6 +232,37 @@ export default function Queue() {
           <span className="text-xl font-semibold text-success tabular-nums">{inChairCount}</span>
         </Card>
       </div>
+
+      {/* Unified Schedule Context: Upcoming Scheduled Bookings (Next 2h) */}
+      {upcomingBookings.length > 0 && (
+        <Card className="p-4 space-y-2.5 border-accent/25">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-accent uppercase tracking-wide">
+              📅 {t('queue.upcomingBookingsTitle', 'Upcoming Scheduled Appointments (Next 2h)')}
+            </span>
+            <span className="text-xs text-text-muted tabular-nums">{upcomingBookings.length}</span>
+          </div>
+          <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+            {upcomingBookings.map((b) => {
+              const hhmm = new Date(b.requestedTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+              return (
+                <div
+                  key={b._id}
+                  className="shrink-0 px-3 py-2 rounded-xl bg-surface-2 border border-border-soft text-xs space-y-0.5"
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold text-accent tabular-nums">{hhmm}</span>
+                    <span className="font-medium text-text truncate max-w-[120px]">{b.userName || 'Client'}</span>
+                  </div>
+                  <p className="text-[11px] text-text-muted truncate max-w-[160px]">
+                    {b.staffName || 'Any'} {b.serviceName ? `· ${b.serviceName}` : ''}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+        </Card>
+      )}
 
       {/* Queue List */}
       {queue === null ? (
@@ -389,7 +443,13 @@ export default function Queue() {
                     <button
                       key={sv._id}
                       type="button"
-                      onClick={() => setForm((f) => ({ ...f, serviceName: active ? '' : label }))}
+                      onClick={() =>
+                        setForm((f) => ({
+                          ...f,
+                          serviceId: active ? '' : sv._id,
+                          serviceName: active ? '' : label,
+                        }))
+                      }
                       className={clsx(
                         'px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors cursor-pointer',
                         active

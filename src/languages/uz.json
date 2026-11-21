@@ -684,7 +684,8 @@
     "toastCancelled": "Navbatdan o‘chirildi",
     "toastLoadError": "Navbatni yuklashda xatolik",
     "toastError": "Xatolik yuz berdi",
-    "namePhoneRequired": "Ism va telefon raqam kiritilishi shart"
+    "namePhoneRequired": "Ism va telefon raqam kiritilishi shart",
+    "upcomingBookingsTitle": "Yaqin 2 soatdagi bandlovlar"
   },
   "crm": {
     "winBackBtn": "Qaytarish (CRM)",

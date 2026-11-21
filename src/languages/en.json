@@ -684,7 +684,8 @@
     "toastCancelled": "Removed from queue",
     "toastLoadError": "Failed to load queue",
     "toastError": "Action failed",
-    "namePhoneRequired": "Name and phone are required"
+    "namePhoneRequired": "Name and phone are required",
+    "upcomingBookingsTitle": "Upcoming Scheduled Appointments (Next 2h)"
   },
   "crm": {
     "winBackBtn": "Win-Back",

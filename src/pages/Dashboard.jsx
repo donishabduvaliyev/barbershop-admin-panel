@@ -211,6 +211,12 @@ export default function Dashboard() {
     loadTodayStats();
   });
 
+  useShopSocket(token, () => {
+    api.get('/admin/waitlist').then((res) => setQueueCount((res.queue || []).length)).catch(() => {});
+    loadTodayAppointments();
+    loadTodayStats();
+  }, 'waitlist:update');
+
   const runAction = async (id, action, body) => {
     setActioningId(id);
     try {
