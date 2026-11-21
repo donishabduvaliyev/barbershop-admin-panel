@@ -145,6 +145,7 @@ export default function Customers() {
       setCreateName('');
       setCreateNumber('');
       load(search);
+      api.get('/admin/crm/segments').then(setCrmData).catch(() => {});
     } catch (err) {
       showToast(err.message || t('customers.toastSaveError'), 'error');
     } finally {
@@ -325,7 +326,7 @@ export default function Customers() {
                 </div>
                 <div className="text-right shrink-0 hidden sm:block">
                   <p className="text-sm font-medium text-text">{t('customers.visit', { count: c.visitCount })}</p>
-                  <p className="text-xs text-text-faint">{t('customers.last', { date: formatDate(c.lastVisit) })}</p>
+                  <p className="text-xs text-text-faint">{c.lastVisit ? t('customers.last', { date: formatDate(c.lastVisit) }) : '—'}</p>
                 </div>
                 <div className="text-right shrink-0 w-24">
                   <p className="text-sm font-semibold text-accent">{currency(c.totalSpent)}</p>

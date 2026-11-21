@@ -51,6 +51,10 @@ export default function Queue() {
   const [form, setForm] = useState({ customerName: '', customerPhone: '', staffId: '', serviceId: '', serviceName: '' });
   const [adding, setAdding] = useState(false);
   const [upcomingBookings, setUpcomingBookings] = useState([]);
+  const [resolvedShopId, setResolvedShopId] = useState(() => {
+    const candidate = shop?._id || (typeof shop?.id === 'string' && /^[a-f0-9]{24}$/i.test(shop.id) ? shop.id : '');
+    return candidate;
+  });
 
   // QR Poster modal
   const [qrOpen, setQrOpen] = useState(false);
@@ -67,7 +71,7 @@ export default function Queue() {
     api.get(`/admin/appointments?from=${hourStart.toISOString()}&to=${twoHoursLater.toISOString()}&limit=20`)
       .then((res) => {
         const active = (res.appointments || []).filter(
-          (a) => a.status === 'pending' || a.status === 'confirmed'
+          (a) => (a.status === 'pending' || a.status === 'confirmed') && a.source !== 'walk-in'
         );
         setUpcomingBookings(active);
       })
@@ -87,6 +91,7 @@ export default function Queue() {
     loadQueue();
     loadUpcoming();
     api.get('/admin/shop').then((s) => {
+      if (s?._id) setResolvedShopId(s._id);
       setStaff(s.staff || []);
       setServices(s.services || []);
     }).catch(() => {});
@@ -103,14 +108,16 @@ export default function Queue() {
   }, 'appointment:update');
 
   const customerBaseUrl = import.meta.env.VITE_CUSTOMER_APP_URL || 'https://barbershop-telegram-bot.netlify.app';
-  const shopObjectId = shop?._id || shop?.id;
-  const checkInUrl = shopObjectId ? `${customerBaseUrl}/waitlist/${shopObjectId}` : '';
+  const checkInUrl = resolvedShopId ? `${customerBaseUrl}/waitlist/${resolvedShopId}` : '';
 
   const openQrModal = async () => {
+    if (!checkInUrl) {
+      showToast(t('queue.toastLoadError', 'Shop ID still loading, please try again.'), 'error');
+      return;
+    }
     setQrOpen(true);
     try {
-      const url = checkInUrl || `${customerBaseUrl}/waitlist/shop`;
-      const dataUrl = await QRCode.toDataURL(url, {
+      const dataUrl = await QRCode.toDataURL(checkInUrl, {
         width: 512,
         margin: 2,
         color: { dark: '#0a0a0c', light: '#ffffff' },

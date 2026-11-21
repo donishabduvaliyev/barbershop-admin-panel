@@ -113,8 +113,8 @@ export default function Register() {
   const handleAddTransaction = async (e) => {
     e.preventDefault();
     const numericAmount = Number(txForm.amount);
-    if (!Number.isFinite(numericAmount) || numericAmount < 0 || txForm.amount === '') {
-      showToast(t('register.invalidAmount', 'Enter a valid amount'), 'error');
+    if (!Number.isFinite(numericAmount) || numericAmount <= 0 || txForm.amount === '') {
+      showToast(t('register.invalidAmount', 'Enter a valid positive amount'), 'error');
       return;
     }
 

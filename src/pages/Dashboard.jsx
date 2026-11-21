@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import {
   PlusIcon,
   ChartBarIcon,
@@ -143,6 +143,14 @@ export default function Dashboard() {
   const [registerStatus, setRegisterStatus] = useState(null);
   const [queueCount, setQueueCount] = useState(0);
   const [checkoutTarget, setCheckoutTarget] = useState(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  useEffect(() => {
+    if (searchParams.get('newBooking') === '1') {
+      setManualOpen(true);
+      setSearchParams({}, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
 
   useEffect(() => {
     window.__openManualBooking = () => setManualOpen(true);
@@ -699,7 +707,7 @@ export default function Dashboard() {
         footer={(
           <>
             <Button variant="ghost" onClick={() => setCancelTarget(null)}>{t('common.cancel', 'Ortga')}</Button>
-            <Button variant="danger" onClick={submitCancel}>{t('appointments.confirmCancel', 'Ha, bekor qilinsin')}</Button>
+            <Button variant="danger" disabled={actioningId === cancelTarget?._id} onClick={submitCancel}>{t('appointments.confirmCancel', 'Ha, bekor qilinsin')}</Button>
           </>
         )}
       >
@@ -732,6 +740,7 @@ export default function Dashboard() {
         onSuccess={() => {
           api.get('/admin/register/current').then(setRegisterStatus).catch(() => {});
           loadTodayAppointments();
+          loadTodayStats();
         }}
         {...(checkoutTarget || {})}
       />

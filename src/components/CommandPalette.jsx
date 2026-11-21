@@ -29,10 +29,7 @@ export default function CommandPalette({ open, onClose }) {
       label: t('appointments.manual.newBooking', 'New Booking'),
       group: t('cmd.quickActions', 'Quick Actions'),
       icon: PlusIcon,
-      run: () => {
-        navigate('/');
-        setTimeout(() => window.__openManualBooking?.(), 80);
-      },
+      run: () => navigate('/?newBooking=1'),
     },
     {
       id: 'new-walkin',

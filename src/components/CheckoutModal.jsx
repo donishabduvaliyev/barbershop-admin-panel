@@ -88,13 +88,14 @@ export default function CheckoutModal({
 
   const quickOpenAndPay = async () => {
     const numericAmount = Number(amount);
-    if (!Number.isFinite(numericAmount) || numericAmount < 0 || amount === '') {
-      showToast(t('register.invalidAmount', 'Enter a valid amount'), 'error');
+    if (!Number.isFinite(numericAmount) || numericAmount <= 0 || amount === '') {
+      showToast(t('register.invalidAmount', 'Enter a valid positive amount'), 'error');
       return;
     }
     setSaving(true);
     try {
       await api.post('/admin/register/open', { openingCashBalance: 0 });
+      setRegisterClosedError(false);
       const res = await api.post('/admin/register/transactions', {
         type: 'service_payment',
         amount: numericAmount,
