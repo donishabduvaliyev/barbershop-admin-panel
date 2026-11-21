@@ -644,7 +644,11 @@
     "toastError": "Xatolik yuz berdi",
     "invalidAmount": "To‘g‘ri summani kiriting",
     "quickOpenAndPayBtn": "Kassani ochish (0 UZS) va to‘lash",
-    "toastQuickOpenedAndPaid": "Kassa ochildi va to‘lov yozildi"
+    "toastQuickOpenedAndPaid": "Kassa ochildi va to‘lov yozildi",
+    "paidBadge": "To‘langan",
+    "payRemainingBtn": "Qolganini to‘lash",
+    "alreadyPaidLabel": "To‘langan",
+    "remainingDueLabel": "Qoldiq"
   },
   "queue": {
     "title": "Jonli navbat (Walk-In)",

@@ -230,9 +230,11 @@ export default function Dashboard() {
           : action === 'cancel' ? t('appointments.toastCancelled', 'Bekor qilindi')
           : t('appointments.toastCompleted', 'Bajarildi deb belgilandi')
       );
-      if (action === 'complete' && updated) {
+      if (action === 'complete' && updated && !updated.isPaid) {
         setCheckoutTarget({
           initialAmount: updated.price || '',
+          price: updated.price || 0,
+          paidAmount: updated.paidAmount || 0,
           staffId: updated.staffId || null,
           staffName: updated.staffName || '',
           bookingId: updated._id,
@@ -584,24 +586,35 @@ export default function Dashboard() {
                         )}
 
                         {appt.status === 'completed' && (
-                          <Button
-                            variant="subtle"
-                            className="!px-2.5 !py-1 text-xs"
-                            onClick={() =>
-                              setCheckoutTarget({
-                                initialAmount: appt.price || '',
-                                staffId: appt.staffId || null,
-                                staffName: appt.staffName || '',
-                                bookingId: appt._id,
-                                customerName: appt.userName || '',
-                                customerPhone: appt.userNumber || '',
-                                description: appt.serviceName || '',
-                              })
-                            }
-                          >
-                            <BanknotesIcon className="w-3.5 h-3.5 text-accent" />
-                            {t('register.payBtn', 'Pay')}
-                          </Button>
+                          appt.isPaid ? (
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-success/15 border border-success/30 text-success text-[11px] font-semibold">
+                              ✓ {t('register.paidBadge', 'Paid')}
+                              {appt.paymentMethod ? ` (${appt.paymentMethod.toUpperCase()})` : ''}
+                            </span>
+                          ) : (
+                            <Button
+                              variant="subtle"
+                              className="!px-2.5 !py-1 text-xs"
+                              onClick={() =>
+                                setCheckoutTarget({
+                                  initialAmount: appt.price || '',
+                                  price: appt.price || 0,
+                                  paidAmount: appt.paidAmount || 0,
+                                  staffId: appt.staffId || null,
+                                  staffName: appt.staffName || '',
+                                  bookingId: appt._id,
+                                  customerName: appt.userName || '',
+                                  customerPhone: appt.userNumber || '',
+                                  description: appt.serviceName || '',
+                                })
+                              }
+                            >
+                              <BanknotesIcon className="w-3.5 h-3.5 text-accent" />
+                              {appt.paidAmount > 0
+                                ? t('register.payRemainingBtn', 'Pay Remaining')
+                                : t('register.payBtn', 'Pay')}
+                            </Button>
+                          )
                         )}
 
                         {(appt.status === 'pending' || appt.status === 'confirmed') && (
@@ -718,6 +731,7 @@ export default function Dashboard() {
         onClose={() => setCheckoutTarget(null)}
         onSuccess={() => {
           api.get('/admin/register/current').then(setRegisterStatus).catch(() => {});
+          loadTodayAppointments();
         }}
         {...(checkoutTarget || {})}
       />

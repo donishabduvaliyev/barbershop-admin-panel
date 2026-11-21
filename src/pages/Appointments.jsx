@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import clsx from 'clsx';
 import { useTranslation } from 'react-i18next';
-import { CalendarDaysIcon, ListBulletIcon, PlusIcon } from '@heroicons/react/24/outline';
+import { CalendarDaysIcon, ListBulletIcon, PlusIcon, BanknotesIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '../lib/AuthContext';
 import { useShopSocket } from '../lib/socket';
 import { useToast } from '../components/ToastProvider';
@@ -10,6 +10,7 @@ import StatusBadge from '../components/StatusBadge';
 import { Card, Button, EmptyState, Textarea, Input } from '../components/ui';
 import Modal from '../components/Modal';
 import ManualBookingModal from '../components/ManualBookingModal';
+import CheckoutModal from '../components/CheckoutModal';
 import ScheduleCalendar from '../components/ScheduleCalendar';
 import { TableRowSkeleton } from '../components/Skeleton';
 import { localeFor } from '../lib/locale';
@@ -132,6 +133,7 @@ export default function Appointments() {
   const [loading, setLoading] = useState(true);
   const [shop, setShop] = useState(null);
   const [actioningId, setActioningId] = useState(null);
+  const [checkoutTarget, setCheckoutTarget] = useState(null);
   const [rejectTarget, setRejectTarget] = useState(null);
   const [rejectReason, setRejectReason] = useState('');
   const [cancelTarget, setCancelTarget] = useState(null);
@@ -318,7 +320,38 @@ export default function Appointments() {
                         {(appt.status === 'pending' || appt.status === 'confirmed') && (
                           <Button variant="ghost" className="!px-3 !py-1.5 text-xs" disabled={actioningId === appt._id} onClick={() => setRescheduleTarget(appt)}>{t('appointments.reschedule')}</Button>
                         )}
-                        {(appt.status === 'confirmed' || appt.status === 'completed') && (
+                        {appt.status === 'completed' && (
+                          appt.isPaid ? (
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-success/15 border border-success/30 text-success text-[11px] font-semibold">
+                              ✓ {t('register.paidBadge', 'Paid')}
+                              {appt.paymentMethod ? ` (${appt.paymentMethod.toUpperCase()})` : ''}
+                            </span>
+                          ) : (
+                            <Button
+                              variant="subtle"
+                              className="!px-3 !py-1.5 text-xs"
+                              onClick={() =>
+                                setCheckoutTarget({
+                                  initialAmount: appt.price || '',
+                                  price: appt.price || 0,
+                                  paidAmount: appt.paidAmount || 0,
+                                  staffId: appt.staffId || null,
+                                  staffName: appt.staffName || '',
+                                  bookingId: appt._id,
+                                  customerName: appt.userName || '',
+                                  customerPhone: appt.userNumber || '',
+                                  description: appt.serviceName || '',
+                                })
+                              }
+                            >
+                              <BanknotesIcon className="w-3.5 h-3.5 text-accent" />
+                              {appt.paidAmount > 0
+                                ? t('register.payRemainingBtn', 'Pay Remaining')
+                                : t('register.payBtn', 'Pay')}
+                            </Button>
+                          )
+                        )}
+                        {(appt.status === 'confirmed' || (appt.status === 'completed' && !appt.isPaid)) && (
                           <Button variant="ghost" className="!px-3 !py-1.5 text-xs" disabled={actioningId === appt._id} onClick={() => runAction(appt._id, 'no-show')}>{t('appointments.noShow')}</Button>
                         )}
                         <Button variant="ghost" className="!px-2.5 !py-1.5 text-xs" onClick={() => openNote(appt)}>📝</Button>
@@ -399,6 +432,13 @@ export default function Appointments() {
         onClose={() => setManualOpen(false)}
         onCreated={load}
         shop={shop}
+      />
+
+      <CheckoutModal
+        open={!!checkoutTarget}
+        onClose={() => setCheckoutTarget(null)}
+        onSuccess={load}
+        {...(checkoutTarget || {})}
       />
     </div>
   );

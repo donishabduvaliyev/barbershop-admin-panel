@@ -644,7 +644,11 @@
     "toastError": "Action failed",
     "invalidAmount": "Enter a valid amount",
     "quickOpenAndPayBtn": "Open Register (0 UZS) & Pay",
-    "toastQuickOpenedAndPaid": "Register opened & payment recorded"
+    "toastQuickOpenedAndPaid": "Register opened & payment recorded",
+    "paidBadge": "Paid",
+    "payRemainingBtn": "Pay Remaining",
+    "alreadyPaidLabel": "Paid",
+    "remainingDueLabel": "Due"
   },
   "queue": {
     "title": "Live Walk-In Queue",

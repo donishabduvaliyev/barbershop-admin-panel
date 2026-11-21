@@ -158,7 +158,7 @@ export default function Queue() {
     }
 
     try {
-      await api.patch(`/admin/waitlist/${entry._id}/${action}`, {});
+      const res = await api.patch(`/admin/waitlist/${entry._id}/${action}`, {});
       await loadQueue();
       if (action === 'call') showToast(t('queue.toastCalled', 'Client called to chair'));
       if (action === 'seat') showToast(t('queue.toastSeated', 'Client seated in chair'));
@@ -171,8 +171,12 @@ export default function Queue() {
             sv.name?.en === entry.serviceName ||
             sv.name?.ru === entry.serviceName
         );
+        const resolvedPrice = res?.entry?.price ?? matchedService?.price ?? 0;
         setCheckoutTarget({
-          initialAmount: matchedService?.price || '',
+          initialAmount: resolvedPrice || '',
+          price: resolvedPrice,
+          paidAmount: 0,
+          bookingId: res?.entry?.bookingId || entry.bookingId || null,
           staffId: entry.staffId || null,
           staffName: entry.staffName || '',
           customerName: entry.customerName,

@@ -19,6 +19,8 @@ export default function CheckoutModal({
   open,
   onClose,
   initialAmount = '',
+  price = 0,
+  paidAmount = 0,
   staffId = null,
   staffName = '',
   bookingId = null,
@@ -37,19 +39,22 @@ export default function CheckoutModal({
   const [saving, setSaving] = useState(false);
   const [registerClosedError, setRegisterClosedError] = useState(false);
 
+  const remainingDue = price > 0 ? Math.max(0, price - (paidAmount || 0)) : 0;
+
   useEffect(() => {
     if (!open) return;
-    setAmount(initialAmount ? String(initialAmount) : '');
+    const defaultAmt = price > 0 ? remainingDue : initialAmount;
+    setAmount(defaultAmt ? String(defaultAmt) : '');
     setPaymentMethod('cash');
     setNote(description || '');
     setRegisterClosedError(false);
-  }, [open, initialAmount, description]);
+  }, [open, initialAmount, price, remainingDue, description]);
 
   const submit = async (e) => {
     e.preventDefault();
     const numericAmount = Number(amount);
-    if (!Number.isFinite(numericAmount) || numericAmount < 0 || amount === '') {
-      showToast(t('register.invalidAmount', 'Enter a valid amount'), 'error');
+    if (!Number.isFinite(numericAmount) || numericAmount <= 0 || amount === '') {
+      showToast(t('register.invalidAmount', 'Enter a valid positive amount'), 'error');
       return;
     }
 
@@ -154,6 +159,17 @@ export default function CheckoutModal({
           <div className="px-3.5 py-2.5 rounded-xl bg-surface-3/60 border border-border-soft flex items-center justify-between text-xs">
             <span className="text-text-muted">{t('register.clientLabel', 'Client')}</span>
             <span className="font-medium text-text">{customerName}{staffName ? ` · ${staffName}` : ''}</span>
+          </div>
+        )}
+
+        {price > 0 && paidAmount > 0 && (
+          <div className="px-3.5 py-2.5 rounded-xl bg-accent/10 border border-accent/25 flex items-center justify-between text-xs">
+            <span className="text-text-muted">
+              {t('register.alreadyPaidLabel', 'Paid')}: <strong className="text-text tabular-nums">{paidAmount.toLocaleString()} UZS</strong>
+            </span>
+            <span className="font-semibold text-accent tabular-nums">
+              {t('register.remainingDueLabel', 'Due')}: {remainingDue.toLocaleString()} UZS
+            </span>
           </div>
         )}
 

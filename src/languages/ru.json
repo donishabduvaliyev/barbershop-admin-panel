@@ -670,7 +670,11 @@
     "toastError": "Ошибка операции",
     "invalidAmount": "Введите корректную сумму",
     "quickOpenAndPayBtn": "Открыть кассу (0 UZS) и оплатить",
-    "toastQuickOpenedAndPaid": "Касса открыта, оплата записана"
+    "toastQuickOpenedAndPaid": "Касса открыта, оплата записана",
+    "paidBadge": "Оплачено",
+    "payRemainingBtn": "Доплатить",
+    "alreadyPaidLabel": "Оплачено",
+    "remainingDueLabel": "Остаток"
   },
   "queue": {
     "title": "Живая очередь (Walk-In)",
