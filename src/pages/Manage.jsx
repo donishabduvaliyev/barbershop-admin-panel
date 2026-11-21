@@ -5,6 +5,7 @@ import clsx from 'clsx';
 import {
   ScissorsIcon, UserGroupIcon, ChartBarIcon, MegaphoneIcon, Cog6ToothIcon,
   ChevronRightIcon, ChevronUpDownIcon, CheckIcon, ArrowLeftStartOnRectangleIcon,
+  BanknotesIcon, QueueListIcon,
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../lib/AuthContext';
 import { createApiClient } from '../lib/api';
@@ -13,6 +14,8 @@ import Modal from '../components/Modal';
 import LanguageSwitcher from '../components/LanguageSwitcher';
 
 const MENU_ITEMS = [
+  { to: '/queue', key: 'queue', icon: QueueListIcon },
+  { to: '/register', key: 'register', icon: BanknotesIcon },
   { to: '/services', key: 'services', icon: ScissorsIcon },
   { to: '/staff', key: 'staff', icon: UserGroupIcon },
   { to: '/statistics', key: 'statistics', icon: ChartBarIcon },

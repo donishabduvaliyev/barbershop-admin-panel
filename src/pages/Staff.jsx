@@ -9,6 +9,8 @@ import { Card, Button, Field, Input, EmptyState, Switch } from '../components/ui
 import Modal from '../components/Modal';
 import ImageUpload from '../components/ImageUpload';
 import WorkingHoursEditor from '../components/WorkingHoursEditor';
+import StaffShiftsTab from '../components/StaffShiftsTab';
+import StaffPayrollTab from '../components/StaffPayrollTab';
 import { CardGridSkeleton } from '../components/Skeleton';
 import { localeFor } from '../lib/locale';
 
@@ -33,6 +35,7 @@ export default function Staff() {
   const [newDayOffDate, setNewDayOffDate] = useState('');
   const [dayOffConflict, setDayOffConflict] = useState(null);
   const [availabilityBusyId, setAvailabilityBusyId] = useState(null);
+  const [activeTab, setActiveTab] = useState('roster'); // 'roster' | 'shifts' | 'payroll'
 
   useEffect(() => {
     api.get('/admin/shop').then((shop) => {
@@ -171,15 +174,47 @@ export default function Staff() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="font-display text-2xl font-semibold text-text">{t('staff.title')}</h1>
           <p className="text-text-muted text-sm mt-1">{t('staff.subtitle')}</p>
         </div>
-        <Button onClick={openCreate}><PlusIcon className="w-4 h-4" /> {t('staff.addStaff')}</Button>
+        {activeTab === 'roster' && (
+          <Button onClick={openCreate}><PlusIcon className="w-4 h-4" /> {t('staff.addStaff')}</Button>
+        )}
       </div>
 
-      {staff === null ? (
+      {/* Segmented Navigation Tabs: Roster | Shifts | Commissions & Payroll */}
+      <div className="flex items-center gap-1 bg-surface border border-border-soft rounded-xl p-1 w-fit max-w-full overflow-x-auto no-scrollbar">
+        {[
+          { id: 'roster', label: t('staff.tabRoster', 'Team Roster') },
+          { id: 'shifts', label: t('staff.tabShifts', 'Shifts & Attendance') },
+          { id: 'payroll', label: t('staff.tabPayroll', 'Commissions & Payroll') },
+        ].map((tab) => (
+          <button
+            key={tab.id}
+            type="button"
+            onClick={() => setActiveTab(tab.id)}
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all cursor-pointer ${
+              activeTab === tab.id
+                ? 'bg-accent text-black font-semibold shadow-sm'
+                : 'text-text-muted hover:text-text hover:bg-surface-3'
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {activeTab === 'shifts' ? (
+        <StaffShiftsTab staff={staff || []} />
+      ) : activeTab === 'payroll' ? (
+        <StaffPayrollTab
+          onCommissionUpdated={() => {
+            api.get('/admin/shop').then((shop) => setStaff(shop.staff)).catch(() => {});
+          }}
+        />
+      ) : staff === null ? (
         <CardGridSkeleton />
       ) : staff.length === 0 ? (
         <Card><EmptyState icon="💇" title={t('staff.noStaffTitle')} description={t('staff.noStaffDesc')} action={<Button onClick={openCreate}>{t('staff.addStaff')}</Button>} /></Card>

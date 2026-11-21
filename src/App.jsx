@@ -13,6 +13,8 @@ import Statistics from './pages/Statistics';
 import Promotions from './pages/Promotions';
 import Settings from './pages/Settings';
 import Manage from './pages/Manage';
+import Register from './pages/Register';
+import Queue from './pages/Queue';
 import SuperAdminLayout from './components/SuperAdminLayout';
 import SuperAdminDashboard from './pages/superadmin/Dashboard';
 import SuperAdminShops from './pages/superadmin/Shops';
@@ -61,6 +63,8 @@ export default function App() {
               <Route path="/promotions" element={<Promotions />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/manage" element={<Manage />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/queue" element={<Queue />} />
             </Route>
             <Route
               element={

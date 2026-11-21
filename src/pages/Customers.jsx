@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import { MagnifyingGlassIcon, PlusIcon, PencilSquareIcon, PhoneIcon } from '@heroicons/react/24/outline';
+import { MagnifyingGlassIcon, PlusIcon, PencilSquareIcon, PhoneIcon, SparklesIcon } from '@heroicons/react/24/outline';
+import clsx from 'clsx';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../lib/AuthContext';
 import { useToast } from '../components/ToastProvider';
@@ -33,6 +34,12 @@ export default function Customers() {
   const [creating, setCreating] = useState(false);
   const [blockBusy, setBlockBusy] = useState(false);
   const [blockConfirmOpen, setBlockConfirmOpen] = useState(false);
+  const [crmData, setCrmData] = useState(null);
+  const [activeSegment, setActiveSegment] = useState('all'); // 'all' | 'vip' | 'regular' | 'new' | 'at_risk' | 'lost'
+  const [broadcastOpen, setBroadcastOpen] = useState(false);
+  const [broadcastSegment, setBroadcastSegment] = useState('at_risk');
+  const [broadcastTemplate, setBroadcastTemplate] = useState('');
+  const [broadcasting, setBroadcasting] = useState(false);
   // Tracks whichever customer is currently "active" in the detail modal —
   // every async action below (load detail, save notes/info, toggle block)
   // checks this before writing to `detail`, so a slow response for a
@@ -48,7 +55,29 @@ export default function Customers() {
     return api.get(`/admin/customers${query}`).then((res) => setCustomers(res.customers));
   };
 
-  useEffect(() => { load(''); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [api]);
+  useEffect(() => {
+    load('');
+    api.get('/admin/crm/segments').then(setCrmData).catch(() => {});
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  }, [api]);
+
+  const sendBroadcast = async (e) => {
+    e.preventDefault();
+    setBroadcasting(true);
+    try {
+      const res = await api.post('/admin/crm/broadcast-reengagement', {
+        targetSegment: broadcastSegment,
+        messageTemplate: broadcastTemplate.trim() || undefined,
+      });
+      showToast(t('crm.broadcastSentToast', { count: res.sentCount, defaultValue: `Sent to ${res.sentCount} clients` }));
+      setBroadcastOpen(false);
+      setBroadcastTemplate('');
+    } catch (err) {
+      showToast(err.message || t('crm.broadcastError', 'Failed to send broadcast'), 'error');
+    } finally {
+      setBroadcasting(false);
+    }
+  };
 
   // Debounced server-side search — matches routes/adminCustomers.js's
   // ?search= support rather than fetching every customer up front.
@@ -171,6 +200,24 @@ export default function Customers() {
     }
   };
 
+  const segmentMap = new Map(
+    (crmData?.customers || []).map((item) => [Number(item.telegramId), item])
+  );
+
+  const visibleCustomers = customers === null
+    ? null
+    : activeSegment === 'all'
+      ? customers
+      : customers.filter((c) => segmentMap.get(Number(c.telegramId))?.segment === activeSegment);
+
+  const SEGMENT_BADGES = {
+    vip: 'bg-accent/15 text-accent border-accent/30',
+    regular: 'bg-success/15 text-success border-success/30',
+    new: 'bg-info/15 text-info border-info/30',
+    at_risk: 'bg-warning/15 text-warning border-warning/30',
+    lost: 'bg-danger/15 text-danger border-danger/30',
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-3">
@@ -178,7 +225,7 @@ export default function Customers() {
           <h1 className="font-display text-2xl font-semibold text-text">{t('customers.title')}</h1>
           <p className="text-text-muted text-sm mt-1">{t('customers.subtitle')}</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <div className="relative">
             <MagnifyingGlassIcon className="w-4 h-4 text-text-faint absolute left-3 top-1/2 -translate-y-1/2" />
             <input
@@ -188,18 +235,59 @@ export default function Customers() {
               className="bg-surface-3 border border-border rounded-lg pl-9 pr-3 py-2 text-sm text-text placeholder:text-text-faint outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 transition-all w-56"
             />
           </div>
+          <Button variant="subtle" onClick={() => setBroadcastOpen(true)} className="!px-3 !py-2 text-sm">
+            <SparklesIcon className="w-4 h-4 text-accent" /> {t('crm.winBackBtn', 'Win-Back')}
+          </Button>
           <Button onClick={() => setCreateOpen(true)} className="!px-3 !py-2 text-sm"><PlusIcon className="w-4 h-4" /> {t('customers.newClient')}</Button>
         </div>
       </div>
 
+      {/* CRM RFM Segments Strip */}
+      {crmData?.segments && (
+        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
+          {[
+            { id: 'all', label: t('crm.segAll', 'All'), count: crmData.totalClients || 0 },
+            { id: 'vip', label: t('crm.segVip', 'VIP'), count: crmData.segments.vip?.count || 0 },
+            { id: 'regular', label: t('crm.segRegular', 'Regular'), count: crmData.segments.regular?.count || 0 },
+            { id: 'new', label: t('crm.segNew', 'New'), count: crmData.segments.new?.count || 0 },
+            { id: 'at_risk', label: t('crm.segAtRisk', 'At-Risk'), count: crmData.segments.at_risk?.count || 0 },
+            { id: 'lost', label: t('crm.segLost', 'Lost'), count: crmData.segments.lost?.count || 0 },
+          ].map((seg) => (
+            <button
+              key={seg.id}
+              type="button"
+              onClick={() => setActiveSegment(seg.id)}
+              className={clsx(
+                'px-3.5 py-2 rounded-xl border text-xs font-medium whitespace-nowrap flex items-center gap-2 transition-all cursor-pointer',
+                activeSegment === seg.id
+                  ? 'bg-accent text-black border-accent font-semibold'
+                  : 'bg-surface border-border-soft text-text-muted hover:text-text hover:bg-surface-2'
+              )}
+            >
+              <span>{seg.label}</span>
+              <span
+                className={clsx(
+                  'px-1.5 py-0.5 rounded-full text-[10px] tabular-nums font-semibold',
+                  activeSegment === seg.id ? 'bg-black/15 text-black' : 'bg-surface-3 text-text'
+                )}
+              >
+                {seg.count}
+              </span>
+            </button>
+          ))}
+        </div>
+      )}
+
       <Card className="overflow-hidden">
-        {customers === null ? (
+        {visibleCustomers === null ? (
           <div>{Array.from({ length: 6 }).map((_, i) => <TableRowSkeleton key={i} />)}</div>
-        ) : customers.length === 0 ? (
+        ) : visibleCustomers.length === 0 ? (
           <EmptyState icon="👥" title={t('customers.noCustomersTitle')} description={t('customers.noCustomersDesc')} />
         ) : (
           <div>
-            {customers.map((c, i) => (
+            {visibleCustomers.map((c, i) => {
+              const crmInfo = segmentMap.get(Number(c.telegramId));
+              return (
               <motion.div
                 key={c.telegramId}
                 initial={{ opacity: 0, y: 6 }}
@@ -215,8 +303,18 @@ export default function Customers() {
                   {(c.userName || '?').slice(0, 1).toUpperCase()}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-text truncate flex items-center gap-1.5">
+                  <p className="text-sm font-medium text-text truncate flex items-center gap-1.5 flex-wrap">
                     {c.userName || t('common.guest')} <span className="text-text-faint font-normal">· {c.userNumber}</span>
+                    {crmInfo?.segment && (
+                      <span
+                        className={clsx(
+                          'text-[10px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded border shrink-0',
+                          SEGMENT_BADGES[crmInfo.segment] || 'bg-surface-3 text-text-muted border-border'
+                        )}
+                      >
+                        {t(`crm.seg_${crmInfo.segment}`, crmInfo.segment.replace('_', ' '))}
+                      </span>
+                    )}
                     {c.isBlocked && <span className="text-[10px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded bg-danger/15 text-danger shrink-0">{t('customers.blocked')}</span>}
                   </p>
                   <p className="text-xs text-text-muted truncate">
@@ -243,7 +341,8 @@ export default function Customers() {
                   </a>
                 )}
               </motion.div>
-            ))}
+              );
+            })}
           </div>
         )}
       </Card>
@@ -407,6 +506,48 @@ export default function Customers() {
           <Field label={t('appointments.manual.newClientName')}><Input value={createName} onChange={(e) => setCreateName(e.target.value)} autoFocus /></Field>
           <Field label={t('common.phoneNumber')}><Input value={createNumber} onChange={(e) => setCreateNumber(e.target.value)} /></Field>
         </div>
+      </Modal>
+
+      {/* Win-Back Re-engagement Broadcast Modal */}
+      <Modal
+        open={broadcastOpen}
+        onClose={() => setBroadcastOpen(false)}
+        title={t('crm.broadcastTitle', 'Send Telegram Win-Back Broadcast')}
+        footer={(
+          <>
+            <Button variant="ghost" onClick={() => setBroadcastOpen(false)}>{t('common.cancel', 'Cancel')}</Button>
+            <Button disabled={broadcasting} onClick={sendBroadcast}>
+              {broadcasting ? t('common.sending', 'Sending...') : t('crm.sendBroadcastBtn', 'Send Broadcast')}
+            </Button>
+          </>
+        )}
+      >
+        <form onSubmit={sendBroadcast} className="space-y-4">
+          <Field label={t('crm.targetSegmentLabel', 'Target Segment')}>
+            <select
+              value={broadcastSegment}
+              onChange={(e) => setBroadcastSegment(e.target.value)}
+              className="w-full bg-surface-3 border border-border rounded-lg px-3 py-2.5 text-sm text-text outline-none focus:border-accent"
+            >
+              <option value="at_risk">{t('crm.segAtRisk', 'At-Risk (29-60 days)')} ({crmData?.segments?.at_risk?.count || 0})</option>
+              <option value="lost">{t('crm.segLost', 'Lost (60+ days)')} ({crmData?.segments?.lost?.count || 0})</option>
+              <option value="vip">{t('crm.segVip', 'VIP Clients')} ({crmData?.segments?.vip?.count || 0})</option>
+              <option value="regular">{t('crm.segRegular', 'Regular Clients')} ({crmData?.segments?.regular?.count || 0})</option>
+            </select>
+          </Field>
+
+          <Field
+            label={t('crm.messageTemplateLabel', 'Custom Message (optional)')}
+            hint={t('crm.templateHint', 'Variables: {name}, {shop}. Leave blank for default localized message.')}
+          >
+            <Textarea
+              rows={3}
+              value={broadcastTemplate}
+              onChange={(e) => setBroadcastTemplate(e.target.value)}
+              placeholder={t('crm.templatePlaceholder', 'Salom {name}! {shop} sizni kutmoqda...')}
+            />
+          </Field>
+        </form>
       </Modal>
     </div>
   );

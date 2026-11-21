@@ -10,6 +10,8 @@ import {
   Squares2X2Icon,
   ArrowRightIcon,
   PhoneIcon,
+  BanknotesIcon,
+  QueueListIcon,
 } from '@heroicons/react/24/outline';
 import clsx from 'clsx';
 import { useAuth } from '../lib/AuthContext';
@@ -20,6 +22,7 @@ import StatusBadge from '../components/StatusBadge';
 import { Card, Button, EmptyState, Input, Textarea } from '../components/ui';
 import Modal from '../components/Modal';
 import ManualBookingModal from '../components/ManualBookingModal';
+import CheckoutModal from '../components/CheckoutModal';
 import ScheduleCalendar from '../components/ScheduleCalendar';
 import { StatCardSkeleton, TableRowSkeleton } from '../components/Skeleton';
 import { localeFor } from '../lib/locale';
@@ -137,6 +140,9 @@ export default function Dashboard() {
   const [rescheduleTarget, setRescheduleTarget] = useState(null);
   const [noteTarget, setNoteTarget] = useState(null);
   const [noteDraft, setNoteDraft] = useState('');
+  const [registerStatus, setRegisterStatus] = useState(null);
+  const [queueCount, setQueueCount] = useState(0);
+  const [checkoutTarget, setCheckoutTarget] = useState(null);
 
   useEffect(() => {
     window.__openManualBooking = () => setManualOpen(true);
@@ -192,6 +198,8 @@ export default function Dashboard() {
     Promise.all([
       loadTodayStats(),
       api.get('/admin/shop').then(setShopInfo).catch(() => {}),
+      api.get('/admin/register/current').then(setRegisterStatus).catch(() => {}),
+      api.get('/admin/waitlist').then((res) => setQueueCount((res.queue || []).length)).catch(() => {}),
       loadTodayAppointments(),
     ]).finally(() => !cancelled && setLoading(false));
 
@@ -277,6 +285,49 @@ export default function Dashboard() {
           <PlusIcon className="w-4 h-4 stroke-[2.5]" />
           {t('appointments.manual.newBooking', 'Yangi bandlov')}
         </Button>
+      </div>
+
+      {/* Live Operations Quick-Access Strip (Cashier Register & Walk-In Queue) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <Link
+          to="/register"
+          className="press-spring bg-surface border border-border-soft hover:border-accent/40 rounded-2xl p-4 flex items-center justify-between gap-3 card-bevel transition-colors"
+        >
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-10 h-10 rounded-xl bg-accent/15 border border-accent/30 flex items-center justify-center text-accent shrink-0">
+              <BanknotesIcon className="w-5 h-5" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-xs text-text-muted font-medium">{t('nav.register', 'Cashier & Z-Report')}</p>
+              <p className="text-sm font-semibold text-text tabular-nums truncate">
+                {registerStatus?.isOpen
+                  ? currency(registerStatus.summary?.expectedCashBalance || 0)
+                  : t('register.closedBadge', 'Shift Closed — Open Register')}
+              </p>
+            </div>
+          </div>
+          <ArrowRightIcon className="w-4 h-4 text-text-faint shrink-0" />
+        </Link>
+
+        <Link
+          to="/queue"
+          className="press-spring bg-surface border border-border-soft hover:border-accent/40 rounded-2xl p-4 flex items-center justify-between gap-3 card-bevel transition-colors"
+        >
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-10 h-10 rounded-xl bg-info/15 border border-info/30 flex items-center justify-center text-info shrink-0">
+              <QueueListIcon className="w-5 h-5" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-xs text-text-muted font-medium">{t('nav.queue', 'Walk-In Queue')}</p>
+              <p className="text-sm font-semibold text-text tabular-nums truncate">
+                {queueCount > 0
+                  ? t('queue.activeCountLabel', { count: queueCount, defaultValue: `${queueCount} waiting in salon` })
+                  : t('queue.noWaitingShort', 'No walk-ins waiting')}
+              </p>
+            </div>
+          </div>
+          <ArrowRightIcon className="w-4 h-4 text-text-faint shrink-0" />
+        </Link>
       </div>
 
       {/* Daily KPI Strip with Direct Link to Full Statistics */}
@@ -515,6 +566,27 @@ export default function Dashboard() {
                           </>
                         )}
 
+                        {appt.status === 'completed' && (
+                          <Button
+                            variant="subtle"
+                            className="!px-2.5 !py-1 text-xs"
+                            onClick={() =>
+                              setCheckoutTarget({
+                                initialAmount: appt.price || '',
+                                staffId: appt.staffId || null,
+                                staffName: appt.staffName || '',
+                                bookingId: appt._id,
+                                customerName: appt.userName || '',
+                                customerPhone: appt.userNumber || '',
+                                description: appt.serviceName || '',
+                              })
+                            }
+                          >
+                            <BanknotesIcon className="w-3.5 h-3.5 text-accent" />
+                            {t('register.payBtn', 'Pay')}
+                          </Button>
+                        )}
+
                         {(appt.status === 'pending' || appt.status === 'confirmed') && (
                           <Button
                             variant="ghost"
@@ -623,6 +695,15 @@ export default function Dashboard() {
           autoFocus
         />
       </Modal>
+
+      <CheckoutModal
+        open={!!checkoutTarget}
+        onClose={() => setCheckoutTarget(null)}
+        onSuccess={() => {
+          api.get('/admin/register/current').then(setRegisterStatus).catch(() => {});
+        }}
+        {...(checkoutTarget || {})}
+      />
     </div>
   );
 }

@@ -7,7 +7,7 @@ const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || undefined; // undefined = 
 // calling component. `onEvent(payload)` fires for every 'appointment:update'
 // pushed by the backend — a booking created via Telegram, or confirmed/
 // rejected from either the bot or another open tab of this same panel.
-export function useShopSocket(token, onEvent) {
+export function useShopSocket(token, onEvent, eventName = 'appointment:update') {
   const handlerRef = useRef(onEvent);
   handlerRef.current = onEvent;
 
@@ -24,8 +24,8 @@ export function useShopSocket(token, onEvent) {
       extraHeaders: { 'ngrok-skip-browser-warning': 'true' },
     });
 
-    socket.on('appointment:update', (payload) => handlerRef.current?.(payload));
+    socket.on(eventName, (payload) => handlerRef.current?.(payload));
 
     return () => socket.disconnect();
-  }, [token]);
+  }, [token, eventName]);
 }
