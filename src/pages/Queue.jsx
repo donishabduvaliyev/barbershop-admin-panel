@@ -107,7 +107,7 @@ export default function Queue() {
     loadUpcoming();
   }, 'appointment:update');
 
-  const customerBaseUrl = import.meta.env.VITE_CUSTOMER_APP_URL || 'https://barbershop-telegram-bot.netlify.app';
+  const customerBaseUrl = import.meta.env.VITE_CUSTOMER_APP_URL || 'https://t.me/SmartchairAdminbot';
   const checkInUrl = resolvedShopId ? `${customerBaseUrl}/waitlist/${resolvedShopId}` : '';
 
   const openQrModal = async () => {
