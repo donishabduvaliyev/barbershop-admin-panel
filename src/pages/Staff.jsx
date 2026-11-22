@@ -16,7 +16,13 @@ import { CardGridSkeleton } from '../components/Skeleton';
 import { localeFor } from '../lib/locale';
 
 const EMPTY_FORM = { name: '', title: '', photo: '', daysOff: [], serviceIds: [], commission: '', workingHours: [] };
-const todayKey = () => new Date().toISOString().slice(0, 10);
+const todayKey = () => {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+};
 
 export default function Staff() {
   const { t, i18n } = useTranslation();
@@ -204,7 +210,10 @@ export default function Staff() {
           <button
             key={tab.id}
             type="button"
-            onClick={() => setActiveTab(tab.id)}
+            onClick={() => {
+              setActiveTab(tab.id);
+              setSearchParams(tab.id === 'roster' ? {} : { tab: tab.id }, { replace: true });
+            }}
             className={`px-3.5 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all cursor-pointer ${
               activeTab === tab.id
                 ? 'bg-accent text-black font-semibold shadow-sm'
@@ -320,7 +329,7 @@ export default function Staff() {
                       onClick={() => toggleService(service._id)}
                       className={`px-2.5 py-1.5 rounded-lg border text-xs transition-colors ${checked ? 'bg-accent/15 border-accent text-accent' : 'bg-surface-3 border-border text-text-muted hover:text-text'}`}
                     >
-                      {service.name?.en}
+                      {service.name?.[i18n.language] || service.name?.uz || service.name?.en}
                     </button>
                   );
                 })}

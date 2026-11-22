@@ -59,6 +59,12 @@ function RescheduleModal({ booking, onClose, onSaved }) {
     return list;
   }, [date]);
 
+  useEffect(() => {
+    if (hour !== null && !hours.includes(hour)) {
+      setHour(hours[0] ?? null);
+    }
+  }, [hours, hour]);
+
   const submit = async () => {
     setSaving(true);
     try {
@@ -189,7 +195,13 @@ export default function Appointments() {
     setActioningId(id);
     try {
       const updated = await api.patch(`/admin/appointments/${id}/${action}`, body);
-      setData((prev) => ({ ...prev, appointments: prev.appointments.map((a) => (a._id === id ? updated : a)) }));
+      setData((prev) => {
+        if (!prev) return prev;
+        const appointments = status && updated.status !== status
+          ? prev.appointments.filter((a) => a._id !== id)
+          : prev.appointments.map((a) => (a._id === id ? updated : a));
+        return { ...prev, appointments };
+      });
       showToast(
         action === 'confirm' ? t('appointments.toastConfirmed')
           : action === 'reject' ? t('appointments.toastRejected')
@@ -197,6 +209,19 @@ export default function Appointments() {
           : action === 'cancel' ? t('appointments.toastCancelled')
           : t('appointments.toastCompleted')
       );
+      if (action === 'complete' && updated && !updated.isPaid) {
+        setCheckoutTarget({
+          initialAmount: updated.price || '',
+          price: updated.price || 0,
+          paidAmount: updated.paidAmount || 0,
+          staffId: updated.staffId || null,
+          staffName: updated.staffName || '',
+          bookingId: updated._id,
+          customerName: updated.userName || '',
+          customerPhone: updated.userNumber || '',
+          description: updated.serviceName || '',
+        });
+      }
     } catch (err) {
       showToast(err.message || t('appointments.toastError'), 'error');
     } finally {

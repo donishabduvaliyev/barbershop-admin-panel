@@ -58,6 +58,12 @@ function RescheduleModal({ booking, onClose, onSaved }) {
     return list;
   }, [date]);
 
+  useEffect(() => {
+    if (hour !== null && !hours.includes(hour)) {
+      setHour(hours[0] ?? null);
+    }
+  }, [hours, hour]);
+
   const submit = async () => {
     setSaving(true);
     try {
@@ -670,7 +676,12 @@ export default function Dashboard() {
         booking={rescheduleTarget}
         onClose={() => setRescheduleTarget(null)}
         onSaved={(updated) => {
-          setAppointments((prev) => prev.map((a) => (a._id === updated._id ? updated : a)));
+          const isToday = new Date(updated.requestedTime).toDateString() === new Date().toDateString();
+          setAppointments((prev) => (
+            isToday
+              ? prev.map((a) => (a._id === updated._id ? updated : a))
+              : prev.filter((a) => a._id !== updated._id)
+          ));
           setRescheduleTarget(null);
           loadTodayStats();
         }}

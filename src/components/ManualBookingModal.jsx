@@ -37,6 +37,7 @@ export default function ManualBookingModal({ open, onClose, onCreated, shop, pre
 
   const [daySchedule, setDaySchedule] = useState(null);
   const [scheduleLoading, setScheduleLoading] = useState(false);
+  const [loadedDateKey, setLoadedDateKey] = useState(null);
 
   useEffect(() => {
     if (shop) setShopData(shop);
@@ -53,7 +54,10 @@ export default function ManualBookingModal({ open, onClose, onCreated, shop, pre
 
   // Fetch schedule for the selected date to know booked slots and staff presence
   useEffect(() => {
-    if (!open || !date) return;
+    if (!open || !date) {
+      setLoadedDateKey(null);
+      return;
+    }
     const y = date.getFullYear();
     const m = pad(date.getMonth() + 1);
     const d = pad(date.getDate());
@@ -62,7 +66,10 @@ export default function ManualBookingModal({ open, onClose, onCreated, shop, pre
     api.get(`/admin/shop/schedule?date=${dateKey}`)
       .then(setDaySchedule)
       .catch(() => setDaySchedule(null))
-      .finally(() => setScheduleLoading(false));
+      .finally(() => {
+        setScheduleLoading(false);
+        setLoadedDateKey(dateKey);
+      });
   }, [open, date, api]);
 
   const dates = useMemo(() => [...Array(7)].map((_, i) => {
@@ -210,6 +217,9 @@ export default function ManualBookingModal({ open, onClose, onCreated, shop, pre
 
   // Ensure selected hour is always valid among availableHours
   useEffect(() => {
+    if (!open || !date || scheduleLoading) return;
+    const currentKey = `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+    if (loadedDateKey !== currentKey) return;
     if (availableHours.length > 0) {
       if (hour === null || !availableHours.some((item) => item.hour === hour)) {
         setHour(availableHours[0].hour);
@@ -217,7 +227,7 @@ export default function ManualBookingModal({ open, onClose, onCreated, shop, pre
     } else {
       setHour(null);
     }
-  }, [availableHours, hour]);
+  }, [open, date, scheduleLoading, loadedDateKey, availableHours, hour]);
 
   useEffect(() => {
     if (!open || clientMode !== 'search' || !search.trim()) { setSearchResults([]); return; }

@@ -1,7 +1,8 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import clsx from 'clsx';
 import { useAuth } from '../lib/AuthContext';
+import { useShopSocket } from '../lib/socket';
 import { Card, EmptyState } from './ui';
 import { Skeleton } from './Skeleton';
 import ManualBookingModal from './ManualBookingModal';
@@ -34,7 +35,7 @@ const SOURCE_ICON = { bot: '🤖', phone: '📞', 'walk-in': '🚶' };
 
 export default function ScheduleCalendar({ shop }) {
   const { t, i18n } = useTranslation();
-  const { api } = useAuth();
+  const { api, token } = useAuth();
 
   const [selectedDate, setSelectedDate] = useState(() => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; });
   const [schedule, setSchedule] = useState(null);
@@ -45,11 +46,12 @@ export default function ScheduleCalendar({ shop }) {
   const dateKey = toDateKey(selectedDate);
   const dayName = WEEKDAY_NAMES[selectedDate.getDay()];
 
-  const load = () => {
+  const load = useCallback(() => {
     setLoading(true);
     api.get(`/admin/shop/schedule?date=${dateKey}`).then(setSchedule).finally(() => setLoading(false));
-  };
-  useEffect(load, [dateKey]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [api, dateKey]);
+  useEffect(() => { load(); }, [load]);
+  useShopSocket(token, load);
 
   const dates = useMemo(() => [...Array(14)].map((_, i) => {
     const d = new Date();
@@ -69,7 +71,10 @@ export default function ScheduleCalendar({ shop }) {
     return list;
   }, [schedule, dayName]);
 
-  const findBookingAt = (bookings, hour) => bookings?.find((b) => b.hour === hour);
+  const findBookingAt = (bookings, hour) => {
+    const atHour = (bookings || []).filter((b) => b.hour === hour);
+    return atHour.find((b) => b.status === 'confirmed' || b.status === 'pending') || atHour[0];
+  };
 
   const openBookingSlot = (staffId, hour) => setBookingModal({ staffId, hour });
 
@@ -136,7 +141,15 @@ export default function ScheduleCalendar({ shop }) {
                         className={clsx(
                           'm-0.5 rounded-lg text-[11px] font-medium px-1.5 py-2.5 transition-colors text-left',
                           booking
-                            ? (booking.status === 'confirmed' ? 'bg-success/15 text-success hover:bg-success/25' : 'bg-warning/15 text-warning hover:bg-warning/25')
+                            ? (
+                              booking.status === 'confirmed'
+                                ? 'bg-success/15 text-success hover:bg-success/25'
+                                : booking.status === 'completed'
+                                  ? 'bg-info/15 border border-info/40 text-info hover:bg-info/25'
+                                  : booking.status === 'no-show'
+                                    ? 'bg-danger/10 border border-danger/30 text-danger hover:bg-danger/20'
+                                    : 'bg-warning/15 text-warning hover:bg-warning/25'
+                            )
                             : closed ? 'bg-surface-2/40 text-text-faint cursor-not-allowed' : 'bg-surface-2 text-text-faint hover:bg-accent/10 hover:text-accent'
                         )}
                       >
