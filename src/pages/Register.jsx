@@ -299,7 +299,7 @@ export default function Register() {
           {/* Payment Method Breakdown */}
           <Card className="p-5 space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-sm font-semibold text-text uppercase tracking-wide">
+              <h2 className="text-sm font-semibold text-text">
                 {t('register.methodBreakdown', 'Payment Method Breakdown')}
               </h2>
               <span className="text-xs text-text-muted tabular-nums">
@@ -321,7 +321,7 @@ export default function Register() {
                     <p className="text-base font-semibold text-text tabular-nums">{currency(amt)}</p>
                     <div className="h-1.5 w-full rounded-full bg-surface-3 overflow-hidden">
                       <div
-                        className="h-full bg-accent rounded-full transition-all duration-500"
+                        className="h-full bg-accent rounded-full transition-[transform,opacity] duration-500"
                         style={{ width: `${pct}%` }}
                       />
                     </div>
@@ -334,7 +334,7 @@ export default function Register() {
           {/* Current Shift Transactions */}
           <Card className="overflow-hidden">
             <div className="px-5 py-4 border-b border-border-soft flex items-center justify-between">
-              <h2 className="text-sm font-semibold text-text uppercase tracking-wide">
+              <h2 className="text-sm font-semibold text-text">
                 {t('register.ledgerTitle', 'Shift Transactions')} ({transactions.length})
               </h2>
             </div>
@@ -400,7 +400,7 @@ export default function Register() {
       {/* Past Z-Report History */}
       {history.length > 0 && (
         <div className="space-y-3">
-          <h2 className="text-sm font-semibold text-text-muted uppercase tracking-wide flex items-center gap-2">
+          <h2 className="text-sm font-semibold text-text-muted flex items-center gap-2">
             <DocumentCheckIcon className="w-4 h-4 text-accent" />
             {t('register.historyTitle', 'Past Z-Reports')}
           </h2>
@@ -441,7 +441,7 @@ export default function Register() {
                   </div>
                 </div>
                 {session.notes && (
-                  <p className="text-xs text-text-muted italic truncate">“{session.notes}”</p>
+                  <p className="text-xs text-text-muted truncate">“{session.notes}”</p>
                 )}
               </Card>
             ))}

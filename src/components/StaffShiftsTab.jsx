@@ -196,7 +196,7 @@ export default function StaffShiftsTab({ staff = [] }) {
                       <p className="text-sm font-semibold text-text truncate">{member?.name || 'Master'}</p>
                       <span
                         className={clsx(
-                          'text-[11px] font-semibold px-2 py-0.5 rounded-full border uppercase',
+                          'text-[11px] font-semibold px-2 py-0.5 rounded-full border',
                           SHIFT_BADGE[shift.status] || 'bg-surface-3 text-text-muted border-border'
                         )}
                       >
@@ -216,7 +216,7 @@ export default function StaffShiftsTab({ staff = [] }) {
                       variant="primary"
                       disabled={isBusy}
                       onClick={() => handleAction(shift, 'clock-in')}
-                      className="text-xs px-3 py-2 min-h-[38px]"
+                      className="text-xs px-3 py-2 min-h-[36px]"
                     >
                       <ClockIcon className="w-4 h-4" />
                       {t('staff.clockInBtn', 'Clock In')}
@@ -227,7 +227,7 @@ export default function StaffShiftsTab({ staff = [] }) {
                       variant="subtle"
                       disabled={isBusy}
                       onClick={() => handleAction(shift, 'clock-out')}
-                      className="text-xs px-3 py-2 min-h-[38px]"
+                      className="text-xs px-3 py-2 min-h-[36px]"
                     >
                       <CheckCircleIcon className="w-4 h-4 text-success" />
                       {t('staff.clockOutBtn', 'Clock Out')}
@@ -238,7 +238,7 @@ export default function StaffShiftsTab({ staff = [] }) {
                       variant="ghost"
                       disabled={isBusy}
                       onClick={() => handleAction(shift, 'absent')}
-                      className="text-xs px-2.5 py-2 min-h-[38px]"
+                      className="text-xs px-2.5 py-2 min-h-[36px]"
                       title={t('staff.markAbsentBtn', 'Mark Absent')}
                     >
                       <XCircleIcon className="w-4 h-4 text-danger" />
@@ -248,7 +248,7 @@ export default function StaffShiftsTab({ staff = [] }) {
                     variant="danger"
                     disabled={isBusy}
                     onClick={() => handleAction(shift, 'delete')}
-                    className="text-xs px-2.5 py-2 min-h-[38px]"
+                    className="text-xs px-2.5 py-2 min-h-[36px]"
                     title={t('common.delete', 'Delete')}
                   >
                     <TrashIcon className="w-4 h-4" />

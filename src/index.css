@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,500;9..144,600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Fraunces:opsz,wght@9..144,500;9..144,600&display=swap');
 @import "tailwindcss";
 
 @theme {
@@ -29,10 +29,10 @@
   --color-info: #5b9df9;
   --color-info-soft: #5b9df91a;
 
-  --animate-fade-in: fade-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  --animate-slide-up: slide-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  --animate-slide-in-right: slide-in-right 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  --animate-scale-in: scale-in 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  --animate-fade-in: fade-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  --animate-slide-up: slide-up 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  --animate-slide-in-right: slide-in-right 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  --animate-scale-in: scale-in 0.25s cubic-bezier(0.22, 1, 0.36, 1) forwards;
   --animate-shimmer: shimmer 1.8s ease-in-out infinite;
 
   @keyframes fade-in {
@@ -112,7 +112,7 @@ body {
 }
 
 .press-spring {
-  transition: transform 0.14s cubic-bezier(0.2, 0, 0, 1), background-color 0.14s ease, border-color 0.14s ease, box-shadow 0.14s ease;
+  transition: transform 0.14s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.14s ease, border-color 0.14s ease;
 }
 .press-spring:active {
   transform: scale(0.978);
@@ -125,9 +125,9 @@ body {
 .btn-gold-admin {
   background: var(--color-accent);
   color: #0a0a0c;
-  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.35), 0 3px 12px rgba(212, 175, 90, 0.22);
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
 }
 .btn-gold-admin:hover {
   background: var(--color-accent-hover);
-  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.45), 0 4px 16px rgba(212, 175, 90, 0.3);
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
 }

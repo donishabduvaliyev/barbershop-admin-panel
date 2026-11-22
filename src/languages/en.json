@@ -73,7 +73,7 @@
     "noShow": "No-show"
   },
   "dashboard": {
-    "greeting": "Good to see you 👋",
+    "greeting": "Today's Overview",
     "subtitlePrefix": "Here's how",
     "subtitleSuffix": "is doing this month.",
     "today": "Today",

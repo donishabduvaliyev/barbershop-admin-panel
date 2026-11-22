@@ -12,7 +12,7 @@ export function Button({ variant = 'primary', className, children, ...props }) {
   return (
     <motion.button
       whileTap={{ scale: 0.98 }}
-      transition={{ type: 'spring', stiffness: 450, damping: 28 }}
+      transition={{ duration: 0.16, ease: [0.22, 1, 0.36, 1] }}
       className={clsx(
         'inline-flex items-center justify-center gap-2 rounded-xl text-sm font-medium px-4 py-2.5 transition-colors disabled:opacity-40 disabled:pointer-events-none cursor-pointer',
         variants[variant],
@@ -39,7 +39,7 @@ export function Input({ className, ...props }) {
   return (
     <input
       className={clsx(
-        'w-full bg-surface-3 border border-border rounded-lg px-3 py-2.5 text-sm text-text placeholder:text-text-faint outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 transition-all',
+        'w-full bg-surface-3 border border-border rounded-lg px-3 py-2.5 text-sm text-text placeholder:text-text-faint outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 transition-colors',
         className
       )}
       {...props}
@@ -51,7 +51,7 @@ export function Textarea({ className, ...props }) {
   return (
     <textarea
       className={clsx(
-        'w-full bg-surface-3 border border-border rounded-lg px-3 py-2.5 text-sm text-text placeholder:text-text-faint outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 transition-all resize-none',
+        'w-full bg-surface-3 border border-border rounded-lg px-3 py-2.5 text-sm text-text placeholder:text-text-faint outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 transition-colors resize-none',
         className
       )}
       {...props}
@@ -75,7 +75,7 @@ export function Switch({ checked, onChange, label }) {
         <motion.span
           className="absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow-md"
           animate={{ x: checked ? 20 : 0 }}
-          transition={{ type: 'spring', stiffness: 500, damping: 32 }}
+          transition={{ duration: 0.16, ease: [0.22, 1, 0.36, 1] }}
         />
       </span>
       {label && <span className="text-sm text-text">{label}</span>}

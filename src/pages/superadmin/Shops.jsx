@@ -281,7 +281,7 @@ export default function SuperAdminShops() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="text-xs text-text-muted uppercase tracking-wide text-left">
+                <tr className="text-xs text-text-muted text-left">
                   <th className="px-5 py-3 font-medium">{t('superadmin.shops.colName')}</th>
                   <th className="px-4 py-3 font-medium">{t('superadmin.shops.colOwner')}</th>
                   <th className="px-4 py-3 font-medium">{t('superadmin.shops.colStatus')}</th>
@@ -406,7 +406,7 @@ export default function SuperAdminShops() {
             <select
               value={form.category}
               onChange={(e) => setForm({ ...form, category: e.target.value })}
-              className="w-full bg-surface-3 border border-border rounded-lg px-3 py-2.5 text-sm text-text outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 transition-all"
+              className="w-full bg-surface-3 border border-border rounded-lg px-3 py-2.5 text-sm text-text outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 transition-colors"
             >
               {CATEGORY_OPTIONS.map((c) => <option key={c} value={c}>{categoryLabel(c)}</option>)}
             </select>

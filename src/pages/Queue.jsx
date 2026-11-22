@@ -231,15 +231,15 @@ export default function Queue() {
       {/* Live Status Strip */}
       <div className="grid grid-cols-3 gap-3">
         <Card className="p-4 flex items-center justify-between">
-          <span className="text-xs font-medium text-text-muted uppercase">{t('queue.statusWaiting', 'Waiting')}</span>
+          <span className="text-xs font-medium text-text-muted">{t('queue.statusWaiting', 'Waiting')}</span>
           <span className="text-xl font-semibold text-warning tabular-nums">{waitingCount}</span>
         </Card>
         <Card className="p-4 flex items-center justify-between">
-          <span className="text-xs font-medium text-text-muted uppercase">{t('queue.statusCalled', 'Called')}</span>
+          <span className="text-xs font-medium text-text-muted">{t('queue.statusCalled', 'Called')}</span>
           <span className="text-xl font-semibold text-info tabular-nums">{calledCount}</span>
         </Card>
         <Card className="p-4 flex items-center justify-between">
-          <span className="text-xs font-medium text-text-muted uppercase">{t('queue.statusInChair', 'In Chair')}</span>
+          <span className="text-xs font-medium text-text-muted">{t('queue.statusInChair', 'In Chair')}</span>
           <span className="text-xl font-semibold text-success tabular-nums">{inChairCount}</span>
         </Card>
       </div>
@@ -248,8 +248,8 @@ export default function Queue() {
       {upcomingBookings.length > 0 && (
         <Card className="p-4 space-y-2.5 border-accent/25">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-accent uppercase tracking-wide">
-              📅 {t('queue.upcomingBookingsTitle', 'Upcoming Scheduled Appointments (Next 2h)')}
+            <span className="text-xs font-semibold text-accent">
+              {t('queue.upcomingBookingsTitle', 'Upcoming Scheduled Appointments (Next 2h)')}
             </span>
             <span className="text-xs text-text-muted tabular-nums">{upcomingBookings.length}</span>
           </div>
@@ -322,7 +322,7 @@ export default function Queue() {
                           <h3 className="text-base font-semibold text-text truncate">{entry.customerName}</h3>
                           <span
                             className={clsx(
-                              'text-[11px] font-semibold px-2 py-0.5 rounded-full border uppercase tracking-wide',
+                              'text-[11px] font-semibold px-2 py-0.5 rounded-full border',
                               STATUS_STYLE[entry.status] || 'bg-surface-3 text-text-muted border-border'
                             )}
                           >

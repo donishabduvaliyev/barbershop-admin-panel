@@ -146,7 +146,7 @@ export default function StaffPayrollTab({ onCommissionUpdated }) {
           {/* Per-Master Breakdown */}
           <Card className="overflow-hidden">
             <div className="px-5 py-4 border-b border-border-soft">
-              <h3 className="text-sm font-semibold text-text uppercase tracking-wide">
+              <h3 className="text-sm font-semibold text-text">
                 {t('staff.payrollBreakdownTitle', 'Commission Breakdown by Master')}
               </h3>
             </div>

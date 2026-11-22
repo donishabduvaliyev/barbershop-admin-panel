@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import clsx from 'clsx';
 import { useTranslation } from 'react-i18next';
 import {
-  Squares2X2Icon, CalendarDaysIcon, UsersIcon, Bars3Icon, ChartBarIcon, MagnifyingGlassIcon,
+  Squares2X2Icon, CalendarDaysIcon, UsersIcon, Bars3Icon, ChartBarIcon, MagnifyingGlassIcon, ScissorsIcon,
 } from '@heroicons/react/24/outline';
 import {
   Squares2X2Icon as Squares2X2IconSolid, CalendarDaysIcon as CalendarDaysIconSolid,
@@ -32,8 +32,8 @@ function TopNavbar({ onOpenCmd }) {
       <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between gap-6">
         {/* Brand */}
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-accent/15 border border-accent/30 flex items-center justify-center font-bold text-accent text-lg">
-            ✂️
+          <div className="w-9 h-9 rounded-xl bg-accent/15 border border-accent/30 flex items-center justify-center text-accent">
+            <ScissorsIcon className="w-[18px] h-[18px] stroke-[1.5]" />
           </div>
           <div>
             <span className="font-display font-bold text-text text-base leading-tight block truncate max-w-[200px]">
@@ -54,7 +54,7 @@ function TopNavbar({ onOpenCmd }) {
               end={end}
               className={({ isActive }) =>
                 clsx(
-                  'relative flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer',
+                  'relative flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer',
                   isActive
                     ? 'bg-accent text-black font-semibold shadow-sm'
                     : 'text-text-muted hover:text-text hover:bg-surface-3'

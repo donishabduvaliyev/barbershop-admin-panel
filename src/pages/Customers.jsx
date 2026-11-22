@@ -233,7 +233,7 @@ export default function Customers() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder={t('customers.searchPlaceholder')}
-              className="bg-surface-3 border border-border rounded-lg pl-9 pr-3 py-2 text-sm text-text placeholder:text-text-faint outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 transition-all w-56"
+              className="bg-surface-3 border border-border rounded-lg pl-9 pr-3 py-2 text-sm text-text placeholder:text-text-faint outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 transition-colors w-56"
             />
           </div>
           <Button variant="subtle" onClick={() => setBroadcastOpen(true)} className="!px-3 !py-2 text-sm">
@@ -259,7 +259,7 @@ export default function Customers() {
               type="button"
               onClick={() => setActiveSegment(seg.id)}
               className={clsx(
-                'px-3.5 py-2 rounded-xl border text-xs font-medium whitespace-nowrap flex items-center gap-2 transition-all cursor-pointer',
+                'px-3.5 py-2 rounded-xl border text-xs font-medium whitespace-nowrap flex items-center gap-2 transition-colors cursor-pointer',
                 activeSegment === seg.id
                   ? 'bg-accent text-black border-accent font-semibold'
                   : 'bg-surface border-border-soft text-text-muted hover:text-text hover:bg-surface-2'
@@ -309,14 +309,14 @@ export default function Customers() {
                     {crmInfo?.segment && (
                       <span
                         className={clsx(
-                          'text-[10px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded border shrink-0',
+                          'text-[10px] font-semibold px-1.5 py-0.5 rounded border shrink-0',
                           SEGMENT_BADGES[crmInfo.segment] || 'bg-surface-3 text-text-muted border-border'
                         )}
                       >
                         {t(`crm.seg_${crmInfo.segment}`, crmInfo.segment.replace('_', ' '))}
                       </span>
                     )}
-                    {c.isBlocked && <span className="text-[10px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded bg-danger/15 text-danger shrink-0">{t('customers.blocked')}</span>}
+                    {c.isBlocked && <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-danger/15 text-danger shrink-0">{t('customers.blocked')}</span>}
                   </p>
                   <p className="text-xs text-text-muted truncate">
                     {c.favoriteServices.length > 0 ? c.favoriteServices.join(', ') : t('customers.noFavoriteService')}

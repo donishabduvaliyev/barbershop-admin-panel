@@ -73,7 +73,7 @@
     "noShow": "Не явился"
   },
   "dashboard": {
-    "greeting": "Рады вас видеть 👋",
+    "greeting": "Обзор дня",
     "subtitlePrefix": "Вот как дела у",
     "subtitleSuffix": "в этом месяце.",
     "today": "Сегодня",

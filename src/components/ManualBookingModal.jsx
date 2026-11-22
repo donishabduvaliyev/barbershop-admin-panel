@@ -363,7 +363,7 @@ export default function ManualBookingModal({ open, onClose, onCreated, shop, pre
           <select
             value={serviceId || ''}
             onChange={(e) => setServiceId(e.target.value)}
-            className="w-full bg-surface-3 border border-border rounded-lg px-3 py-2.5 text-sm text-text outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 transition-all"
+            className="w-full bg-surface-3 border border-border rounded-lg px-3 py-2.5 text-sm text-text outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 transition-colors"
           >
             {activeServices.length === 0 ? (
               <option value="">{t('common.loading') || 'Yuklanmoqda...'}</option>
@@ -426,7 +426,7 @@ export default function ManualBookingModal({ open, onClose, onCreated, shop, pre
         <div>
           <div className="flex items-center justify-between mb-2">
             <p className="text-xs font-medium text-text-muted">{t('appointments.manual.time')}</p>
-            {scheduleLoading && <span className="text-[11px] text-accent animate-pulse">{t('common.loading', 'Yuklanmoqda...')}</span>}
+            {scheduleLoading && <span className="text-[11px] text-accent">{t('common.loading', 'Yuklanmoqda...')}</span>}
           </div>
           {availableHours.length === 0 ? (
             <div className="p-3 bg-surface-3 rounded-lg border border-border text-center">

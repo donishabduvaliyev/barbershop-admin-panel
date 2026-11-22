@@ -209,7 +209,7 @@ export default function SuperAdminCategories() {
                   <div className="flex items-center gap-2">
                     <p className="text-text font-medium truncate">{cat.label[lang] || cat.label.en}</p>
                     <span className={clsx(
-                      'text-[10px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded',
+                      'text-[10px] font-semibold px-1.5 py-0.5 rounded',
                       cat.type === 'auto' ? 'bg-accent/15 text-accent' : 'bg-surface-3 text-text-muted'
                     )}>
                       {cat.type === 'auto' ? t('superadmin.categories.autoBadge') : t('superadmin.categories.manualBadge')}
@@ -265,7 +265,7 @@ export default function SuperAdminCategories() {
             </Field>
           )}
           <Field label={t('superadmin.categories.icon')} hint={t('superadmin.categories.iconHint')}>
-            <Input value={form.icon} onChange={(e) => setForm({ ...form, icon: e.target.value })} placeholder="✨" />
+            <Input value={form.icon} onChange={(e) => setForm({ ...form, icon: e.target.value })} placeholder="Scissors" />
           </Field>
           <Field label={t('superadmin.categories.labelEn')}><Input value={form.labelEn} onChange={(e) => setForm({ ...form, labelEn: e.target.value })} /></Field>
           <Field label={t('superadmin.categories.labelUz')}><Input value={form.labelUz} onChange={(e) => setForm({ ...form, labelUz: e.target.value })} /></Field>

@@ -144,12 +144,12 @@ export default function Statistics() {
           Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-24" />)
         ) : (
           <>
-            <StatCard index={0} label={t('statistics.totalAppointments', 'Jami bandlovlar')} value={stats.totals.appointments} icon="📅" />
-            <StatCard index={1} label={t('statistics.completedVisits', 'Bajarilgan tashriflar')} value={stats.totals.completed} icon="✅" />
-            <StatCard index={2} label={t('statistics.revenue', 'Jami tushum')} value={stats.totals.revenue} icon="💰" format={(v) => `${Math.round(v).toLocaleString()}`} suffix=" UZS" />
-            <StatCard index={3} label={t('statistics.avgTicket', 'O\'rtacha chek')} value={stats.totals.averageTicket || 0} icon="🧾" format={(v) => `${Math.round(v).toLocaleString()}`} suffix=" UZS" />
-            <StatCard index={4} label={t('statistics.completionRate', 'Bajarilish ko\'rsatkichi')} value={stats.totals.completionRate || 0} icon="🎯" suffix="%" />
-            <StatCard index={5} label={t('statistics.noShowRate', 'Kelmaslik darajasi')} value={stats.totals.noShowRate || 0} icon="🚫" suffix="%" accent={(stats.totals.noShowRate || 0) > 10} />
+            <StatCard index={0} label={t('statistics.totalAppointments', 'Jami bandlovlar')} value={stats.totals.appointments} />
+            <StatCard index={1} label={t('statistics.completedVisits', 'Bajarilgan tashriflar')} value={stats.totals.completed} />
+            <StatCard index={2} label={t('statistics.revenue', 'Jami tushum')} value={stats.totals.revenue} format={(v) => `${Math.round(v).toLocaleString()}`} suffix=" UZS" />
+            <StatCard index={3} label={t('statistics.avgTicket', 'O\'rtacha chek')} value={stats.totals.averageTicket || 0} format={(v) => `${Math.round(v).toLocaleString()}`} suffix=" UZS" />
+            <StatCard index={4} label={t('statistics.completionRate', 'Bajarilish ko\'rsatkichi')} value={stats.totals.completionRate || 0} suffix="%" />
+            <StatCard index={5} label={t('statistics.noShowRate', 'Kelmaslik darajasi')} value={stats.totals.noShowRate || 0} suffix="%" accent={(stats.totals.noShowRate || 0) > 10} />
           </>
         )}
       </div>
@@ -312,7 +312,7 @@ export default function Statistics() {
                       <span className="text-text-muted tabular-nums">{s.count} ta ({pct}%) · {s.revenue.toLocaleString()} UZS</span>
                     </div>
                     <div className="w-full h-2 rounded-full bg-surface-3 overflow-hidden">
-                      <div className="h-full rounded-full transition-all duration-500" style={{ width: `${pct}%`, backgroundColor: s.color }} />
+                      <div className="h-full rounded-full transition-colors duration-300" style={{ width: `${pct}%`, backgroundColor: s.color }} />
                     </div>
                   </div>
                 );
@@ -335,7 +335,7 @@ export default function Statistics() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="text-xs text-text-muted uppercase tracking-wide text-left">
+                <tr className="text-xs text-text-muted text-left">
                   <th className="px-6 py-3 font-medium">{t('statistics.colName', 'Ism')}</th>
                   <th className="px-4 py-3 font-medium text-right">{t('statistics.colAppointments', 'Qabullar')}</th>
                   <th className="px-4 py-3 font-medium text-right">{t('statistics.colRevenue', 'Tushum')}</th>

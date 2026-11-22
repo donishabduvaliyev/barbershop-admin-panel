@@ -105,7 +105,7 @@ export default function SuperAdminReviews() {
                   <div className="flex items-center gap-2 flex-wrap">
                     <p className="text-sm font-medium text-text truncate">{r.shopName?.[i18n.language] || r.shopName?.en}</p>
                     <Stars value={r.rating} />
-                    {r.isHidden && <span className="text-[10px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded bg-danger/15 text-danger">{t('superadmin.reviews.hidden')}</span>}
+                    {r.isHidden && <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-danger/15 text-danger">{t('superadmin.reviews.hidden')}</span>}
                   </div>
                   <p className="text-xs text-text-faint truncate mt-0.5">
                     {r.userName || t('superadmin.reviews.unknownCustomer')}

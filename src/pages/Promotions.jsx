@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import clsx from 'clsx';
-import { TrashIcon, PaperAirplaneIcon } from '@heroicons/react/24/outline';
+import { TrashIcon, PaperAirplaneIcon, TagIcon } from '@heroicons/react/24/outline';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../lib/AuthContext';
 import { useToast } from '../components/ToastProvider';
@@ -139,7 +139,7 @@ export default function Promotions() {
         {promotions === null ? (
           <div>{Array.from({ length: 3 }).map((_, i) => <div key={i} className="px-5 py-4"><Skeleton className="h-10 w-full" /></div>)}</div>
         ) : promotions.length === 0 ? (
-          <EmptyState icon="🎉" title={t('promotions.noPromotionsTitle')} description={t('promotions.noPromotionsDesc')} />
+          <EmptyState icon={<TagIcon className="w-8 h-8 text-text-faint stroke-[1.5]" />} title={t('promotions.noPromotionsTitle')} description={t('promotions.noPromotionsDesc')} />
         ) : (
           <div>
             {promotions.map((promo) => (
@@ -185,7 +185,7 @@ export default function Promotions() {
             <select
               value={form.serviceId}
               onChange={(e) => setForm({ ...form, serviceId: e.target.value })}
-              className="w-full bg-surface-3 border border-border rounded-lg px-3 py-2.5 text-sm text-text outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 transition-all"
+              className="w-full bg-surface-3 border border-border rounded-lg px-3 py-2.5 text-sm text-text outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 transition-colors"
             >
               <option value="">{t('promotions.allServices')}</option>
               {services.map((s) => <option key={s._id} value={s._id}>{s.name?.en}</option>)}

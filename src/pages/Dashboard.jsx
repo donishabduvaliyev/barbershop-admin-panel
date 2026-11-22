@@ -303,7 +303,7 @@ export default function Dashboard() {
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
-          <h1 className="font-display text-2xl font-bold tracking-tight text-text">
+          <h1 className="font-display text-2xl font-semibold tracking-tight text-text">
             {t('dashboard.greeting', 'Xush kelibsiz')}
           </h1>
           <p className="text-text-muted text-sm mt-0.5">
@@ -367,7 +367,7 @@ export default function Dashboard() {
       <div>
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <h2 className="text-sm font-semibold text-text uppercase tracking-wider">
+            <h2 className="text-sm font-semibold text-text">
               {t('dashboard.today', 'Bugungi ko\'rsatkichlar')}
             </h2>
             <span className="text-xs px-2 py-0.5 rounded-full bg-accent/15 text-accent font-medium">
@@ -377,7 +377,7 @@ export default function Dashboard() {
 
           <Link
             to="/statistics"
-            className="group flex items-center gap-1.5 text-xs text-accent hover:text-accent-hover font-semibold px-3 py-1.5 rounded-lg bg-surface-2 border border-border-soft hover:border-accent/40 transition-all shadow-sm"
+            className="group flex items-center gap-1.5 text-xs text-accent hover:text-accent-hover font-semibold px-3 py-1.5 rounded-lg bg-surface-2 border border-border-soft hover:border-accent/40 transition-colors shadow-sm"
           >
             <ChartBarIcon className="w-3.5 h-3.5 text-accent" />
             <span>{t('dashboard.viewFullStats', 'To\'liq statistika')}</span>
@@ -394,26 +394,22 @@ export default function Dashboard() {
                 index={0}
                 label={t('dashboard.appointments', 'Bugungi bandlovlar')}
                 value={today.appointments}
-                icon="📅"
               />
               <StatCard
                 index={1}
                 label={t('dashboard.completed', 'Bajarilgan tashriflar')}
                 value={today.completed}
-                icon="✅"
               />
               <StatCard
                 index={2}
                 label={t('dashboard.revenue', 'Bugungi tushum')}
                 value={today.revenue}
-                icon="💰"
                 format={currency}
               />
               <StatCard
                 index={3}
                 label={t('dashboard.pending', 'Kutilayotganlar')}
                 value={today.appointments - today.completed - today.cancelled - today.noShows}
-                icon="⏳"
                 accent={(today.appointments - today.completed - today.cancelled - today.noShows) > 0}
               />
             </>
@@ -441,7 +437,7 @@ export default function Dashboard() {
                 type="button"
                 onClick={() => setViewMode('table')}
                 className={clsx(
-                  'flex items-center gap-1.5 px-3 py-1.5 rounded-md transition-all cursor-pointer',
+                  'flex items-center gap-1.5 px-3 py-1.5 rounded-md transition-colors cursor-pointer',
                   viewMode === 'table' ? 'bg-accent text-black font-semibold shadow-sm' : 'text-text-muted hover:text-text'
                 )}
               >
@@ -452,7 +448,7 @@ export default function Dashboard() {
                 type="button"
                 onClick={() => setViewMode('grid')}
                 className={clsx(
-                  'flex items-center gap-1.5 px-3 py-1.5 rounded-md transition-all cursor-pointer',
+                  'flex items-center gap-1.5 px-3 py-1.5 rounded-md transition-colors cursor-pointer',
                   viewMode === 'grid' ? 'bg-accent text-black font-semibold shadow-sm' : 'text-text-muted hover:text-text'
                 )}
               >
@@ -535,7 +531,7 @@ export default function Dashboard() {
                           <div className="flex items-center gap-2 mt-1 text-xs text-text-muted flex-wrap">
                             <span className="text-text font-medium">✂️ {appt.serviceName || t('common.service', 'Xizmat')}</span>
                             <span>•</span>
-                            <span>💈 {appt.staffName || t('appointments.anyBarber', 'Har qanday bo\'sh')}</span>
+                            <span>{appt.staffName || t('appointments.anyBarber', 'Har qanday bo\'sh')}</span>
                             {appt.price ? (
                               <>
                                 <span>•</span>
@@ -547,7 +543,7 @@ export default function Dashboard() {
                           {appt.adminNotes && (
                             <p className="text-xs text-accent/80 mt-1 flex items-center gap-1">
                               <span>📝</span>
-                              <span className="italic">{appt.adminNotes}</span>
+                              <span>{appt.adminNotes}</span>
                             </p>
                           )}
                         </div>

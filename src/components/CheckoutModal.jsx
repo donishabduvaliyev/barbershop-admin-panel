@@ -200,7 +200,7 @@ export default function CheckoutModal({
                   type="button"
                   onClick={() => setPaymentMethod(id)}
                   className={clsx(
-                    'press-spring flex items-center gap-2.5 px-3 py-2.5 rounded-xl border text-sm font-medium transition-all cursor-pointer min-h-[44px]',
+                    'press-spring flex items-center gap-2.5 px-3 py-2.5 rounded-xl border text-sm font-medium transition-colors cursor-pointer min-h-[44px]',
                     active
                       ? 'bg-accent/15 border-accent text-accent'
                       : 'bg-surface-3 border-border text-text-muted hover:text-text hover:border-border'

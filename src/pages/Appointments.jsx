@@ -290,7 +290,7 @@ export default function Appointments() {
               <select
                 value={staffFilter}
                 onChange={(e) => { setStaffFilter(e.target.value); setPage(1); }}
-                className="bg-surface-3 border border-border rounded-lg px-3 py-2.5 text-sm text-text outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 transition-all"
+                className="bg-surface-3 border border-border rounded-lg px-3 py-2.5 text-sm text-text outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 transition-colors"
               >
                 <option value="">{t('appointments.allStaff')}</option>
                 {shop.staff.map((s) => <option key={s._id} value={s._id}>{s.name}</option>)}

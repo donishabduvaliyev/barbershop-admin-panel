@@ -86,7 +86,7 @@ export default function ScheduleCalendar({ shop }) {
             key={d.toISOString()}
             onClick={() => setSelectedDate(d)}
             className={clsx(
-              'px-3 py-2 rounded-lg border text-xs font-medium whitespace-nowrap text-center min-w-[60px] transition-all',
+              'px-3 py-2 rounded-lg border text-xs font-medium whitespace-nowrap text-center min-w-[60px] transition-colors',
               d.toDateString() === selectedDate.toDateString() ? 'bg-accent text-black border-accent' : 'bg-surface text-text-muted border-border-soft'
             )}
           >

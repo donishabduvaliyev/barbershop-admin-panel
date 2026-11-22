@@ -69,10 +69,10 @@ export default function SuperAdminDashboard() {
           Array.from({ length: 4 }).map((_, i) => <StatCardSkeleton key={i} />)
         ) : (
           <>
-            <StatCard index={0} label={t('superadmin.dashboard.totalShops')} value={overview.shops.total} icon="🏪" />
-            <StatCard index={1} label={t('superadmin.dashboard.bookingsThisMonth')} value={overview.month.appointments} icon="📅" />
-            <StatCard index={2} label={t('superadmin.dashboard.revenueThisMonth')} value={overview.month.revenue} icon="💰" format={currency} />
-            <StatCard index={3} label={t('superadmin.dashboard.visitsToday')} value={visits.today} icon="👀" />
+            <StatCard index={0} label={t('superadmin.dashboard.totalShops')} value={overview.shops.total} />
+            <StatCard index={1} label={t('superadmin.dashboard.bookingsThisMonth')} value={overview.month.appointments} />
+            <StatCard index={2} label={t('superadmin.dashboard.revenueThisMonth')} value={overview.month.revenue} format={currency} />
+            <StatCard index={3} label={t('superadmin.dashboard.visitsToday')} value={visits.today} />
           </>
         )}
       </div>
@@ -82,10 +82,10 @@ export default function SuperAdminDashboard() {
           Array.from({ length: 4 }).map((_, i) => <StatCardSkeleton key={i} />)
         ) : (
           <>
-            <StatCard index={0} label={t('superadmin.dashboard.activeShops')} value={overview.shops.active} icon="✅" />
-            <StatCard index={1} label={t('superadmin.dashboard.suspendedShops')} value={overview.shops.suspended} icon="⏸️" accent={overview.shops.suspended > 0} />
-            <StatCard index={2} label={t('superadmin.dashboard.unclaimedShops')} value={overview.shops.unclaimed} icon="🔓" accent={overview.shops.unclaimed > 0} />
-            <StatCard index={3} label={t('superadmin.dashboard.avgRating')} value={overview.averageRating} icon="⭐" format={(v) => v.toFixed(1)} />
+            <StatCard index={0} label={t('superadmin.dashboard.activeShops')} value={overview.shops.active} />
+            <StatCard index={1} label={t('superadmin.dashboard.suspendedShops')} value={overview.shops.suspended} accent={overview.shops.suspended > 0} />
+            <StatCard index={2} label={t('superadmin.dashboard.unclaimedShops')} value={overview.shops.unclaimed} accent={overview.shops.unclaimed > 0} />
+            <StatCard index={3} label={t('superadmin.dashboard.avgRating')} value={overview.averageRating} format={(v) => v.toFixed(1)} />
           </>
         )}
       </div>

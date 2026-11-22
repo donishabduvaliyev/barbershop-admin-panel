@@ -214,7 +214,7 @@ export default function Staff() {
               setActiveTab(tab.id);
               setSearchParams(tab.id === 'roster' ? {} : { tab: tab.id }, { replace: true });
             }}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all cursor-pointer ${
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors cursor-pointer ${
               activeTab === tab.id
                 ? 'bg-accent text-black font-semibold shadow-sm'
                 : 'text-text-muted hover:text-text hover:bg-surface-3'
